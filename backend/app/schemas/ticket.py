@@ -1,5 +1,5 @@
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any, Union
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 class TicketBase(BaseModel):
@@ -16,7 +16,14 @@ class TicketBase(BaseModel):
     expected_complexity: str = Field(default="small", description="Complexity: small, medium, large")
     estimated_resources: str = Field(default="1 LLM call, 1 pytest run", description="Estimated compute and test budget")
     evidence: List[str] = Field(default_factory=list, description="Concrete evidence found in AST or logs")
-    out_of_scope: Optional[str] = Field(default=None, description="Explicitly protected or excluded files and behaviors")
+    out_of_scope: Optional[Union[str, List[str]]] = Field(default=None, description="Explicitly protected or excluded files and behaviors")
+
+    @field_validator("out_of_scope", mode="before")
+    @classmethod
+    def normalize_out_of_scope(cls, v):
+        if isinstance(v, list):
+            return "; ".join(str(item) for item in v)
+        return v
 
 class TicketCreate(TicketBase):
     repo_id: str
