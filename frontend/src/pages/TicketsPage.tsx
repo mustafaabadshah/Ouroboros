@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Ticket as TicketIcon, Sparkles, Check, X, Edit3, PlayCircle, RefreshCw } from 'lucide-react';
+import { Ticket as TicketIcon, Sparkles, Check, X, Edit3, Save, RotateCcw, PlayCircle, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 import { Ticket } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
@@ -10,6 +10,14 @@ interface TicketsPageProps {
   setCurrentTab: (tab: TabType) => void;
 }
 
+const PRESET_CHIPS = [
+  { label: '⚡ API Validation', prompt: 'API boundary validation and defensive HTTP 400/404/422 status handlers in games and moves API' },
+  { label: '♟️ Chess Board Invariants', prompt: 'Chess board state invariants, FEN parser boundary checks, and move notation validation in board_manager.py' },
+  { label: '⏱️ Stockfish Engine Latency', prompt: 'Stockfish engine subprocess timeout recovery, bounds checking, and latency metrics in stockfish.py' },
+  { label: '🏆 Tournament & Forfeits', prompt: 'Tournament round forfeit tracking and match failure telemetry in tournament.py' },
+  { label: '📊 Agent Telemetry Counters', prompt: 'Groq agent fallback move counters and structured error logging in groq_agent.py' },
+];
+
 export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurrentTab }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -17,6 +25,15 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   const [generating, setGenerating] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showGenModal, setShowGenModal] = useState(false);
+
+  // In-line ticket editing state
+  const [isEditing, setIsEditing] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editProblem, setEditProblem] = useState('');
+  const [editCurrent, setEditCurrent] = useState('');
+  const [editDesired, setEditDesired] = useState('');
+  const [editCriteria, setEditCriteria] = useState('');
 
   useEffect(() => {
     loadTickets();
@@ -45,6 +62,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
       setCustomPrompt('');
       await loadTickets();
       setSelectedTicket(newTicket);
+      setIsEditing(false);
     } catch (e) {
       alert(`Ticket generation failed: ${e}`);
     } finally {
@@ -71,6 +89,41 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
     } catch (e) {
       alert(`Reject failed: ${e}`);
     }
+  };
+
+  const startEdit = (t: Ticket) => {
+    setEditTitle(t.title);
+    setEditProblem(t.problem_statement);
+    setEditCurrent(t.current_behavior);
+    setEditDesired(t.desired_behavior);
+    setEditCriteria(t.acceptance_criteria.join('\n'));
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedTicket) return;
+    try {
+      setSavingEdit(true);
+      const updated = await api.updateTicket(selectedTicket.id, {
+        title: editTitle,
+        problem_statement: editProblem,
+        current_behavior: editCurrent,
+        desired_behavior: editDesired,
+        acceptance_criteria: editCriteria.split('\n').map((s) => s.trim()).filter(Boolean),
+      });
+      setSelectedTicket(updated);
+      setTickets(tickets.map((t) => (t.id === updated.id ? updated : t)));
+      setIsEditing(false);
+    } catch (e) {
+      alert(`Failed to save ticket edits: ${e}`);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const selectTicketItem = (t: Ticket) => {
+    setSelectedTicket(t);
+    setIsEditing(false);
   };
 
   return (
@@ -111,7 +164,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
               return (
                 <div
                   key={t.id}
-                  onClick={() => setSelectedTicket(t)}
+                  onClick={() => selectTicketItem(t)}
                   className={`p-4 cursor-pointer transition ${
                     isSelected ? 'bg-zinc-900 border-l-2 border-emerald-500' : 'hover:bg-zinc-900/40'
                   }`}
@@ -136,7 +189,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
         {selectedTicket && (
           <div className="lg:col-span-2 border border-zinc-800 rounded bg-zinc-950 p-6 space-y-6">
             <div className="flex items-start justify-between border-b border-zinc-800 pb-4">
-              <div>
+              <div className="flex-1 mr-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-mono text-xs text-zinc-500">{selectedTicket.id}</span>
                   <StatusBadge status={selectedTicket.status} />
@@ -144,70 +197,160 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
                     Risk: {selectedTicket.risk_level.toUpperCase()}
                   </span>
                 </div>
-                <h2 className="text-base font-bold text-zinc-100">{selectedTicket.title}</h2>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded px-2.5 py-1 text-sm font-bold text-zinc-100 font-sans outline-none focus:border-emerald-500 mt-1"
+                    placeholder="Ticket Title"
+                  />
+                ) : (
+                  <h2 className="text-base font-bold text-zinc-100">{selectedTicket.title}</h2>
+                )}
               </div>
 
-              {selectedTicket.status === 'PROPOSED' && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleApprove(selectedTicket.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition"
-                  >
-                    <Check className="w-3.5 h-3.5" /> Approve & Launch Run
-                  </button>
-                  <button
-                    onClick={() => handleReject(selectedTicket.id)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded border border-rose-800 bg-rose-950/60 text-rose-300 hover:bg-rose-900 transition"
-                  >
-                    <X className="w-3.5 h-3.5" /> Reject
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={savingEdit}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition disabled:opacity-50"
+                    >
+                      <Save className="w-3.5 h-3.5" /> {savingEdit ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => startEdit(selectedTicket)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition"
+                      title="Edit Problem Statement, Desired Output, or Acceptance Criteria"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-zinc-400" /> Edit Ticket
+                    </button>
+                    {selectedTicket.status === 'PROPOSED' && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(selectedTicket.id)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition"
+                        >
+                          <Check className="w-3.5 h-3.5" /> Approve & Launch Run
+                        </button>
+                        <button
+                          onClick={() => handleReject(selectedTicket.id)}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded border border-rose-800 bg-rose-950/60 text-rose-300 hover:bg-rose-900 transition"
+                        >
+                          <X className="w-3.5 h-3.5" /> Reject
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Sections */}
             <div className="space-y-4 text-xs">
               <div>
-                <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1">
-                  Problem Statement
-                </h4>
-                <p className="text-zinc-300 bg-zinc-900/60 p-3 rounded border border-zinc-800/80 leading-relaxed font-sans">
-                  {selectedTicket.problem_statement}
-                </p>
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px]">
+                    Problem Statement
+                  </h4>
+                  {isEditing && (
+                    <span className="text-[10px] text-zinc-500 font-mono">Editable description of the technical debt / bug</span>
+                  )}
+                </div>
+                {isEditing ? (
+                  <textarea
+                    rows={3}
+                    value={editProblem}
+                    onChange={(e) => setEditProblem(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-zinc-200 font-sans outline-none focus:border-emerald-500"
+                  />
+                ) : (
+                  <p className="text-zinc-300 bg-zinc-900/60 p-3 rounded border border-zinc-800/80 leading-relaxed font-sans">
+                    {selectedTicket.problem_statement}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1">
-                    Current Behavior
-                  </h4>
-                  <p className="text-zinc-400 bg-zinc-900/40 p-3 rounded border border-zinc-800/60 leading-relaxed">
-                    {selectedTicket.current_behavior}
-                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px]">
+                      Current Behavior
+                    </h4>
+                  </div>
+                  {isEditing ? (
+                    <textarea
+                      rows={3}
+                      value={editCurrent}
+                      onChange={(e) => setEditCurrent(e.target.value)}
+                      className="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-zinc-300 font-sans outline-none focus:border-emerald-500"
+                    />
+                  ) : (
+                    <p className="text-zinc-400 bg-zinc-900/40 p-3 rounded border border-zinc-800/60 leading-relaxed">
+                      {selectedTicket.current_behavior}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1">
-                    Desired Behavior
-                  </h4>
-                  <p className="text-zinc-300 bg-zinc-900/40 p-3 rounded border border-zinc-800/60 leading-relaxed">
-                    {selectedTicket.desired_behavior}
-                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px]">
+                      Desired Behavior
+                    </h4>
+                  </div>
+                  {isEditing ? (
+                    <textarea
+                      rows={3}
+                      value={editDesired}
+                      onChange={(e) => setEditDesired(e.target.value)}
+                      className="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-zinc-200 font-sans outline-none focus:border-emerald-500"
+                    />
+                  ) : (
+                    <p className="text-zinc-300 bg-zinc-900/40 p-3 rounded border border-zinc-800/60 leading-relaxed">
+                      {selectedTicket.desired_behavior}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Acceptance Criteria */}
               <div>
-                <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1.5">
-                  Deterministic Acceptance Criteria
-                </h4>
-                <ul className="space-y-1.5 font-mono text-[11px]">
-                  {selectedTicket.acceptance_criteria.map((ac, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-zinc-300 bg-zinc-900/50 p-2 rounded border border-zinc-800/60">
-                      <span className="text-emerald-400 font-bold">[{idx + 1}]</span>
-                      <span>{ac}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex items-center justify-between mb-1.5">
+                  <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px]">
+                    Deterministic Acceptance Criteria
+                  </h4>
+                  {isEditing && (
+                    <span className="text-[10px] text-zinc-500 font-mono">One criterion per line</span>
+                  )}
+                </div>
+                {isEditing ? (
+                  <textarea
+                    rows={4}
+                    value={editCriteria}
+                    onChange={(e) => setEditCriteria(e.target.value)}
+                    placeholder="Enter each acceptance criterion on a new line..."
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-zinc-200 font-mono text-[11px] outline-none focus:border-emerald-500"
+                  />
+                ) : (
+                  <ul className="space-y-1.5 font-mono text-[11px]">
+                    {selectedTicket.acceptance_criteria.map((ac, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-zinc-300 bg-zinc-900/50 p-2 rounded border border-zinc-800/60">
+                        <span className="text-emerald-400 font-bold">[{idx + 1}]</span>
+                        <span>{ac}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               {/* Candidate Files Scope */}
@@ -253,13 +396,30 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
               The Architect Agent will analyze Meta-Graph AST summaries for Agent Chess and synthesize a structured Jira ticket.
             </p>
 
+            {/* Quick Focus Preset Chips */}
+            <div>
+              <label className="block text-[11px] font-mono text-zinc-400 mb-1.5">Quick Focus Presets:</label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_CHIPS.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setCustomPrompt(chip.prompt)}
+                    className="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-emerald-400 transition"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="block text-xs font-mono text-zinc-400 mb-1">Focus or Direction (Optional):</label>
-              <input
-                type="text"
+              <textarea
+                rows={2}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="e.g. Add latency telemetry or timeout error backoff tests"
+                placeholder="Leave blank for automatic domain rotation or pick a preset above..."
                 className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-emerald-500"
               />
             </div>

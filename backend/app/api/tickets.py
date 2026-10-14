@@ -64,10 +64,12 @@ async def generate_ticket(
         raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found.")
 
     summary = meta_graph_adapter.get_architectural_summary(req.repo_id)
+    existing_titles = [t.title for t in list_tickets(db, repo_id=req.repo_id)]
     generated = await architect_agent.generate_ticket(
         repo_id=req.repo_id,
         repo_summary=summary,
         target_focus=req.target_area or req.custom_prompt,
+        existing_tickets=existing_titles,
         force_mock=use_mock
     )
 

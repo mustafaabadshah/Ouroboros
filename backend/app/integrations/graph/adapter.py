@@ -180,18 +180,30 @@ class MetaGraphAdapter:
             return {"status": "empty", "modules": []}
 
         modules: Dict[str, List[str]] = {}
+        classes: List[Dict[str, str]] = []
+        functions: List[Dict[str, str]] = []
+
         for n, d in graph.nodes(data=True):
-            if d.get("type") == "File":
-                rel = d.get("rel_path", "")
+            ntype = d.get("type")
+            rel = str(d.get("rel_path", "")).replace("\\", "/")
+            if ntype == "File":
                 parent_mod = str(Path(rel).parent).replace("\\", "/")
                 modules.setdefault(parent_mod, []).append(Path(rel).name)
+            elif ntype == "Class":
+                classes.append({"class_name": d.get("name", ""), "file": rel})
+            elif ntype == "Function":
+                fname = d.get("name", "")
+                if not fname.startswith("__"):
+                    functions.append({"func_name": fname, "file": rel})
 
         return {
             "status": "ready",
             "repo_id": repo_id,
             "total_nodes": graph.number_of_nodes(),
             "total_edges": graph.number_of_edges(),
-            "module_structure": {k: v[:8] for k, v in list(modules.items())[:max_files]}
+            "module_structure": {k: v[:8] for k, v in list(modules.items())[:max_files]},
+            "key_classes": classes[:25],
+            "key_functions": functions[:35]
         }
 
 meta_graph_adapter = MetaGraphAdapter()
