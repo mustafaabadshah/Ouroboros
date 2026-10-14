@@ -49,12 +49,12 @@ class PhoenixTracingService:
             try:
                 from phoenix.otel import register
                 from opentelemetry import trace
-                endpoint = self.collector_endpoint or f"http://localhost:{self.port}/v1/traces"
+                endpoint = self.collector_endpoint or f"http://127.0.0.1:{self.port}/v1/traces"
                 self.tracer_provider = register(
                     project_name=self.project_name,
                     endpoint=endpoint,
                     protocol="http/protobuf",
-                    batch=False,
+                    batch=True,
                     set_global_tracer_provider=True
                 )
                 self.tracer = trace.get_tracer("ouroboros")
