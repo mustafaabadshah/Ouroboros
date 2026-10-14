@@ -8,7 +8,6 @@ from app.core.config import settings
 
 PROTECTED_FILE_PATTERNS = [
     "validator.py",
-    "board_manager.py",
     "stockfish.py",
     "config.py",
     ".env",

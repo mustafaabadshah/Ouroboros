@@ -11,7 +11,7 @@ Identify bounded technical debt, input validation gaps, missing error handling, 
 Rules:
 1. You MUST respond with ONLY a single valid JSON object. No conversational filler or surrounding markdown.
 2. The ticket MUST be small, bounded, and testable via pytest.
-3. NEVER propose large refactors, architectural rewrites, or modifying protected core engine logic (e.g. validator.py, legality checks).
+3. NEVER propose large refactors, architectural rewrites, or modifying protected core engine logic (e.g. validator.py, stockfish.py, legality checks, config files).
 4. Ground your ticket directly in the specific functions, classes, and file paths provided in the architectural summary.
 5. Do NOT duplicate or re-propose any previously generated tickets listed in the prompt.
 6. Strictly adhere to the requested schema keys:
@@ -34,7 +34,7 @@ Rules:
 FOCUS_DOMAINS = [
     "API boundary validation, HTTP 400/404/422 status error handlers, and defensive parameter sanitization in backend/app/api.",
     "Chess state invariants, FEN parser boundary conditions, and deterministic move notation validation in backend/app/chess/board_manager.py.",
-    "Stockfish engine subprocess timeout recovery, evaluation score bounds checking, and latency metrics in backend/app/chess/stockfish.py.",
+    "Evaluation service timeout recovery, evaluation score bounds checking, and latency metrics in backend/app/api/analysis.py.",
     "Tournament match lifecycle, forfeit handling on agent timeout, and match summary telemetry in backend/app/api/tournament.py.",
     "Game state persistence, move history serialization edge cases, and session cleanup in backend/app/database.",
     "Agent error taxonomy, token calculation observability, and structured failure logging in backend/app/agents/groq_agent.py."
@@ -83,17 +83,17 @@ DIVERSE_FALLBACK_TICKETS = [
             "backend/tests/test_evaluator.py::test_stockfish_evaluation_latency_metric"
         ],
         relevant_graph_entities=[
-            "StockfishEvaluator.evaluate_position",
-            "MoveQualityClassifier"
+            "get_game_analysis",
+            "StockfishEvaluator"
         ],
         candidate_files=[
-            "backend/app/chess/stockfish.py"
+            "backend/app/api/analysis.py"
         ],
         risk_level="low",
         expected_complexity="small",
         estimated_resources="1 LLM call, 1 pytest run",
-        evidence=["backend/app/chess/stockfish.py:48"],
-        out_of_scope="Do not change Stockfish binary or UCI protocol flags."
+        evidence=["backend/app/api/analysis.py:48"],
+        out_of_scope="Do not change core chess legality rules in validator.py."
     ),
     TicketBase(
         title="Add defensive HTTP 404 validation for nonexistent game IDs in analysis API",

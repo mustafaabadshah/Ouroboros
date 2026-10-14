@@ -66,6 +66,9 @@ class WorkflowController:
                 logger.error(f"Missing ticket or repository for run {run_id}.")
                 return
 
+            from app.observability.phoenix_service import set_current_run_context
+            set_current_run_context(run.id, run.ticket_id)
+
             repo_path = Path(repo.path)
 
             # -------------------------------------------------------------
