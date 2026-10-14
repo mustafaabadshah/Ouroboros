@@ -110,6 +110,22 @@ class DeterministicJudge:
                 "regression": regression_res
             }
 
+        verdict = "PASS" if regression_res["passed"] else ("FAIL" if candidate_failed > baseline_failed else "NEEDS_HUMAN_REVIEW")
+        from app.observability.phoenix_service import phoenix_service
+        try:
+            phoenix_service.record_evaluator_span(
+                name="deterministic_harness",
+                run_id=str(worktree_path.name),
+                ticket_id=str(worktree_path.name),
+                verdict=verdict,
+                tests_passed=regression_res.get("passed_count", 0),
+                tests_failed=regression_res.get("failed_count", 0),
+                duration_ms=float(regression_res.get("duration_ms", 0)),
+                ast_changes=[]
+            )
+        except Exception as ex:
+            logger.debug(f"Phoenix evaluator span recording skipped: {ex}")
+
         # If regression suite passed completely
         if regression_res["passed"]:
             return {

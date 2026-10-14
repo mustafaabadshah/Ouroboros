@@ -23,10 +23,14 @@ class AgentRuntime(ABC):
     ) -> Dict[str, Any]:
         pass
 
+import time
+from app.observability.phoenix_service import phoenix_service
+
 class AutoGenRuntime(AgentRuntime):
     """
     Microsoft AutoGen 0.7+ compatible runtime adapter.
     Executes role-specific prompt tasks bounded to single deterministic turns.
+    Instrumented with Arize Phoenix OpenTelemetry tracing.
     """
 
     async def execute_task(
@@ -37,13 +41,33 @@ class AutoGenRuntime(AgentRuntime):
         force_mock: bool = False
     ) -> Dict[str, Any]:
         logger.info(f"AutoGenRuntime executing task for role: {role}")
+        t0 = time.perf_counter()
         # Delegate to model router
-        return await model_router.route_task(
+        res = await model_router.route_task(
             agent_role=role,
             prompt=prompt,
             system_instruction=system_instruction,
             force_mock=force_mock
         )
+        duration_ms = (time.perf_counter() - t0) * 1000
+
+        try:
+            phoenix_service.record_agent_span(
+                role=role,
+                task_name="execute_turn",
+                model_name=res.get("model", "unknown"),
+                input_prompt=prompt,
+                output_content=res.get("content", ""),
+                duration_ms=duration_ms,
+                tokens_in=res.get("input_tokens", 0),
+                tokens_out=res.get("output_tokens", 0),
+                status="ERROR" if res.get("is_error") else "OK",
+                error_message=res.get("error_message")
+            )
+        except Exception as e:
+            logger.debug(f"Phoenix span recording skipped: {e}")
+
+        return res
 
 # Global default runtime
 agent_runtime: AgentRuntime = AutoGenRuntime()

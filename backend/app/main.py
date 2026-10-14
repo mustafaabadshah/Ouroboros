@@ -17,10 +17,13 @@ from app.api.runs import router as runs_router
 from app.api.failures import router as failures_router
 from app.api.settings import router as settings_router
 
+from app.observability.phoenix_service import phoenix_service
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing Project Ouroboros Backend...")
     init_db()
+    phoenix_service.initialize()
 
     # Seed default repository registration if present on disk
     default_repo_path = Path(settings.DEFAULT_REPO_PATH)

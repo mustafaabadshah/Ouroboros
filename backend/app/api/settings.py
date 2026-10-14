@@ -93,3 +93,10 @@ async def get_audit_log(db: Session = Depends(get_db)):
             "created_at": e.created_at
         } for e in events
     ]
+
+from app.observability.phoenix_service import phoenix_service
+
+@router.get("/observability/phoenix/status")
+async def get_phoenix_status():
+    """Returns real-time Arize Phoenix AI Observability and OpenInference tracing state."""
+    return phoenix_service.get_status()

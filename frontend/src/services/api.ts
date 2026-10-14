@@ -42,6 +42,30 @@ export const api = {
   getSystemStatus: () => request<any>('/system/status'),
   getMetricsOverview: () => request<MetricsOverview>('/metrics/overview'),
   getAuditEvents: () => request<any[]>('/audit-events'),
+  getPhoenixStatus: () => request<{
+    enabled: boolean;
+    active: boolean;
+    ui_url: string;
+    port: number;
+    project_name: string;
+    collector_endpoint: string;
+    total_recorded_spans: number;
+    recent_spans: Array<{
+      id: string;
+      trace_id: string;
+      name: string;
+      span_kind: string;
+      role: string;
+      model_name: string;
+      duration_ms: number;
+      tokens_in: number;
+      tokens_out: number;
+      total_tokens: number;
+      status: string;
+      timestamp: string;
+      attributes: Record<string, any>;
+    }>;
+  }>('/observability/phoenix/status'),
 
   // Repositories
   getRepositories: () => request<Repository[]>('/repositories'),

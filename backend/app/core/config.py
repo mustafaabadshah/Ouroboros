@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     SANDBOX_MODE: str = "auto"
     ISOLATED_WORKTREE_DIR: str = str(BACKEND_DIR / "worktrees")
 
+    # Arize Phoenix AI Observability & Tracing
+    PHOENIX_ENABLED: bool = True
+    PHOENIX_PORT: int = 6006
+    PHOENIX_PROJECT_NAME: str = "ouroboros-swarm"
+    PHOENIX_COLLECTOR_ENDPOINT: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"),
         env_file_encoding="utf-8",
