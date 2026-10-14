@@ -47,10 +47,15 @@ class LocalCoderAgent:
     def extract_diff(text: str) -> str:
         clean = text.strip()
         if "```diff" in clean:
-            return clean.split("```diff", 1)[1].split("```", 1)[0].strip()
+            part = clean.split("```diff", 1)[1]
+            if "```" in part:
+                return part.split("```", 1)[0].strip()
+            return part.strip()
         elif "--- a/" in clean and "+++ b/" in clean:
-            # Extract from first header to end of diff lines
             start = clean.find("--- a/")
+            end = clean.find("```", start)
+            if end != -1:
+                return clean[start:end].strip()
             return clean[start:].strip()
         return clean
 

@@ -35,8 +35,10 @@ Rules:
 1. Output MUST include standard unified diff headers:
    --- a/{clean_file}
    +++ b/{clean_file}
-2. Only modify code inside {clean_file}.
-3. Do not modify unrelated functions or comments.
+2. Keep the patch compact: include only 2 to 3 lines of context before and after modified lines.
+3. Every hunk must begin with @@ and contain matching context.
+4. Do not reproduce the entire file. Wrap the final diff cleanly inside ```diff ... ```.
+5. Only modify code inside {clean_file}. Do not touch unrelated functions or comments.
 """
         return prompt
 

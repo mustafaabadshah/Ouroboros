@@ -225,6 +225,8 @@ class WorkflowController:
                         model=coder_res.get("model")
                     )
                     attempt += 1
+                    run.retry_count = attempt - 1
+                    db.commit()
                     continue
 
                 # Apply patch into isolated worktree
@@ -246,6 +248,8 @@ class WorkflowController:
                         model=coder_res.get("model")
                     )
                     attempt += 1
+                    run.retry_count = attempt - 1
+                    db.commit()
                     continue
 
                 # Commit candidate inside isolated worktree
@@ -306,6 +310,8 @@ class WorkflowController:
                         model=coder_res.get("model")
                     )
                     attempt += 1
+                    run.retry_count = attempt - 1
+                    db.commit()
 
             # -------------------------------------------------------------
             # Stage 7: FINAL VERDICT & AWAITING APPROVAL

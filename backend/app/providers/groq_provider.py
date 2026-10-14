@@ -69,7 +69,7 @@ class GroqProvider(BaseLLMProvider):
         prompt: str,
         system_instruction: Optional[str] = None,
         model_name: Optional[str] = None,
-        max_tokens: int = 1500,
+        max_tokens: int = 4096,
         temperature: float = 0.2
     ) -> Dict[str, Any]:
         """

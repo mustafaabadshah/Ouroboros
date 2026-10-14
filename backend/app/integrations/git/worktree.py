@@ -62,34 +62,142 @@ class GitWorktreeManager:
 
         return worktree_path, candidate_branch, base_commit
 
+    @staticmethod
+    def _sanitize_patch(patch_text: str) -> str:
+        """
+        Sanitizes raw LLM diff text:
+        1. Strips non-diff leading/trailing text.
+        2. Normalizes line endings to \n.
+        3. Drops trailing truncated/incomplete hunks (e.g. hunk ending mid-line without additions).
+        """
+        if not patch_text or not patch_text.strip():
+            return ""
+
+        clean = patch_text.replace("\r\n", "\n").strip()
+        lines = clean.split("\n")
+
+        # Extract only from first '--- a/' or '--- ' line
+        start_idx = 0
+        for i, l in enumerate(lines):
+            if l.startswith("--- "):
+                start_idx = i
+                break
+        lines = lines[start_idx:]
+
+        # Drop trailing lines that are obviously truncated/incomplete
+        while lines:
+            last = lines[-1]
+            if not last.strip():
+                lines.pop()
+                continue
+            if last.startswith("@@") or (not last.startswith(" ") and not last.startswith("+") and not last.startswith("-")):
+                lines.pop()
+            else:
+                break
+
+        # Check last hunk: ensure it has at least one addition or deletion, otherwise pop trailing hunk lines
+        hunk_indices = [i for i, l in enumerate(lines) if l.startswith("@@")]
+        if hunk_indices:
+            last_hunk_start = hunk_indices[-1]
+            last_hunk_lines = lines[last_hunk_start:]
+            has_changes = any(l.startswith("+") or l.startswith("-") for l in last_hunk_lines[1:])
+            if not has_changes:
+                lines = lines[:last_hunk_start]
+
+        return "\n".join(lines).strip() + "\n"
+
+    @staticmethod
+    def _apply_hunks_directly(worktree_path: Path, patch_text: str) -> Tuple[bool, str]:
+        """
+        Resilient direct Python hunk application fallback.
+        Parses target file and unified diff blocks, replacing context/deletions with additions.
+        """
+        try:
+            import re
+            lines = patch_text.splitlines()
+            target_file_rel = None
+            for l in lines:
+                if l.startswith("+++ b/"):
+                    target_file_rel = l[6:].strip()
+                    break
+                elif l.startswith("+++ "):
+                    target_file_rel = l[4:].strip()
+                    break
+
+            if not target_file_rel:
+                return False, "Could not determine target file from diff headers"
+
+            full_target_path = (worktree_path / target_file_rel).resolve()
+            if not full_target_path.exists():
+                return False, f"Target file does not exist: {target_file_rel}"
+
+            with open(full_target_path, "r", encoding="utf-8", errors="replace") as f:
+                original_content = f.read()
+
+            hunk_blocks = re.split(r"(^@@\s+-\d+(?:,\d+)?\s+\+\d+(?:,\d+)?\s+@@.*$)", patch_text, flags=re.MULTILINE)
+            modified_content = original_content
+            applied_count = 0
+
+            for i in range(1, len(hunk_blocks), 2):
+                hunk_body = hunk_blocks[i + 1] if i + 1 < len(hunk_blocks) else ""
+                hunk_lines = [l for l in hunk_body.splitlines() if not l.startswith("---") and not l.startswith("+++")]
+                old_lines = [l[1:] for l in hunk_lines if l.startswith(" ") or l.startswith("-")]
+                new_lines = [l[1:] for l in hunk_lines if l.startswith(" ") or l.startswith("+")]
+
+                old_block = "\n".join(old_lines)
+                new_block = "\n".join(new_lines)
+
+                if old_block and old_block in modified_content:
+                    modified_content = modified_content.replace(old_block, new_block, 1)
+                    applied_count += 1
+
+            if applied_count > 0:
+                with open(full_target_path, "w", encoding="utf-8") as f:
+                    f.write(modified_content)
+                return True, f"Directly applied {applied_count} hunk(s) to {target_file_rel}"
+
+            return False, "Hunks could not find exact matching context in target file"
+        except Exception as e:
+            return False, f"Direct hunk applier failed: {e}"
+
     async def apply_patch(self, worktree_path: Path, patch_text: str) -> Tuple[bool, str]:
         """
-        Applies a candidate patch into the isolated worktree using git apply.
+        Applies a candidate patch into the isolated worktree using git apply with resilient fallbacks.
         """
         worktree_path = Path(worktree_path).resolve()
         patch_file = worktree_path / "_candidate.patch"
         try:
-            normalized_patch = patch_text.replace("\r\n", "\n").strip() + "\n"
+            cleaned_patch = self._sanitize_patch(patch_text)
             with open(patch_file, "wb") as f:
-                f.write(normalized_patch.encode("utf-8"))
+                f.write(cleaned_patch.encode("utf-8"))
 
-            # Check if patch applies cleanly
+            # 1. Try git apply with --recount and whitespace tolerance
             check_code, _, check_err = await run_safe_subprocess(
-                ["git", "apply", "--check", "--ignore-whitespace", "--whitespace=nowarn", str(patch_file)],
+                ["git", "apply", "--check", "--recount", "--ignore-space-change", "--ignore-whitespace", "--whitespace=nowarn", str(patch_file)],
                 cwd=worktree_path
             )
-            if check_code != 0:
-                return False, f"Patch failed dry-run check: {check_err}"
+            if check_code == 0:
+                apply_code, _, apply_err = await run_safe_subprocess(
+                    ["git", "apply", "--recount", "--ignore-space-change", "--ignore-whitespace", "--whitespace=nowarn", str(patch_file)],
+                    cwd=worktree_path
+                )
+                if apply_code == 0:
+                    return True, "Patch applied successfully via git apply."
 
-            # Apply patch
-            apply_code, apply_out, apply_err = await run_safe_subprocess(
-                ["git", "apply", "--ignore-whitespace", "--whitespace=nowarn", str(patch_file)],
+            # 2. Try git apply with 3-way merge fallback
+            check_3way, _, _ = await run_safe_subprocess(
+                ["git", "apply", "-3", "--recount", "--ignore-whitespace", str(patch_file)],
                 cwd=worktree_path
             )
-            if apply_code != 0:
-                return False, f"Patch apply failed: {apply_err}"
+            if check_3way == 0:
+                return True, "Patch applied successfully via 3-way git apply."
 
-            return True, "Patch applied successfully."
+            # 3. Resilient Python direct hunk applier fallback
+            direct_ok, direct_msg = self._apply_hunks_directly(worktree_path, cleaned_patch)
+            if direct_ok:
+                return True, f"Patch applied via resilient hunk applier ({direct_msg})."
+
+            return False, f"Patch failed dry-run check: {check_err}"
 
         finally:
             if patch_file.exists():
