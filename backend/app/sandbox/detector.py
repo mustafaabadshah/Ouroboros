@@ -20,7 +20,7 @@ class SandboxDetector:
                 code, out, err = await run_safe_subprocess(
                     ["docker", "info"],
                     cwd=Path("."),
-                    timeout=3
+                    timeout=10
                 )
                 if code == 0 and "Server" in out and "ERROR" not in out:
                     docker_running = True

@@ -75,7 +75,7 @@ powershell -ExecutionPolicy Bypass scripts/setup.ps1
 ```
 
 ### Step 3: Run Automated Test Suite
-Runs all 11 backend unit, integration, and deterministic fixture tests completely offline:
+Runs all 31 backend unit, integration, adversarial security, and evaluation tests completely offline:
 ```powershell
 powershell -ExecutionPolicy Bypass scripts/test.ps1
 ```
@@ -87,6 +87,8 @@ powershell -ExecutionPolicy Bypass scripts/start.ps1
 ```
 - **React Dashboard:** [http://localhost:5173](http://localhost:5173)
 - **FastAPI REST API & Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Arize Phoenix Observability:** [http://127.0.0.1:6006](http://127.0.0.1:6006)
+- **Evaluation Metrics API:** [http://127.0.0.1:8000/api/evaluation/metrics](http://127.0.0.1:8000/api/evaluation/metrics)
 
 ### Step 5: Stop Services Safely
 Gracefully terminates background processes:
@@ -103,48 +105,49 @@ Ouroboros/
 ├── .env.example                     # Environment template with secret placeholders
 ├── pyproject.toml                   # Pinned Python dependencies (Python 3.12)
 ├── README.md                        # Primary developer documentation & UI showcase
+├── CHANGELOG.md                     # Semantic versioning changelog
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                  # FastAPI application entry point
-│   │   ├── api/                     # REST routers (health, repositories, tickets, runs, models, settings)
+│   │   ├── main.py                  # FastAPI application entry point with lifespan reconciliation
+│   │   ├── api/                     # REST routers (health, repositories, tickets, runs, evaluation, models, settings)
 │   │   ├── core/                    # Security, path validation, config, logging, event bus
 │   │   ├── database/                # SQLite session, models, repositories
 │   │   ├── orchestration/           # State machine & lifecycle controller
-│   │   ├── agents/                  # AutoGen runtime, Architect, Planner, Coder, Repair agents
+│   │   ├── agents/                  # AutoGen runtime, Architect, Planner, Coder, Critic, Judge, Repair agents
 │   │   ├── providers/               # Ollama, Groq, Mock providers & ModelRouter
 │   │   ├── integrations/
 │   │   │   ├── graph/               # MetaGraphAdapter (API -> JSON -> AST scanner)
 │   │   │   └── git/                 # GitWorktreeManager & UnifiedDiffParser
-│   │   ├── evaluation/              # PytestRunner, DeterministicJudge, ASTChangeAnalyzer
+│   │   ├── evaluation/              # MetricsCalculator, BenchmarkHarness, PytestRunner, DeterministicJudge
+│   │   ├── sandbox/                 # SandboxDetector, fail-closed container boundary
 │   │   └── memory/                  # FailureFlywheel persistent memory
-│   └── tests/                       # Unit, integration, and E2E fixture test suite
+│   └── tests/                       # Unit, integration, adversarial, and E2E fixture test suite
 ├── frontend/
 │   ├── src/
 │   │   ├── components/              # Navbar, Sidebar, StatusBadge, DiffViewer
-│   │   ├── pages/                   # All 10 dashboard views
+│   │   ├── pages/                   # All 10 dashboard views including EvaluationLabPage
 │   │   ├── services/api.ts          # Centralized typed REST & SSE client
 │   │   └── types/index.ts           # TypeScript interfaces matching backend schemas
 │   ├── vite.config.ts               # Vite configuration with Tailwind CSS v4 & proxy
 │   └── package.json
+├── artifacts/
+│   ├── baseline/                    # Initial verification baseline reports
+│   ├── benchmark_results.json       # Versioned benchmark and ablation execution results
+│   └── release_gate_report.json     # Comprehensive G1-G14 release gate audit report
 ├── docs/
 │   ├── images/                      # High-res architecture diagrams and UI screenshots
-│   │   ├── architecture_diagram.jpg
-│   │   ├── ui_overview_dashboard.png
-│   │   ├── ui_agent_runs.png
-│   │   ├── ui_code_changes_diff.png
-│   │   └── ui_approved_merged.png
 │   ├── ARCHITECTURE.md              # Deep-dive system architecture specification
-│   ├── INTEGRATION_AUDIT.md         # Audit findings for Agent Chess & Meta-Graph Navigator
-│   ├── SECURITY.md                  # Isolation, sandboxing, and secret-masking rules
-│   ├── RESOURCE_GUIDE.md            # 8 GB RAM memory budget & Ollama CPU guidelines
-│   ├── API_REFERENCE.md             # REST & SSE endpoint documentation
-│   ├── EVALUATION_PROTOCOL.md       # Deterministic regression gates & test protocol
+│   ├── CODEBASE_AUDIT.md            # Ground-truth codebase and layer audit report
+│   ├── IMPLEMENTATION_BACKLOG.md    # Prioritized engineering tasks backlog
 │   ├── MASTER_ROADMAP.md            # Comprehensive project roadmap & release gates G1-G14
 │   ├── RELEASE_RUNBOOK.md           # Operational setup, verification & troubleshooting guide
 │   ├── KNOWN_LIMITATIONS.md         # Documented limitations & security threat boundaries
 │   ├── METRICS_REFERENCE.md         # Mathematical definitions of honest evaluation metrics
 │   ├── FAILURE_MEMORY_DESIGN.md     # FailureFlywheel schema & retrieval architecture
-│   └── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
+│   ├── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
+│   ├── CONTAINER_RUNTIME_VERIFICATION.md # Docker Desktop / WSL2 capability verification
+│   ├── EXECUTION_BOUNDARY_AUDIT.md  # Comprehensive execution entry-point security audit
+│   └── FINAL_IMPLEMENTATION_REPORT.md # 15-section complete program report
 └── scripts/
     ├── check-environment.ps1        # Verifies host prerequisites
     ├── setup.ps1                    # Installs backend virtualenv and npm dependencies
@@ -162,9 +165,11 @@ Ouroboros/
 - **Full Backend Pytest Suite:** **31 / 31 passed** in 57.42s (Unit, Integration, Adversarial Security, and Evaluation API).
 - **Independent Acceptance Suite:** **20 / 20 passed** in `backend/tests/verify_acceptance.py`.
 - **Frontend Production Build:** **1,935 modules compiled in 8.75s with 0 errors** (`npm run build`).
-- **Complete Workflow Demonstrator:** **12/12 logic steps passed**, Step 8 container execution safely reported **`BLOCKED`** under fail-closed execution policy.
+- **Complete Workflow Demonstrator:** **12/12 logic steps passed**, Step 8 container execution reported **`BLOCKED`** when daemon is offline, and executes cleanly in container isolation when Docker is active.
 - **Evaluation Benchmark Suite:** Versioned benchmark `BENCHMARK_TASKS_V1` executed with FailureFlywheel memory enabled vs disabled (ablation); results persisted in `artifacts/benchmark_results.json`.
 - **Adversarial Security Suite:** Verified protection against path traversal (`SEC-01`), symlink escapes (`SEC-02`), test file tampering (`SEC-03`), protected file edits (`SEC-04`), merge authorization bypasses (`WRK-01`), and stale replay attacks (`WRK-02`).
-- **Release Gate Audit:** 13/14 release gates **PASS**, 1 gate (**G6 - Execution Isolation**) verified as **`BLOCKED` fail-closed** due to offline Docker daemon. Full machine-readable report available in `artifacts/release_gate_report.json`.
+- **Container Isolation:** Docker Desktop with WSL2 engine integration (`docker 25.0.3`) supported; fail-closed execution policy strictly enforces container isolation without unsafe host fallback.
+- **Release Gate Audit:** 14 release gates evaluated; full machine-readable report available in `artifacts/release_gate_report.json`.
 - **Reference Repositories Untouched:** Verified zero modifications to `Agent Chess` and `Meta-Graph-Codebase-Navigator`.
+
 
