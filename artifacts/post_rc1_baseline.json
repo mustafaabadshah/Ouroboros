@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-10-15T17:25:00+05:00",
+  "commit": "172fa93",
+  "branch": "main",
+  "remote": "https://github.com/mustafaabadshah/Ouroboros.git",
+  "environment": {
+    "os": "Windows 10 x64",
+    "python": "3.12.3",
+    "node": "24.14.1",
+    "git": "2.45+",
+    "ram_total_gb": 8,
+    "gpu": "Intel HD 620 (No CUDA)"
+  },
+  "reference_repositories": {
+    "agent_chess": {
+      "path": "E:\\MM Office\\Agent Chess",
+      "status": "CLEAN",
+      "modified_files": 0,
+      "untracked_files": 0
+    },
+    "meta_graph_codebase_navigator": {
+      "path": "E:\\MM Office\\Meta-Graph-Codebase-Navigator",
+      "status": "CLEAN",
+      "modified_files": 0,
+      "untracked_files": 0
+    }
+  },
+  "baseline_verification_results": {
+    "pytest_suite": {
+      "command": ".\\.venv\\Scripts\\python.exe -m pytest backend/tests -v",
+      "exit_code": 0,
+      "total_tests": 31,
+      "passed": 31,
+      "failed": 0,
+      "duration_seconds": 17.50,
+      "status": "PASS"
+    },
+    "acceptance_suite": {
+      "command": ".\\.venv\\Scripts\\python.exe backend/tests/verify_acceptance.py",
+      "exit_code": 0,
+      "total_checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "duration_seconds": 16.32,
+      "status": "PASS"
+    },
+    "frontend_production_build": {
+      "command": "npm run build (in frontend)",
+      "exit_code": 0,
+      "modules_transformed": 1935,
+      "errors": 0,
+      "duration_seconds": 2.28,
+      "status": "PASS"
+    },
+    "benchmark_harness": {
+      "command": ".\\.venv\\Scripts\\python.exe scripts/run_benchmarks.py",
+      "exit_code": 0,
+      "tasks_total": 3,
+      "tasks_passed": 2,
+      "tasks_blocked": 1,
+      "tasks_failed": 0,
+      "success_rate": 0.6667,
+      "memory_enabled_median_latency_ms": 5806,
+      "memory_disabled_median_latency_ms": 4624,
+      "status": "PASS"
+    },
+    "workflow_demonstrator": {
+      "command": ".\\.venv\\Scripts\\python.exe scripts/demonstrate_complete_workflow.py",
+      "exit_code": 0,
+      "steps_total": 13,
+      "steps_passed": 12,
+      "steps_blocked_policy": 1,
+      "status": "PASS"
+    }
+  },
+  "overall_baseline_status": "PASS"
+}

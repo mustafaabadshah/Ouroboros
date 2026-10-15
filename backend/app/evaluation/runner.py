@@ -55,12 +55,14 @@ class PytestRunner:
             sandbox_status = await sandbox_detector.detect_capabilities()
             if not sandbox_status.get("can_execute", True):
                 msg = sandbox_status.get("message", "Sandbox execution blocked by policy.")
-                logger.warning(f"PytestRunner execution blocked: {msg}")
+                reason_code = sandbox_status.get("reason_code", "RUNTIME_UNAVAILABLE")
+                logger.warning(f"PytestRunner execution blocked: {msg} [code: {reason_code}]")
                 return {
                     "exit_code": 1,
                     "passed": False,
                     "duration_ms": 0,
                     "command": "BLOCKED",
+                    "reason_code": reason_code,
                     "passed_count": 0,
                     "failed_count": 1,
                     "error_count": 1,
@@ -73,17 +75,23 @@ class PytestRunner:
                 # Strict container isolation specification:
                 # - non-root UID 1000:1000
                 # - network disabled: --network none
+                # - dropped capabilities: --cap-drop ALL
+                # - no new privileges: --security-opt no-new-privileges
                 # - memory capped: --memory 1500m
                 # - cpu capped: --cpus 1.0
                 # - pids limit: --pids-limit 100
+                # - tmpfs /tmp with noexec
                 # - docker socket never mounted
                 cmd = [
                     "docker", "run", "--rm",
                     "--network", "none",
                     "--user", "1000:1000",
+                    "--security-opt", "no-new-privileges",
+                    "--cap-drop", "ALL",
                     "--memory", "1500m",
                     "--cpus", "1.0",
                     "--pids-limit", "100",
+                    "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
                     "-v", f"{working_dir.resolve()}:/workspace:rw",
                     "-w", "/workspace",
                     "python:3.12-slim",

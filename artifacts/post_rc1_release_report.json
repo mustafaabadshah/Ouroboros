@@ -1,0 +1,90 @@
+{
+  "report_type": "POST_RC1_RELEASE_QUALIFICATION_REPORT",
+  "timestamp_start": "2026-10-15T17:56:56.298241+00:00",
+  "timestamp_end": "2026-10-15T17:58:33.268640+00:00",
+  "release_verdict": "CONDITIONAL",
+  "release_version": "v0.9.1-pre",
+  "target_commit": "71e58aedd917186d0a26ed2bd6e3513e92ee602a",
+  "branch": "main",
+  "host_environment": {
+    "os": "Windows-10-10.0.19045-SP0",
+    "python": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+    "node": "v24.14.1",
+    "total_ram_mb": 7820.98,
+    "free_ram_mb": 915.45
+  },
+  "gates": {
+    "gate_1_backend_tests": {
+      "status": "PASS",
+      "description": "Full backend test suite (unit, integration, adversarial fixtures)",
+      "test_count": 35,
+      "exit_code": 0,
+      "duration_ms": 42198,
+      "evidence": "ore.py::test_unified_diff_parser PASSED    [ 94%]\nbackend/tests/unit/test_unit_core.py::test_telemetry_cost_and_resources PASSED [ 97%]\nbackend/tests/unit/test_unit_core.py::test_model_router_mock_fallback PASSED [100%]\n\n============================= 35 passed in 19.57s ============================="
+    },
+    "gate_2_acceptance_criteria": {
+      "status": "PASS",
+      "description": "20-check independent criteria verification script",
+      "checks_passed": 20,
+      "exit_code": 0,
+      "duration_ms": 23455
+    },
+    "gate_3_frontend_build": {
+      "status": "PASS",
+      "description": "TypeScript compiler type-check and Vite production bundling",
+      "exit_code": 0,
+      "duration_ms": 7678,
+      "evidence": "tml                   0.45 kB \u00e2\u201d\u201a gzip:  0.29 kB\ndist/assets/index-bnulW-qh.css   34.62 kB \u00e2\u201d\u201a gzip:  6.69 kB\ndist/assets/index-CBMLGBrp.js   325.02 kB \u00e2\u201d\u201a gzip: 90.67 kB\n\n\u001b[32m\u00e2\u0153\u201c built in 1.45s\u001b[39m"
+    },
+    "gate_4_benchmarks": {
+      "status": "PASS",
+      "description": "Versioned benchmark execution with memory flywheel ablation",
+      "exit_code": 0,
+      "duration_ms": 20817,
+      "total_tasks": 3,
+      "eligible_tasks": 2,
+      "passed_tasks": 2,
+      "blocked_tasks": 1,
+      "failed_tasks": 0,
+      "raw_success_rate": 0.6667,
+      "eligible_success_rate": 1.0,
+      "evidence_file": "artifacts/benchmark_results.json"
+    },
+    "gate_5_container_isolation": {
+      "description": "Live container sandbox isolation (rootless, no-net, no-socket, cleanup, timeout)",
+      "docker_installed": true,
+      "docker_daemon_active": false,
+      "live_isolation_tested": false,
+      "fail_closed_verified": true,
+      "reason_code": "RUNTIME_UNAVAILABLE",
+      "note": "Docker daemon offline; candidate execution strictly blocked fail-closed (0 host candidate execution)",
+      "status": "BLOCKED"
+    },
+    "gate_6_reference_repos_untouched": {
+      "status": "PASS",
+      "description": "Agent Chess and Meta-Graph Codebase Navigator strictly untouched",
+      "agent_chess_clean": true,
+      "agent_chess_commit": "c7dedd8902e5c845c0fe8a6767f58312add1db3d",
+      "meta_graph_clean": true,
+      "meta_graph_commit": "86d9597f98ec37e09a1b3c00d389acce8980aa24"
+    }
+  },
+  "summary": {
+    "total_gates": 6,
+    "passed_gates": 5,
+    "blocked_gates": 1,
+    "failed_gates": 0
+  },
+  "artifacts_generated": [
+    "artifacts/post_rc1_release_report.json",
+    "artifacts/benchmark_results.json",
+    "artifacts/post_rc1_baseline.json",
+    "docs/POST_RC1_BASELINE_AUDIT.md",
+    "docs/POST_RC1_IMPLEMENTATION_PLAN.md",
+    "docs/MODEL_ROUTING_AND_PRIVACY.md",
+    "docs/CODE_GRAPH_INTEGRATION.md",
+    "docs/EVALUATION_METHODOLOGY.md",
+    "docs/FAILURE_MEMORY_EVALUATION.md",
+    "docs/WINDOWS_OPERATIONS.md"
+  ]
+}

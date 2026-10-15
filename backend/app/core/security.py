@@ -12,6 +12,8 @@ PROTECTED_FILE_PATTERNS = [
     "config.py",
     ".env",
     ".git",
+    ".github",
+    "workflows",
     "ouroboros.db",
     "judge.py",
     "runner.py",
@@ -19,7 +21,12 @@ PROTECTED_FILE_PATTERNS = [
     "security.py",
     "verify_acceptance.py",
     "conftest.py",
+    "id_rsa",
+    "id_ed25519",
+    "docker-compose",
+    "docker.sock",
 ]
+
 
 def mask_secret(text: Optional[str]) -> str:
     """Masks API keys and secrets so they never leak into logs or telemetry."""

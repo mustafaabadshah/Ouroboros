@@ -259,7 +259,9 @@ class BenchmarkHarness:
         blocked_tasks = sum(1 for r in results if r["verdict"] == "BLOCKED")
         failed_tasks = sum(1 for r in results if r["verdict"] == "FAIL")
 
-        success_rate = (passed_tasks / total_tasks) if total_tasks > 0 else 0.0
+        eligible_tasks = total_tasks - blocked_tasks
+        raw_success_rate = (passed_tasks / total_tasks) if total_tasks > 0 else 0.0
+        eligible_success_rate = (passed_tasks / eligible_tasks) if eligible_tasks > 0 else 0.0
 
         durations = [r["duration_ms"] for r in results]
         durations.sort()
@@ -269,10 +271,13 @@ class BenchmarkHarness:
             "suite_version": "v1.0.0",
             "memory_enabled": memory_enabled,
             "total_tasks": total_tasks,
+            "eligible_tasks": eligible_tasks,
             "passed_tasks": passed_tasks,
             "blocked_tasks": blocked_tasks,
             "failed_tasks": failed_tasks,
-            "repair_success_rate": round(success_rate, 4),
+            "raw_success_rate": round(raw_success_rate, 4),
+            "eligible_success_rate": round(eligible_success_rate, 4),
+            "repair_success_rate": round(raw_success_rate, 4),
             "median_duration_ms": p50,
             "total_duration_ms": total_duration,
             "task_results": results

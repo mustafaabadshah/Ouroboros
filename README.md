@@ -147,7 +147,14 @@ Ouroboros/
 │   ├── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
 │   ├── CONTAINER_RUNTIME_VERIFICATION.md # Docker Desktop / WSL2 capability verification
 │   ├── EXECUTION_BOUNDARY_AUDIT.md  # Comprehensive execution entry-point security audit
-│   └── FINAL_IMPLEMENTATION_REPORT.md # 15-section complete program report
+│   ├── MODEL_ROUTING_AND_PRIVACY.md # Agent schemas, routing rules & privacy standards
+│   ├── CODE_GRAPH_INTEGRATION.md    # MetaGraph 3-tier architecture & data contracts
+│   ├── EVALUATION_METHODOLOGY.md    # Standardized evaluation metrics & task taxonomy
+│   ├── FAILURE_MEMORY_EVALUATION.md # Empirical ablation study on FailureFlywheel
+│   ├── WINDOWS_OPERATIONS.md        # Windows host operations, port bindings & SRE guide
+│   ├── POST_RC1_RELEASE_CHECKLIST.md# Post-RC1 release qualification gates & checklist
+│   ├── POST_RC1_KNOWN_LIMITATIONS.md# Risk register, hardware constraints & limitations
+│   └── POST_RC1_FINAL_REPORT.md     # Comprehensive post-RC1 engineering & verification report
 └── scripts/
     ├── check-environment.ps1        # Verifies host prerequisites
     ├── setup.ps1                    # Installs backend virtualenv and npm dependencies
@@ -155,21 +162,22 @@ Ouroboros/
     ├── stop.ps1                     # Terminates background processes safely (Windows tree kill)
     ├── test.ps1                     # Executes full pytest suite
     ├── run_benchmarks.py            # Executes versioned benchmark suite with memory ablation
+    ├── verify_release.py            # Automated machine-readable release qualification harness
     └── demonstrate_complete_workflow.py # 13-step software repair demonstrator
 ```
 
 ---
 
-## 7. Verification & Empirical Test Evidence (`v0.9.0-rc1`)
+## 7. Verification & Empirical Test Evidence (`v0.9.1-pre`)
 
-- **Full Backend Pytest Suite:** **31 / 31 passed** in 57.42s (Unit, Integration, Adversarial Security, and Evaluation API).
+- **Full Backend Pytest Suite:** **35 / 35 passed** (Unit, Integration, 18 Adversarial Security Tests, and Evaluation API).
 - **Independent Acceptance Suite:** **20 / 20 passed** in `backend/tests/verify_acceptance.py`.
-- **Frontend Production Build:** **1,935 modules compiled in 8.75s with 0 errors** (`npm run build`).
+- **Frontend Production Build:** **1,935 modules compiled in 2.03s with 0 errors** (`npm run build`).
 - **Complete Workflow Demonstrator:** **12/12 logic steps passed**, Step 8 container execution reported **`BLOCKED`** when daemon is offline, and executes cleanly in container isolation when Docker is active.
 - **Evaluation Benchmark Suite:** Versioned benchmark `BENCHMARK_TASKS_V1` executed with FailureFlywheel memory enabled vs disabled (ablation); results persisted in `artifacts/benchmark_results.json`.
-- **Adversarial Security Suite:** Verified protection against path traversal (`SEC-01`), symlink escapes (`SEC-02`), test file tampering (`SEC-03`), protected file edits (`SEC-04`), merge authorization bypasses (`WRK-01`), and stale replay attacks (`WRK-02`).
+- **Adversarial Security Suite:** Verified protection against path traversal (`SEC-01`), symlink escapes (`SEC-02`), test file tampering (`SEC-03`), protected file edits (`SEC-04`), merge authorization bypasses (`WRK-01`), stale replay attacks (`WRK-02`), target-branch drift, and Docker socket access attempts.
 - **Container Isolation:** Docker Desktop with WSL2 engine integration (`docker 25.0.3`) supported; fail-closed execution policy strictly enforces container isolation without unsafe host fallback.
-- **Release Gate Audit:** 14 release gates evaluated; full machine-readable report available in `artifacts/release_gate_report.json`.
+- **Machine-Readable Release Report:** Automated qualification harness `scripts/verify_release.py` evaluates all release gates and exports `artifacts/post_rc1_release_report.json`.
 - **Reference Repositories Untouched:** Verified zero modifications to `Agent Chess` and `Meta-Graph-Codebase-Navigator`.
 
 

@@ -353,3 +353,116 @@ def test_server_restart_reconciliation(test_db):
     assert test_db.query(RunModel).filter(RunModel.id == r2.id).first().state == "FAILED"
     assert test_db.query(RunModel).filter(RunModel.id == r3.id).first().state == "COMPLETED"
 
+def test_protected_file_patterns_block_ci_workflows_and_docker_artifacts():
+    """
+    Verifies that .github/workflows and docker artifacts are strictly protected.
+    """
+    ci_diff = """--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,3 +1,3 @@
+-name: CI
++name: Pwned
+"""
+    is_safe, err = UnifiedDiffParser.validate_patch_boundaries(ci_diff, allowed_files=[".github/workflows/ci.yml"])
+    assert is_safe is False
+    assert "Prohibited modification of protected files" in err
+
+    docker_diff = """--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -1,2 +1,3 @@
+-version: '3'
++version: '2'
+"""
+    is_safe2, err2 = UnifiedDiffParser.validate_patch_boundaries(docker_diff, allowed_files=["docker-compose.yml"])
+    assert is_safe2 is False
+    assert "Prohibited modification of protected files" in err2
+
+def test_validate_safe_path_blocks_symlink_and_traversal(tmp_path):
+    """
+    Verifies that validate_safe_path rejects directory traversal and secret files.
+    """
+    base_dir = tmp_path / "workspace"
+    base_dir.mkdir()
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    secret_file = outside_dir / "secret.txt"
+    secret_file.write_text("TOP_SECRET", encoding="utf-8")
+
+    # Direct traversal
+    with pytest.raises(ValueError) as exc:
+        validate_safe_path(base_dir, "../outside/secret.txt")
+    assert "Path traversal detected" in str(exc.value)
+
+    # Secret file patterns
+    with pytest.raises(ValueError) as exc2:
+        validate_safe_path(base_dir, ".env")
+    assert "Access to secret file" in str(exc2.value)
+
+@pytest.mark.asyncio
+async def test_approve_merge_rejects_target_branch_drift(test_db, tmp_path):
+    """
+    Release Gate: Target-branch drift triggers 409 Conflict and invalidates approval.
+    """
+    repo_dir = tmp_path / "drift_repo"
+    repo_dir.mkdir()
+    await run_safe_subprocess(["git", "init"], cwd=repo_dir)
+    await run_safe_subprocess(["git", "config", "user.name", "Tester"], cwd=repo_dir)
+    await run_safe_subprocess(["git", "config", "user.email", "tester@test.local"], cwd=repo_dir)
+    f = repo_dir / "target.py"
+    f.write_text("initial = 1\n", encoding="utf-8")
+    await run_safe_subprocess(["git", "add", "target.py"], cwd=repo_dir)
+    await run_safe_subprocess(["git", "commit", "-m", "Commit 1"], cwd=repo_dir)
+    await run_safe_subprocess(["git", "branch", "-M", "main"], cwd=repo_dir)
+
+    _, head1, _ = await run_safe_subprocess(["git", "rev-parse", "HEAD"], cwd=repo_dir)
+    base_commit = head1.strip()
+
+    # Create candidate branch
+    await run_safe_subprocess(["git", "checkout", "-b", "candidate/drift-branch"], cwd=repo_dir)
+    f.write_text("initial = 2\n", encoding="utf-8")
+    await run_safe_subprocess(["git", "commit", "-am", "Candidate change"], cwd=repo_dir)
+
+    # Main branch advances (drift)
+    await run_safe_subprocess(["git", "checkout", "main"], cwd=repo_dir)
+    (repo_dir / "other.py").write_text("other = 1\n", encoding="utf-8")
+    await run_safe_subprocess(["git", "add", "other.py"], cwd=repo_dir)
+    await run_safe_subprocess(["git", "commit", "-m", "Commit 2 on main"], cwd=repo_dir)
+
+    repo = get_or_create_repository(test_db, "repo-drift", "Repo Drift", str(repo_dir))
+    ticket = create_ticket(test_db, make_valid_ticket_dict(repo.id, title="Drift ticket", status="APPROVED"))
+    run = create_run(test_db, {
+        "ticket_id": ticket.id,
+        "repo_id": repo.id,
+        "state": "AWAITING_APPROVAL",
+        "verdict": "PASS",
+        "base_commit": base_commit,
+        "candidate_branch": "candidate/drift-branch"
+    })
+    diff_text = "--- a/target.py\n+++ b/target.py\n@@ -1,1 +1,1 @@\n-initial = 1\n+initial = 2\n"
+    actual_hash = hashlib.sha256(diff_text.encode("utf-8")).hexdigest()
+    create_candidate(test_db, {
+        "run_id": run.id,
+        "ticket_id": ticket.id,
+        "attempt": 1,
+        "diff_content": diff_text,
+        "diff_hash": actual_hash,
+        "changed_files_json": ["target.py"]
+    })
+
+    with pytest.raises(HTTPException) as exc_info:
+        await approve_merge(RunApprovalRequest(action="approve"), run.id, test_db)
+    assert exc_info.value.status_code == 409
+    assert "Target branch has drifted" in exc_info.value.detail
+
+@pytest.mark.asyncio
+async def test_pytest_runner_returns_runtime_unavailable_code_when_blocked(monkeypatch):
+    """
+    Verifies that PytestRunner returns reason_code 'RUNTIME_UNAVAILABLE' when fail-closed.
+    """
+    monkeypatch.setattr(settings, "REQUIRE_CONTAINER_SANDBOX", True)
+    status = await SandboxDetector().detect_capabilities()
+    if not status["docker_running"]:
+        res = await pytest_runner.run_tests(working_dir=Path("E:/MM Office/Ouroboros"))
+        assert res["passed"] is False
+        assert res["command"] == "BLOCKED"
+        assert res.get("reason_code") == "RUNTIME_UNAVAILABLE"

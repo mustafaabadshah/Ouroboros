@@ -31,16 +31,20 @@ class SandboxDetector:
 
         fail_closed_required = settings.REQUIRE_CONTAINER_SANDBOX or settings.SANDBOX_MODE == "fail_closed"
         can_execute = True
+        reason_code = "OK"
 
         if not docker_running and fail_closed_required:
             preferred_mode = "blocked"
             can_execute = False
+            reason_code = "RUNTIME_UNAVAILABLE"
             message = "EXECUTION BLOCKED: Strict container sandbox required by policy, but Docker is offline."
         elif docker_running:
             preferred_mode = "docker"
+            reason_code = "NONE"
             message = "Docker container sandbox active."
         else:
             preferred_mode = "restricted_local"
+            reason_code = "NONE"
             message = "Docker offline. Restricted local subprocess worktree sandbox active."
 
         return {
@@ -48,6 +52,7 @@ class SandboxDetector:
             "docker_running": docker_running,
             "preferred_mode": preferred_mode,
             "can_execute": can_execute,
+            "reason_code": reason_code,
             "fail_closed_required": fail_closed_required,
             "message": message
         }

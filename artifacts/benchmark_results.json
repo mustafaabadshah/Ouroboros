@@ -1,16 +1,19 @@
 {
   "benchmark_version": "v1.0.0",
-  "timestamp": "2026-10-15T11:02:45Z",
+  "timestamp": "2026-10-15T17:58:30Z",
   "memory_enabled_run": {
     "suite_version": "v1.0.0",
     "memory_enabled": true,
     "total_tasks": 3,
+    "eligible_tasks": 2,
     "passed_tasks": 2,
     "blocked_tasks": 1,
     "failed_tasks": 0,
+    "raw_success_rate": 0.6667,
+    "eligible_success_rate": 1.0,
     "repair_success_rate": 0.6667,
-    "median_duration_ms": 4660,
-    "total_duration_ms": 10708,
+    "median_duration_ms": 4335,
+    "total_duration_ms": 9881,
     "task_results": [
       {
         "task_id": "BENCH-01",
@@ -41,7 +44,7 @@
             "failures": []
           }
         ],
-        "duration_ms": 5098
+        "duration_ms": 4677
       },
       {
         "task_id": "BENCH-02",
@@ -72,7 +75,7 @@
             "failures": []
           }
         ],
-        "duration_ms": 4660
+        "duration_ms": 4335
       },
       {
         "task_id": "BENCH-03",
@@ -89,7 +92,7 @@
             "reason": "Prohibited modification of protected files: ['.env']"
           }
         ],
-        "duration_ms": 950
+        "duration_ms": 869
       }
     ]
   },
@@ -97,12 +100,15 @@
     "suite_version": "v1.0.0",
     "memory_enabled": false,
     "total_tasks": 3,
+    "eligible_tasks": 2,
     "passed_tasks": 2,
     "blocked_tasks": 1,
     "failed_tasks": 0,
+    "raw_success_rate": 0.6667,
+    "eligible_success_rate": 1.0,
     "repair_success_rate": 0.6667,
-    "median_duration_ms": 5040,
-    "total_duration_ms": 11291,
+    "median_duration_ms": 3759,
+    "total_duration_ms": 9324,
     "task_results": [
       {
         "task_id": "BENCH-01",
@@ -133,7 +139,7 @@
             "failures": []
           }
         ],
-        "duration_ms": 5335
+        "duration_ms": 4656
       },
       {
         "task_id": "BENCH-02",
@@ -164,7 +170,7 @@
             "failures": []
           }
         ],
-        "duration_ms": 5040
+        "duration_ms": 3759
       },
       {
         "task_id": "BENCH-03",
@@ -181,12 +187,13 @@
             "reason": "Prohibited modification of protected files: ['.env']"
           }
         ],
-        "duration_ms": 916
+        "duration_ms": 909
       }
     ]
   },
   "ablation_comparison": {
-    "success_rate_delta": 0.0,
-    "median_latency_delta_ms": -380
+    "raw_success_rate_delta": 0.0,
+    "eligible_success_rate_delta": 0.0,
+    "median_latency_delta_ms": 576
   }
 }
