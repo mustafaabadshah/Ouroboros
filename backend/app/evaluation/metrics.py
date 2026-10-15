@@ -42,7 +42,7 @@ class MetricsCalculator:
         cancelled_runs = sum(1 for r in runs if r.state == "CANCELLED")
 
         # Passing runs (evaluated with PASS verdict)
-        passing_runs = [r for r in runs if r.evaluation_verdict == "PASS"]
+        passing_runs = [r for r in runs if getattr(r, "verdict", None) == "PASS"]
         passing_count = len(passing_runs)
 
         # Eligible attempted runs for repair (runs that entered evaluation)
