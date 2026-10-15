@@ -8,13 +8,18 @@ from sqlalchemy.orm import sessionmaker
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
+from sqlalchemy.pool import StaticPool
 from app.database.session import Base
-from app.database.models import RepositoryModel
+from app.database import models
 
 @pytest.fixture
 def test_db():
     """Provides a fresh, in-memory SQLite database session for tests."""
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool
+    )
     Base.metadata.create_all(bind=engine)
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = TestingSessionLocal()

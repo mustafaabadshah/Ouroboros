@@ -28,5 +28,7 @@ class RunResponse(BaseModel):
         from_attributes = True
 
 class RunApprovalRequest(BaseModel):
-    action: str  # approve, reject
+    action: str = "approve"  # approve, reject
     notes: Optional[str] = None
+    candidate_id: Optional[str] = None
+    candidate_hash: Optional[str] = None

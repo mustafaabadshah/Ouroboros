@@ -14,10 +14,17 @@ class ModelRouter:
     - Enforces local-only privacy boundaries when configured.
     """
 
-    def __init__(self):
-        self.allow_remote_fallback = settings.ALLOW_REMOTE_FALLBACK
-        self.strict_local_only = settings.STRICT_LOCAL_ONLY
-        self.require_confirmation = settings.REQUIRE_FALLBACK_CONFIRMATION
+    @property
+    def allow_remote_fallback(self) -> bool:
+        return settings.ALLOW_REMOTE_FALLBACK
+
+    @property
+    def strict_local_only(self) -> bool:
+        return settings.STRICT_LOCAL_ONLY
+
+    @property
+    def require_confirmation(self) -> bool:
+        return settings.REQUIRE_FALLBACK_CONFIRMATION
 
     async def route_task(
         self,
@@ -35,7 +42,7 @@ class ModelRouter:
 
         # Architect and Planner prefer Groq for strong reasoning
         if agent_role in ("Architect", "Planner"):
-            if not self.strict_local_only and settings.GROQ_API_KEY:
+            if not self.strict_local_only and self.allow_remote_fallback and settings.GROQ_API_KEY:
                 logger.info(f"Routing {agent_role} to GroqProvider ({settings.GROQ_REASONING_MODEL}).")
                 res = await groq_provider.generate(prompt, system_instruction)
                 if not res["is_error"]:

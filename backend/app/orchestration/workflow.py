@@ -67,7 +67,25 @@ class WorkflowController:
                 return
 
             from app.observability.phoenix_service import set_current_run_context
+            from app.sandbox.detector import sandbox_detector
+            import json
+
             set_current_run_context(run.id, run.ticket_id)
+
+            # Fail-Closed Sandbox Gate
+            sandbox_status = await sandbox_detector.detect_capabilities()
+            if not sandbox_status.get("can_execute", True):
+                logger.warning(f"Run {run_id} blocked: {sandbox_status['message']}")
+                return await self._terminate(db, run_id, "BLOCKED", sandbox_status["message"])
+
+            # Cryptographically freeze acceptance criteria
+            criteria_payload = json.dumps({
+                "title": ticket.title,
+                "acceptance_criteria": ticket.acceptance_criteria_json,
+                "candidate_files": ticket.candidate_files_json
+            }, sort_keys=True)
+            frozen_criteria_hash = hashlib.sha256(criteria_payload.encode("utf-8")).hexdigest()
+            logger.info(f"Frozen acceptance criteria hash for run {run_id}: {frozen_criteria_hash[:12]}")
 
             repo_path = Path(repo.path)
 

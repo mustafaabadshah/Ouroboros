@@ -16,6 +16,7 @@ from app.api.tickets import router as tickets_router
 from app.api.runs import router as runs_router
 from app.api.failures import router as failures_router
 from app.api.settings import router as settings_router
+from app.api.evaluation import router as evaluation_router
 
 from app.observability.phoenix_service import phoenix_service
 
@@ -42,6 +43,28 @@ async def lifespan(app: FastAPI):
             logger.warning(f"Could not seed default repository: {e}")
         finally:
             db.close()
+
+    # Reconcile interrupted runs on server restart
+    rec_db = SessionLocal()
+    try:
+        from app.database.models import RunModel
+        interrupted = rec_db.query(RunModel).filter(
+            RunModel.state.in_([
+                "IDLE", "BASELINE_VALIDATION", "PLANNING", "CODING",
+                "PATCH_VALIDATION", "ACCEPTANCE_TESTS", "REGRESSION_TESTS",
+                "REPAIR_REQUIRED", "REVIEW"
+            ])
+        ).all()
+        for r in interrupted:
+            r.state = "FAILED"
+            r.error_message = "Process interrupted by server restart. Run halted safely."
+        if interrupted:
+            rec_db.commit()
+            logger.info(f"Reconciled {len(interrupted)} interrupted run(s) on startup.")
+    except Exception as rec_err:
+        logger.warning(f"Could not reconcile interrupted runs: {rec_err}")
+    finally:
+        rec_db.close()
 
     yield
     logger.info("Project Ouroboros Backend shutting down...")
@@ -70,6 +93,7 @@ app.include_router(tickets_router, prefix="/api")
 app.include_router(runs_router, prefix="/api")
 app.include_router(failures_router, prefix="/api")
 app.include_router(settings_router, prefix="/api")
+app.include_router(evaluation_router)
 
 if __name__ == "__main__":
     import uvicorn

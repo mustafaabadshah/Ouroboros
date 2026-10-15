@@ -28,8 +28,9 @@ $pids = @{
 $pids | ConvertTo-Json | Out-File -FilePath $pidFile -Encoding utf8
 
 Write-Host "`n[OK] Services launched successfully!" -ForegroundColor Green
-Write-Host "  - React Dashboard:  http://localhost:5173" -ForegroundColor Cyan
-Write-Host "  - Backend REST API: http://127.0.0.1:8000/docs" -ForegroundColor Cyan
-Write-Host "  - SSE Event Stream: http://127.0.0.1:8000/api/runs/{id}/events" -ForegroundColor Cyan
+Write-Host "  - React Dashboard:      http://localhost:5173" -ForegroundColor Cyan
+Write-Host "  - Backend REST API:     http://127.0.0.1:8000/docs" -ForegroundColor Cyan
+Write-Host "  - Arize Phoenix UI:     http://127.0.0.1:6006" -ForegroundColor Cyan
+Write-Host "  - SSE Event Stream:     http://127.0.0.1:8000/api/runs/{id}/events" -ForegroundColor Cyan
 Write-Host "`nTo stop all services safely, run:" -ForegroundColor Gray
 Write-Host "  powershell -ExecutionPolicy Bypass scripts/stop.ps1`n" -ForegroundColor Gray

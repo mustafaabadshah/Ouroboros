@@ -50,8 +50,48 @@ class PytestRunner:
         Returns detailed structured test results.
         """
         async with self._lock:
-            py_exe = self.resolve_python_executable(working_dir)
-            cmd = [py_exe, "-m", "pytest"]
+            # Enforce fail-closed execution sandbox policy
+            from app.sandbox.detector import sandbox_detector
+            sandbox_status = await sandbox_detector.detect_capabilities()
+            if not sandbox_status.get("can_execute", True):
+                msg = sandbox_status.get("message", "Sandbox execution blocked by policy.")
+                logger.warning(f"PytestRunner execution blocked: {msg}")
+                return {
+                    "exit_code": 1,
+                    "passed": False,
+                    "duration_ms": 0,
+                    "command": "BLOCKED",
+                    "passed_count": 0,
+                    "failed_count": 1,
+                    "error_count": 1,
+                    "failures": [msg],
+                    "stdout_excerpt": "",
+                    "stderr_excerpt": msg
+                }
+
+            if sandbox_status.get("preferred_mode") == "docker":
+                # Strict container isolation specification:
+                # - non-root UID 1000:1000
+                # - network disabled: --network none
+                # - memory capped: --memory 1500m
+                # - cpu capped: --cpus 1.0
+                # - pids limit: --pids-limit 100
+                # - docker socket never mounted
+                cmd = [
+                    "docker", "run", "--rm",
+                    "--network", "none",
+                    "--user", "1000:1000",
+                    "--memory", "1500m",
+                    "--cpus", "1.0",
+                    "--pids-limit", "100",
+                    "-v", f"{working_dir.resolve()}:/workspace:rw",
+                    "-w", "/workspace",
+                    "python:3.12-slim",
+                    "pytest"
+                ]
+            else:
+                py_exe = self.resolve_python_executable(working_dir)
+                cmd = [py_exe, "-m", "pytest"]
 
             if test_path:
                 cmd.append(test_path)

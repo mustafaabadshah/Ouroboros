@@ -13,6 +13,12 @@ PROTECTED_FILE_PATTERNS = [
     ".env",
     ".git",
     "ouroboros.db",
+    "judge.py",
+    "runner.py",
+    "detector.py",
+    "security.py",
+    "verify_acceptance.py",
+    "conftest.py",
 ]
 
 def mask_secret(text: Optional[str]) -> str:
@@ -37,10 +43,14 @@ def validate_safe_path(base_dir: Path, target_path: str) -> Path:
     except ValueError:
         raise ValueError(f"Security Violation: Path traversal detected. Target '{target_path}' is outside '{base_dir}'.")
 
-    # Reject secret-bearing files
+    # Reject secret-bearing files and version control metadata
     file_name = target_resolved.name.lower()
-    if file_name in [".env", ".env.local", "id_rsa", "id_ed25519"] or file_name.endswith(".pem"):
+    if file_name in [".env", ".env.local", "id_rsa", "id_ed25519", "credentials.json"] or file_name.endswith(".pem"):
         raise ValueError(f"Security Violation: Access to secret file '{file_name}' is forbidden.")
+
+    # Block writing directly into .git repository directory
+    if ".git" in target_resolved.parts or file_name == ".git":
+        raise ValueError(f"Security Violation: Direct modification of Git internal metadata '{target_path}' is forbidden.")
 
     return target_resolved
 
@@ -94,10 +104,18 @@ async def run_safe_subprocess(
 
         except asyncio.TimeoutError:
             try:
-                proc.kill()
+                if proc.pid:
+                    if os.name == "nt":
+                        subprocess.run(
+                            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                            capture_output=True,
+                            timeout=5
+                        )
+                    else:
+                        proc.kill()
                 await proc.wait()
             except Exception as kill_err:
-                logger.warning(f"Failed to kill timed out process: {kill_err}")
+                logger.warning(f"Failed to kill timed out process tree: {kill_err}")
             return -1, "", f"Execution timed out after {timeout} seconds."
 
     except Exception as e:

@@ -46,6 +46,8 @@ candidate_sandboxes/
 temp_eval/
 artifacts/runs/
 data/cache/
+.ouroboros_pids.json
+
 
 # Testing & Coverage
 .pytest_cache/

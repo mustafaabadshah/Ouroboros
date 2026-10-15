@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import StreamingResponse
@@ -21,6 +22,7 @@ from app.schemas.run import RunResponse, RunCreateRequest, RunApprovalRequest
 from app.schemas.evaluation import TestResultResponse, DiffInspectionResponse
 from app.orchestration.workflow import workflow_controller
 from app.integrations.git.worktree import git_worktree_manager
+from app.integrations.git.diff_parser import UnifiedDiffParser
 from app.core.events import event_bus
 from app.core.logging import logger
 
@@ -39,6 +41,23 @@ async def start_run(
     ticket = get_ticket(db, req.ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail=f"Ticket '{req.ticket_id}' not found.")
+
+    if ticket.status != "APPROVED":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot start run: Ticket '{ticket.id}' is '{ticket.status}', must be 'APPROVED' first."
+        )
+
+    # Prevent concurrent duplicate runs on the same ticket
+    active_runs = [
+        r for r in list_runs(db, repo_id=ticket.repo_id)
+        if r.ticket_id == ticket.id and r.state not in ["COMPLETED", "FAILED", "CANCELLED", "BLOCKED"]
+    ]
+    if active_runs:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Conflict: An active run '{active_runs[0].id}' is already in progress for ticket '{ticket.id}'."
+        )
 
     repo = get_repository(db, ticket.repo_id)
     if not repo:
@@ -153,21 +172,70 @@ async def get_run_diff(run_id: str, db: Session = Depends(get_db)):
         verdict=run.verdict
     )
 
+_merge_lock = asyncio.Lock()
+
 @router.post("/{run_id}/approve-merge")
 async def approve_merge(req: RunApprovalRequest, run_id: str, db: Session = Depends(get_db)):
     """
     Explicit Human Approval Gate:
     Merges candidate branch into target branch and cleans up the isolated worktree.
+    Serialized via _merge_lock to prevent concurrent double-merging.
     """
-    run = get_run(db, run_id)
-    if not run:
-        raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
+    async with _merge_lock:
+        run = get_run(db, run_id)
+        if not run:
+            raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
 
-    if run.state != "AWAITING_APPROVAL":
-        raise HTTPException(status_code=400, detail=f"Run is in state '{run.state}', not 'AWAITING_APPROVAL'.")
+        if run.state != "AWAITING_APPROVAL":
+            raise HTTPException(status_code=400, detail=f"Run is in state '{run.state}', not 'AWAITING_APPROVAL'.")
+
+    # Policy revalidation: only PASS or PASS_WITH_WARNINGS verdicts can be approved and merged
+    if run.verdict not in ["PASS", "PASS_WITH_WARNINGS"]:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Approval rejected: Run verdict is '{run.verdict}', must be PASS or PASS_WITH_WARNINGS."
+        )
+
+    # Cryptographic revision binding: re-verify candidate hash
+    cand = get_latest_candidate(db, run_id)
+    if not cand:
+        raise HTTPException(status_code=400, detail="No candidate record found for this run.")
+
+    if req.candidate_id and req.candidate_id != cand.id:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Approval invalidated: Approved candidate '{req.candidate_id}' does not match current candidate '{cand.id}'."
+        )
+
+    # Re-verify candidate hash against stored diff content
+    computed_hash = hashlib.sha256(cand.diff_content.encode("utf-8")).hexdigest()
+    if cand.diff_hash and computed_hash != cand.diff_hash:
+        raise HTTPException(
+            status_code=409,
+            detail="Approval invalidated: Candidate diff hash does not match computed hash (diff altered)."
+        )
+
+    if req.candidate_hash and req.candidate_hash != cand.diff_hash:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Approval invalidated: Provided hash '{req.candidate_hash[:8]}' does not match candidate hash '{cand.diff_hash[:8]}'."
+        )
+
+    # Revalidate patch boundary and protected files before merge
+    is_safe, err_msg = UnifiedDiffParser.validate_patch_boundaries(
+        diff_text=cand.diff_content,
+        allowed_files=cand.changed_files_json or []
+    )
+    if not is_safe:
+        raise HTTPException(status_code=403, detail=f"Merge rejected by policy: {err_msg}")
 
     repo = get_repository(db, run.repo_id)
     repo_path = Path(repo.path)
+
+    # Verify base commit has not drifted unexpectedly
+    current_head = await git_worktree_manager.get_base_commit(repo_path)
+    if run.base_commit and current_head != run.base_commit:
+        logger.warning(f"Target repository HEAD drifted from {run.base_commit[:8]} to {current_head[:8]}")
 
     success, msg = await git_worktree_manager.merge_candidate(
         repo_path=repo_path,

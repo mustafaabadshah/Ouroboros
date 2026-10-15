@@ -41,19 +41,45 @@ class UnifiedDiffParser:
         additions = 0
         deletions = 0
 
-        # Regex for diff header: --- a/path or +++ b/path
-        file_header_re = re.compile(r"^\+\+\+\s+(?:b/)?([^\s\t]+)")
+        # Regex for diff headers
+        diff_git_re = re.compile(r"^diff\s+--git\s+(?:a/)?([^\s\t]+)\s+(?:b/)?([^\s\t]+)")
+        minus_header_re = re.compile(r"^---\s+(?:a/)?([^\s\t]+)")
+        plus_header_re = re.compile(r"^\+\+\+\s+(?:b/)?([^\s\t]+)")
 
         for line in lines:
-            header_match = file_header_re.match(line)
-            if header_match:
-                raw_path = header_match.group(1).strip()
+            git_match = diff_git_re.match(line)
+            if git_match:
+                p_old, p_new = git_match.group(1).strip(), git_match.group(2).strip()
+                for p in (p_old, p_new):
+                    if p != "/dev/null":
+                        clean_p = p.replace("\\", "/")
+                        changed_files.add(clean_p)
+                        if is_protected_path(clean_p):
+                            protected_touched.append(clean_p)
+                        files_details.setdefault(clean_p, {"additions": 0, "deletions": 0})
+                continue
+
+            minus_match = minus_header_re.match(line)
+            if minus_match:
+                raw_path = minus_match.group(1).strip()
                 if raw_path != "/dev/null":
                     current_file = raw_path.replace("\\", "/")
                     changed_files.add(current_file)
                     if is_protected_path(current_file):
                         protected_touched.append(current_file)
                     files_details.setdefault(current_file, {"additions": 0, "deletions": 0})
+                continue
+
+            plus_match = plus_header_re.match(line)
+            if plus_match:
+                raw_path = plus_match.group(1).strip()
+                if raw_path != "/dev/null":
+                    current_file = raw_path.replace("\\", "/")
+                    changed_files.add(current_file)
+                    if is_protected_path(current_file):
+                        protected_touched.append(current_file)
+                    files_details.setdefault(current_file, {"additions": 0, "deletions": 0})
+                # Note: if raw_path == "/dev/null", current_file remains set to the deleted file from minus_match
                 continue
 
             if current_file:
@@ -67,7 +93,7 @@ class UnifiedDiffParser:
         is_valid = len(changed_files) > 0 and (additions > 0 or deletions > 0)
         error = None
         if not is_valid:
-            error = "Could not identify valid unified diff headers (+++ b/<filepath>) or no modifications found."
+            error = "Could not identify valid unified diff headers (--- a/..., +++ b/...) or no modifications found."
 
         return {
             "is_valid": is_valid,

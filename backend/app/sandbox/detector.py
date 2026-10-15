@@ -27,11 +27,29 @@ class SandboxDetector:
             except Exception:
                 docker_running = False
 
+        from app.core.config import settings
+
+        fail_closed_required = settings.REQUIRE_CONTAINER_SANDBOX or settings.SANDBOX_MODE == "fail_closed"
+        can_execute = True
+
+        if not docker_running and fail_closed_required:
+            preferred_mode = "blocked"
+            can_execute = False
+            message = "EXECUTION BLOCKED: Strict container sandbox required by policy, but Docker is offline."
+        elif docker_running:
+            preferred_mode = "docker"
+            message = "Docker container sandbox active."
+        else:
+            preferred_mode = "restricted_local"
+            message = "Docker offline. Restricted local subprocess worktree sandbox active."
+
         return {
             "docker_installed": bool(docker_cli),
             "docker_running": docker_running,
-            "preferred_mode": "docker" if docker_running else "restricted_local",
-            "message": "Docker container sandbox active." if docker_running else "Docker offline. Restricted local subprocess worktree sandbox active."
+            "preferred_mode": preferred_mode,
+            "can_execute": can_execute,
+            "fail_closed_required": fail_closed_required,
+            "message": message
         }
 
 from pathlib import Path

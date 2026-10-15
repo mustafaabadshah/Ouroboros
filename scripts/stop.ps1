@@ -18,6 +18,10 @@ if (Test-Path $pidFile) {
             Write-Host "Stopping Frontend (PID: $($pids.frontend_pid))..." -ForegroundColor Gray
             Stop-Process -Id $pids.frontend_pid -Force -ErrorAction SilentlyContinue
         }
+        if ($pids.phoenix_pid) {
+            Write-Host "Stopping Arize Phoenix (PID: $($pids.phoenix_pid))..." -ForegroundColor Gray
+            Stop-Process -Id $pids.phoenix_pid -Force -ErrorAction SilentlyContinue
+        }
         Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
         Write-Host "[OK] All services stopped." -ForegroundColor Green
     } catch {

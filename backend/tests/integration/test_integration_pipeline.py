@@ -117,3 +117,35 @@ async def test_meta_graph_adapter_agent_chess():
     # Test associated test query
     tests = meta_graph_adapter.get_associated_tests("agent_chess", ["backend/app/agents/groq_agent.py"])
     assert len(tests) > 0
+
+def test_evaluation_metrics_and_benchmark_api(test_db):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.database.session import get_db
+
+    # Override get_db to use test_db
+    app.dependency_overrides[get_db] = lambda: test_db
+    client = TestClient(app)
+
+    try:
+        # Test GET /api/evaluation/metrics
+        res_metrics = client.get("/api/evaluation/metrics")
+        assert res_metrics.status_code == 200
+        metrics_data = res_metrics.json()
+        assert "repair_success_rate" in metrics_data
+        assert "candidate_test_pass_rate" in metrics_data
+        assert "regression_rate" in metrics_data
+        assert "total_runs" in metrics_data
+
+        # Test GET /api/evaluation/benchmark/tasks
+        res_tasks = client.get("/api/evaluation/benchmark/tasks")
+        assert res_tasks.status_code == 200
+        tasks_data = res_tasks.json()
+        assert len(tasks_data) >= 3
+        task_ids = [t["task_id"] for t in tasks_data]
+        assert "BENCH-01" in task_ids
+        assert "BENCH-02" in task_ids
+        assert "BENCH-03" in task_ids
+    finally:
+        app.dependency_overrides.clear()
+

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from app.core.logging import logger
+from app.core.security import validate_safe_path
 from app.integrations.git.diff_parser import UnifiedDiffParser
 from app.evaluation.ast_analyzer import ASTChangeAnalyzer
 from app.evaluation.runner import pytest_runner
@@ -30,21 +31,43 @@ class DeterministicJudge:
                 "ast_analysis": {}
             }
 
+        # Check allowed files scope
+        if allowed_files:
+            allowed_normalized = [f.replace("\\", "/").lower() for f in allowed_files]
+            for modified in diff_meta["changed_files"]:
+                mod_clean = modified.lower()
+                if not any(mod_clean.endswith(allow) or allow.endswith(mod_clean) for allow in allowed_normalized):
+                    return {
+                        "verdict": "BLOCKED",
+                        "reason": f"Out-of-scope modification: '{modified}' is not in allowed files {allowed_files}.",
+                        "ast_analysis": {}
+                    }
+
         if diff_meta["protected_files_touched"]:
             return {
                 "verdict": "NEEDS_HUMAN_REVIEW",
                 "reason": f"Patch touches protected engine files: {diff_meta['protected_files_touched']}",
                 "ast_analysis": {}
             }
+        from app.sandbox.security import analyze_code_security
 
-        # 2. Check AST syntax and protected symbol violations on changed files
+        # 2. Check AST syntax, security violations, and symbol safety on changed files
         ast_results = {}
         for rel_file in diff_meta["changed_files"]:
-            file_path = worktree_path / rel_file
+            try:
+                file_path = validate_safe_path(worktree_path, rel_file)
+            except ValueError as ve:
+                return {
+                    "verdict": "BLOCKED",
+                    "reason": f"Path Security Violation: {ve}",
+                    "ast_analysis": {}
+                }
             if file_path.exists() and file_path.suffix == ".py":
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         code_content = f.read()
+
+                    # A. Static AST Syntax Check
                     tree, syntax_err = ASTChangeAnalyzer.parse_python_ast(code_content, rel_file)
                     if syntax_err:
                         return {
@@ -52,6 +75,16 @@ class DeterministicJudge:
                             "reason": f"Syntax error introduced in {rel_file}: {syntax_err}",
                             "ast_analysis": {rel_file: {"syntax_valid": False, "error": syntax_err}}
                         }
+
+                    # B. Static AST Security Analysis
+                    sec_res = analyze_code_security(code_content, filename=rel_file)
+                    if not sec_res["is_safe"]:
+                        return {
+                            "verdict": "BLOCKED",
+                            "reason": f"Security Policy Violation in {rel_file}: {'; '.join(sec_res['violations'])}",
+                            "ast_analysis": {rel_file: {"security_violations": sec_res["violations"]}}
+                        }
+
                     symbols = ASTChangeAnalyzer.extract_symbols(tree)
                     ast_results[rel_file] = {"syntax_valid": True, "symbols_count": len(symbols)}
                 except Exception as e:
@@ -59,7 +92,7 @@ class DeterministicJudge:
 
         return {
             "verdict": "PASS",
-            "reason": "Static syntax and diff checks passed.",
+            "reason": "Static syntax, security policy, and diff checks passed.",
             "ast_analysis": ast_results
         }
 

@@ -122,6 +122,17 @@ class PhoenixTracingService:
         tokens_out = tokens_out or 0
         total_tokens = tokens_in + tokens_out
 
+        # Privacy redaction for proprietary source code and secrets
+        capture_prompts = getattr(settings, "PHOENIX_CAPTURE_PROMPTS", False)
+        mask_snippets = getattr(settings, "PHOENIX_MASK_CODE_SNIPPETS", True)
+
+        if not capture_prompts:
+            safe_input = f"[Privacy Mode: Prompt text omitted ({len(input_prompt)} chars)]"
+            safe_output = f"[Privacy Mode: Output text omitted ({len(output_content)} chars)]"
+        else:
+            safe_input = input_prompt[:300] + ("..." if len(input_prompt) > 300 else "")
+            safe_output = output_content[:300] + ("..." if len(output_content) > 300 else "")
+
         span_data = {
             "id": span_id,
             "trace_id": trace_id,
@@ -146,8 +157,8 @@ class PhoenixTracingService:
                 "llm.token_count.prompt_tokens": tokens_in,
                 "llm.token_count.completion_tokens": tokens_out,
                 "llm.token_count.total_tokens": total_tokens,
-                "input.value": input_prompt[:300] + ("..." if len(input_prompt) > 300 else ""),
-                "output.value": output_content[:300] + ("..." if len(output_content) > 300 else ""),
+                "input.value": safe_input,
+                "output.value": safe_output,
             }
         }
 
@@ -169,8 +180,8 @@ class PhoenixTracingService:
                 span.set_attribute("llm.token_count.prompt_tokens", tokens_in)
                 span.set_attribute("llm.token_count.completion_tokens", tokens_out)
                 span.set_attribute("llm.token_count.total_tokens", total_tokens)
-                span.set_attribute("input.value", input_prompt)
-                span.set_attribute("output.value", output_content)
+                span.set_attribute("input.value", safe_input)
+                span.set_attribute("output.value", safe_output)
                 if run_id:
                     span.set_attribute("session.id", run_id)
                     span.set_attribute("ouroboros.run_id", run_id)

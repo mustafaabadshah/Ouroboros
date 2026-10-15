@@ -127,7 +127,11 @@ class GitWorktreeManager:
             if not target_file_rel:
                 return False, "Could not determine target file from diff headers"
 
-            full_target_path = (worktree_path / target_file_rel).resolve()
+            try:
+                full_target_path = validate_safe_path(worktree_path, target_file_rel)
+            except ValueError as ve:
+                return False, f"Security Violation in target path '{target_file_rel}': {ve}"
+
             if not full_target_path.exists():
                 return False, f"Target file does not exist: {target_file_rel}"
 
@@ -236,6 +240,8 @@ class GitWorktreeManager:
             cwd=repo_path
         )
         if code != 0:
+            # Abort any in-progress merge conflict to restore repository cleanly
+            await run_safe_subprocess(["git", "merge", "--abort"], cwd=repo_path)
             return False, f"Merge failed: {err}"
         return True, "Candidate merged successfully."
 

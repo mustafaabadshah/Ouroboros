@@ -49,15 +49,19 @@ class Settings(BaseSettings):
     SUBPROCESS_TIMEOUT_SECONDS: int = 60
     MAX_OUTPUT_CAPTURE_BYTES: int = 65536
 
-    # Execution Security & Sandbox Policy ('auto', 'docker', 'restricted_local')
+    # Execution Security & Sandbox Policy ('auto', 'docker', 'restricted_local', 'fail_closed')
     SANDBOX_MODE: str = "auto"
+    REQUIRE_CONTAINER_SANDBOX: bool = False
     ISOLATED_WORKTREE_DIR: str = str(BACKEND_DIR / "worktrees")
+    AUTONOMY_MODE: str = "SUPERVISED"
 
-    # Arize Phoenix AI Observability & Tracing
+    # Arize Phoenix AI Observability & Tracing Privacy Controls
     PHOENIX_ENABLED: bool = True
     PHOENIX_PORT: int = 6006
     PHOENIX_PROJECT_NAME: str = "ouroboros-swarm"
     PHOENIX_COLLECTOR_ENDPOINT: Optional[str] = None
+    PHOENIX_CAPTURE_PROMPTS: bool = False
+    PHOENIX_MASK_CODE_SNIPPETS: bool = True
 
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"),

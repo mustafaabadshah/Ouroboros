@@ -1,69 +1,95 @@
-# Project Ouroboros: Deterministic Evaluation & Regression Protocol
-**Document ID:** EVAL-OURO-001  
-**Authority:** Deterministic Judge (Host Python Engine)  
+# PROJECT OUROBOROS: EVALUATION & BENCHMARKING PROTOCOL
+**Document Version:** 1.0.0 (Production Hardening)  
+**Classification:** Research & Empirical Evaluation Standard  
+**Status:** ACTIVE  
 
 ---
 
-## 1. Evaluation Methodology
+## 1. Evaluation Philosophy
 
-The core tenet of Project Ouroboros is **empirical determinism**:
-> An autonomous agent may never approve its own work, and the system may never claim an improvement unless measured regression gates confirm it.
+In automated code generation, an agent's claim that *"the code is complete and correct"* has zero evidential value. Generated unit tests created by the same model that synthesized the patch cannot serve as independent proof of correctness.
 
+Project Ouroboros enforces a **Deterministic Evaluation Protocol** where code correctness is decided exclusively by deterministic software gates, independent test runners, and baseline comparison.
+
+---
+
+## 2. The 12-Stage Evaluation Pipeline
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Swarm as Workflow Controller
+    participant B as Clean Baseline
+    participant WT as Isolated Worktree
+    participant J as Deterministic Judge
+    participant R as Regression Harness
+    participant F as Failure Flywheel
+
+    Swarm->>B: 1. Establish Pre-Patch Test Baseline
+    B-->>Swarm: Baseline Results (e.g. 19/19 Pass)
+    Swarm->>Swarm: 2. Cryptographically Freeze Criteria (SHA-256)
+    Swarm->>WT: 3. Apply Candidate Patch
+    Swarm->>J: 4. Static AST & Diff Bounds Check
+    alt Static Check Fails
+        J-->>Swarm: BLOCKED / FAIL (Syntax or Security)
+        Swarm->>F: Record Failure Trajectory
+    else Static Check Passes
+        Swarm->>WT: 5. Execute Acceptance Tests
+        Swarm->>R: 6. Execute Baseline Regression Suite
+        R-->>J: Candidate Test Outcome
+        J->>J: 7. Compare Candidate vs Baseline Failures
+        alt New Failures > Baseline Failures
+            J-->>Swarm: FAIL (Regression Detected)
+            Swarm->>F: Record Trajectory (test_name, traceback)
+        else All Tests Pass
+            J-->>Swarm: PASS (0 Regressions)
+            Swarm->>Swarm: 8. AWAITING_HUMAN_APPROVAL
+        end
+    end
 ```
-Target Repository Baseline
-           │
-           ├─► [Phase 1: Baseline Validation]
-           │   Execute existing test suite (e.g. 19 tests in Agent Chess).
-           │   Record baseline exit codes, duration, and passed test names.
-           │
-           ├─► [Phase 2: Candidate Patch Application]
-           │   Apply candidate diff in isolated Git worktree.
-           │   Verify diff syntax, boundaries, and protected paths.
-           │
-           ├─► [Phase 3: Static AST Inspection]
-           │   Parse Python AST; detect added/removed symbols.
-           │   Flag modifications to protected engine symbols.
-           │
-           └─► [Phase 4: Candidate Test & Regression Suite]
-               Execute candidate tests + full regression suite.
-               Compare candidate test results against baseline outcomes.
-               VERDICT: PASS only if regressions == 0 and all tests pass.
+
+---
+
+## 3. Strict Verdict Taxonomy
+
+The Deterministic Judge returns exactly one of five explicit verdicts:
+
+| Verdict | Meaning | Merge Permitted? |
+| :--- | :--- | :---: |
+| **`PASS`** | All static AST checks, acceptance tests, and baseline regression suites passed with **0 newly introduced regressions**. | Yes (Requires Human Approval) |
+| **`PASS_WITH_WARNINGS`** | All functional tests passed, but minor non-blocking style/lint warnings were flagged. | Yes (Requires Human Review) |
+| **`FAIL`** | One or more acceptance tests failed, or candidate test failure count exceeded baseline. | No (Routes to Repair Agent) |
+| **`BLOCKED`** | Patch violates security boundaries, touches forbidden files, contains syntax errors, or sandbox is offline in fail-closed mode. | No (Execution Halted) |
+| **`NEEDS_HUMAN_REVIEW`** | Ambiguous behavior detected (e.g. baseline had pre-existing failures matching candidate failure counts). | No (Requires Operator Decision) |
+
+---
+
+## 4. Regression Isolation: Baseline vs. Candidate
+
+To prevent pre-existing repository bugs from blocking new patches, the Judge calculates:
+$$\text{New Regressions} = \text{Failures}_{\text{candidate}} \setminus \text{Failures}_{\text{baseline}}$$
+
+* Pre-existing defects are cataloged as `KNOWN_BASELINE_DEFECTS`.
+* A patch is marked as a regression **only if** $\text{Count}(\text{Failures}_{\text{candidate}}) > \text{Count}(\text{Failures}_{\text{baseline}})$.
+* Conversely, an existing failure never excuses a newly introduced bug.
+
+---
+
+## 5. Machine-Readable Evaluation Report Schema
+
+Every evaluation produces a persistent JSON report:
+```json
+{
+  "run_id": "run-40ee7c04",
+  "ticket_id": "ouro-3a6996",
+  "base_commit": "c7dedd8902e5c845c0fe8a6767f58312add1db3d",
+  "candidate_patch_hash": "61dbf593a05786a347b74...",
+  "frozen_criteria_hash": "a4f89d0e123...",
+  "verdict": "PASS",
+  "baseline_summary": {"passed": 19, "failed": 0, "duration_ms": 12130},
+  "candidate_summary": {"passed": 20, "failed": 0, "duration_ms": 12450},
+  "regressions_detected": [],
+  "security_findings": [],
+  "timestamp": "2026-10-15T14:28:10Z"
+}
 ```
-
----
-
-## 2. Regression Policy
-
-A candidate patch is rejected (`FAIL`) under any of the following conditions:
-1. **Any Regression in Baseline Tests:** If a test that passed in the baseline fails in the candidate worktree, the patch is rejected immediately.
-2. **Pre-existing Baseline Failures:** Failures present in the clean baseline are segregated and not attributed to the candidate, but are flagged in the report.
-3. **Protected Path Modifications:** Changes to `backend/app/chess/validator.py`, `stockfish.py`, or security configurations trigger an automatic `BLOCKED` verdict.
-4. **Non-deterministic Flakiness:** Any test that exhibits non-deterministic outcomes across identical runs is flagged by `TestAnalystAgent`.
-
----
-
-## 3. Judge Verdict Taxonomies
-
-The `DeterministicJudge` produces an immutable, machine-readable verdict:
-
-| Verdict | Meaning | Next Swarm Action |
-| :--- | :--- | :--- |
-| **`PASS`** | Patch applies cleanly; AST analysis passes; zero regressions; acceptance tests pass. | State transitions to `AWAITING_APPROVAL`. Human operator notified. |
-| **`FAIL`** | Patch caused a test failure or regression. | Failure trajectory recorded in SQLite. Flywheel dispatches `RepairAgent`. |
-| **`BLOCKED`** | Patch violates security policies (protected file edit, path traversal). | Execution halted immediately; no repair attempted. |
-| **`NEEDS_HUMAN_REVIEW`** | Complex AST alterations detected on critical interfaces. | Pauses for human operator inspection. |
-
----
-
-## 4. Persistent Failure Flywheel Protocol
-
-When a test failure occurs during an evaluation cycle:
-1. **Capture:** The judge extracts:
-   - Failed test name and line number
-   - Exact traceback excerpt
-   - AST diff summary
-   - Patch hash
-2. **Persist:** A new record is inserted into SQLite table `failure_trajectories`.
-3. **Analyze:** The flywheel queries prior attempts for the same ticket:
-   - If the same error occurred in Attempt 1 and Attempt 2, it flags `repeated_failure = True`.
-4. **Feed Forward:** The `RepairAgent` prompt receives the exact failure traceback, avoiding repetition of rejected patch strategies.

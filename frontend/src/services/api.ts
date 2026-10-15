@@ -141,4 +141,12 @@ export const api = {
   getSettings: () => request<SystemSettings>('/settings'),
   updateSettings: (data: Partial<SystemSettings>) =>
     request<{ message: string }>('/settings', { method: 'PATCH', body: JSON.stringify(data) }),
+
+  // Evaluation & Benchmarks
+  getEvaluationMetrics: () => request<any>('/evaluation/metrics'),
+  getBenchmarkTasks: () => request<any[]>('/evaluation/benchmark/tasks'),
+  runBenchmarkSuite: (memoryEnabled: boolean = true) =>
+    request<any>(`/evaluation/benchmark/run?memory_enabled=${memoryEnabled}`, { method: 'POST' }),
+  exportBenchmarkUrl: (memoryEnabled: boolean = true) =>
+    `${BASE_URL}/evaluation/benchmark/export?memory_enabled=${memoryEnabled}`,
 };

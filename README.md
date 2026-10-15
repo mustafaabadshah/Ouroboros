@@ -139,20 +139,32 @@ Ouroboros/
 │   ├── RESOURCE_GUIDE.md            # 8 GB RAM memory budget & Ollama CPU guidelines
 │   ├── API_REFERENCE.md             # REST & SSE endpoint documentation
 │   ├── EVALUATION_PROTOCOL.md       # Deterministic regression gates & test protocol
-│   └── TROUBLESHOOTING.md           # Operational solutions & common troubleshooting
+│   ├── MASTER_ROADMAP.md            # Comprehensive project roadmap & release gates G1-G14
+│   ├── RELEASE_RUNBOOK.md           # Operational setup, verification & troubleshooting guide
+│   ├── KNOWN_LIMITATIONS.md         # Documented limitations & security threat boundaries
+│   ├── METRICS_REFERENCE.md         # Mathematical definitions of honest evaluation metrics
+│   ├── FAILURE_MEMORY_DESIGN.md     # FailureFlywheel schema & retrieval architecture
+│   └── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
 └── scripts/
     ├── check-environment.ps1        # Verifies host prerequisites
     ├── setup.ps1                    # Installs backend virtualenv and npm dependencies
-    ├── start.ps1                    # Launches backend & frontend with process tracking
-    ├── stop.ps1                     # Terminates background processes safely
-    └── test.ps1                     # Executes full pytest suite
+    ├── start.ps1                    # Launches backend, frontend & Phoenix with process tracking
+    ├── stop.ps1                     # Terminates background processes safely (Windows tree kill)
+    ├── test.ps1                     # Executes full pytest suite
+    ├── run_benchmarks.py            # Executes versioned benchmark suite with memory ablation
+    └── demonstrate_complete_workflow.py # 13-step software repair demonstrator
 ```
 
 ---
 
-## 7. Verification & Test Evidence
+## 7. Verification & Empirical Test Evidence (`v0.9.0-rc1`)
 
-- **Backend Test Suite:** 11 / 11 tests passed in 11.37s.
-- **Target Repository (Agent Chess):** All 19 baseline tests passed in 18.19s.
-- **Meta-Graph Codebase Navigator:** Ingested `agent_chess_nx.json` (750 nodes, 2,105 edges) without external services.
-- **Deterministic Pilot Run:** Successfully generated ticket `ouro-de9451`, created isolated candidate worktree `candidate/ouro-de9451`, applied unified diff, evaluated 19 pytest regression tests with zero regressions, verified diff in dashboard, and completed human-approved merge.
+- **Full Backend Pytest Suite:** **31 / 31 passed** in 57.42s (Unit, Integration, Adversarial Security, and Evaluation API).
+- **Independent Acceptance Suite:** **20 / 20 passed** in `backend/tests/verify_acceptance.py`.
+- **Frontend Production Build:** **1,935 modules compiled in 8.75s with 0 errors** (`npm run build`).
+- **Complete Workflow Demonstrator:** **12/12 logic steps passed**, Step 8 container execution safely reported **`BLOCKED`** under fail-closed execution policy.
+- **Evaluation Benchmark Suite:** Versioned benchmark `BENCHMARK_TASKS_V1` executed with FailureFlywheel memory enabled vs disabled (ablation); results persisted in `artifacts/benchmark_results.json`.
+- **Adversarial Security Suite:** Verified protection against path traversal (`SEC-01`), symlink escapes (`SEC-02`), test file tampering (`SEC-03`), protected file edits (`SEC-04`), merge authorization bypasses (`WRK-01`), and stale replay attacks (`WRK-02`).
+- **Release Gate Audit:** 13/14 release gates **PASS**, 1 gate (**G6 - Execution Isolation**) verified as **`BLOCKED` fail-closed** due to offline Docker daemon. Full machine-readable report available in `artifacts/release_gate_report.json`.
+- **Reference Repositories Untouched:** Verified zero modifications to `Agent Chess` and `Meta-Graph-Codebase-Navigator`.
+
