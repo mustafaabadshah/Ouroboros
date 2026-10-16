@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=65.5.1", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "project-ouroboros"
 version = "0.1.0"
@@ -27,6 +31,15 @@ dev = [
     "pytest-asyncio>=0.23.0",
     "rich>=13.7.0",
 ]
+
+[tool.setuptools.package-dir]
+"" = "backend"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["app*"]
+exclude = ["tests*"]
+namespaces = true
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]

@@ -1,3 +1,5 @@
+import os
+import sys
 import re
 import time
 import asyncio
@@ -24,13 +26,14 @@ class PytestRunner:
         Locates the appropriate virtual environment python interpreter.
         Prefers target directory venv if present, otherwise uses host/project .venv.
         """
+        bin_dir = "Scripts" if os.name == "nt" else "bin"
+        py_name = "python.exe" if os.name == "nt" else "python"
         candidate_venvs = [
-            target_dir / "venv" / "Scripts" / "python.exe",
-            target_dir / ".venv" / "Scripts" / "python.exe",
-            target_dir.parent / "venv" / "Scripts" / "python.exe",
-            target_dir / "backend" / "venv" / "Scripts" / "python.exe",
-            Path(r"E:\MM Office\Agent Chess\backend\venv\Scripts\python.exe"),
-            Path(r"E:\MM Office\Ouroboros\.venv\Scripts\python.exe"),
+            target_dir / "venv" / bin_dir / py_name,
+            target_dir / ".venv" / bin_dir / py_name,
+            target_dir.parent / "venv" / bin_dir / py_name,
+            target_dir / "backend" / "venv" / bin_dir / py_name,
+            Path(sys.executable),
         ]
 
         for p in candidate_venvs:
@@ -72,7 +75,9 @@ class PytestRunner:
                     "stderr_excerpt": msg
                 }
 
-            if sandbox_status.get("preferred_mode") == "docker":
+            is_docker = sandbox_status.get("preferred_mode") == "docker"
+            if is_docker:
+                sandbox_image = getattr(settings, "DOCKER_SANDBOX_IMAGE", "ouroboros-pytest-sandbox:3.12")
                 # Strict container isolation specification:
                 # - non-root UID 1000:1000
                 # - network disabled: --network none
@@ -95,7 +100,7 @@ class PytestRunner:
                     "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
                     "-v", f"{working_dir.resolve()}:/workspace:rw",
                     "-w", "/workspace",
-                    "python:3.12-slim",
+                    sandbox_image,
                     "pytest"
                 ]
             else:
@@ -109,6 +114,9 @@ class PytestRunner:
 
             # Standard pytest options for concise, machine-readable output
             cmd.extend(["-v", "--tb=short"])
+            if is_docker:
+                # Isolate pytest cache to writable container tmpfs, avoiding non-root workspace permission issues
+                cmd.extend(["-o", "cache_dir=/tmp/.pytest_cache"])
 
             start_time = time.perf_counter()
             logger.info(f"Executing test harness: {' '.join(cmd)} in {working_dir}")

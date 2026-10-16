@@ -33,11 +33,23 @@ async def test_deterministic_e2e_fixture_repair_lifecycle():
     11. Verify original repository remains completely unchanged!
     """
     temp_dir = Path(tempfile.mkdtemp(prefix="ouro_e2e_"))
+    if os.name != "nt":
+        try:
+            os.chmod(temp_dir, 0o775)
+        except Exception:
+            pass
+
     try:
         repo_dir = temp_dir / "target_fixture_repo"
         worktrees_dir = temp_dir / "worktrees"
         repo_dir.mkdir(parents=True)
         worktrees_dir.mkdir(parents=True)
+        if os.name != "nt":
+            try:
+                os.chmod(repo_dir, 0o775)
+                os.chmod(worktrees_dir, 0o775)
+            except Exception:
+                pass
 
         # 1. Initialize Git Repo
         await run_safe_subprocess(["git", "init"], cwd=repo_dir)

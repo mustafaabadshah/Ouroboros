@@ -60,7 +60,7 @@ def test_workflow_state_transitions():
     with pytest.raises(ValueError):
         workflow_sm.validate_transition("BASELINE_VALIDATION", "COMPLETED")
 
-def test_security_controls():
+def test_security_controls(tmp_path):
     # Secret Masking
     assert mask_secret("gsk_1234567890abcdef") == "gsk_...cdef"
     assert mask_secret("") == "NONE"
@@ -74,7 +74,8 @@ def test_security_controls():
     assert is_protected_path("backend/app/agents/groq_agent.py") is False
 
     # Path traversal validation
-    base_dir = Path("E:/MM Office/Agent Chess")
+    base_dir = tmp_path / "agent_chess"
+    base_dir.mkdir()
     with pytest.raises(ValueError, match="Path traversal detected"):
         validate_safe_path(base_dir, "../../../Windows/System32")
 

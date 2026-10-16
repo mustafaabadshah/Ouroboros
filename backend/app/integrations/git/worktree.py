@@ -60,6 +60,12 @@ class GitWorktreeManager:
             logger.error(f"Failed to create Git worktree: {err}")
             raise RuntimeError(f"Git worktree creation failed: {err}")
 
+        if os.name != "nt" and worktree_path.exists():
+            try:
+                os.chmod(worktree_path, 0o775)
+            except Exception:
+                pass
+
         return worktree_path, candidate_branch, base_commit
 
     @staticmethod
