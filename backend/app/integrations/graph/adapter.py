@@ -65,9 +65,15 @@ class MetaGraphAdapter:
         primary = self.navigator_path / "data" / "indexes" / f"{repo_id}_nx.json"
         if primary.exists():
             return primary
-        fallback = Path(__file__).resolve().parent.parent.parent / "tests" / "fixtures" / "indexes" / f"{repo_id}_nx.json"
-        if fallback.exists():
-            return fallback
+        # Check backend fixture indexes
+        backend_dir = Path(__file__).resolve().parent.parent.parent.parent
+        candidates = [
+            backend_dir / "tests" / "fixtures" / "indexes" / f"{repo_id}_nx.json",
+            Path.cwd() / "backend" / "tests" / "fixtures" / "indexes" / f"{repo_id}_nx.json",
+        ]
+        for c in candidates:
+            if c.exists():
+                return c
         return primary
 
     def _load_local_graph(self, repo_id: str) -> nx.MultiDiGraph:
