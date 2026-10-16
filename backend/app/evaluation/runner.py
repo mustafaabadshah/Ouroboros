@@ -6,6 +6,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from app.core.config import settings
 from app.core.logging import logger
 from app.core.security import run_safe_subprocess
+from app.evaluation.failure_context import FailureContextNormalizer
 
 class PytestRunner:
     """
@@ -131,12 +132,13 @@ class PytestRunner:
                 "failed_count": summary["failed"],
                 "error_count": summary["errors"],
                 "failures": summary["failure_details"],
+                "failure_context": summary.get("failure_context"),
                 "stdout_excerpt": stdout[:4000],
                 "stderr_excerpt": stderr[:4000]
             }
 
     def _parse_pytest_output(self, stdout: str, stderr: str) -> Dict[str, Any]:
-        """Parses pytest summary line (e.g. '19 passed, 1 failed in 2.3s') and tracebacks."""
+        """Parses pytest summary line (e.g. '19 passed, 1 failed in 2.3s') and tracebacks into canonical failure context."""
         passed = 0
         failed = 0
         errors = 0
@@ -157,17 +159,32 @@ class PytestRunner:
         if err_match:
             errors = int(err_match.group(1))
 
-        # Extract failure snippets
-        if failed > 0 or errors > 0:
-            blocks = re.findall(r"(?:FAILED|ERROR)\s+([^\s]+)(.*?)(?=(?:FAILED|ERROR|\={5,}))", combined, re.DOTALL)
-            for test_name, snippet in blocks[:5]:  # limit to top 5
+        # Canonical normalization across both stdout and stderr
+        norm_ctx = FailureContextNormalizer.from_pytest_output(
+            stdout=stdout,
+            stderr=stderr,
+            exit_code=1 if (failed > 0 or errors > 0) else 0
+        )
+        norm_ctx_dict = norm_ctx.to_dict()
+
+        # Build clean failure items using normalized node IDs (immune to [100%] progress tokens)
+        if norm_ctx.failed_test_nodes and norm_ctx.failed_test_nodes != ["UnknownTestNode"]:
+            for node_id in norm_ctx.failed_test_nodes:
                 failures.append({
-                    "test_name": test_name.strip(),
-                    "traceback": snippet.strip()[:1000]
+                    "test_name": node_id,
+                    "traceback": norm_ctx.traceback_tail or norm_ctx.assertion_message or "Test assertion failed."
                 })
+        elif failed > 0 or errors > 0:
+            blocks = re.findall(r"(?:FAILED|ERROR)\s+([^\s]+)(.*?)(?=(?:FAILED|ERROR|\={5,}))", combined, re.DOTALL)
+            for test_name, snippet in blocks[:5]:
+                t_clean = test_name.strip()
+                if not re.match(r"^\[\s*\d+%\s*\]$", t_clean):
+                    failures.append({
+                        "test_name": t_clean,
+                        "traceback": snippet.strip()[:1000]
+                    })
 
             if not failures and "Traceback" in combined:
-                # Capture generic traceback
                 tb_lines = combined[combined.find("Traceback"):combined.find("Traceback") + 1200]
                 failures.append({
                     "test_name": "Execution Failure",
@@ -178,7 +195,8 @@ class PytestRunner:
             "passed": passed,
             "failed": failed,
             "errors": errors,
-            "failure_details": failures
+            "failure_details": failures,
+            "failure_context": norm_ctx_dict
         }
 
 pytest_runner = PytestRunner()

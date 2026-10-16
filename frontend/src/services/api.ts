@@ -149,4 +149,14 @@ export const api = {
     request<any>(`/evaluation/benchmark/run?memory_enabled=${memoryEnabled}`, { method: 'POST' }),
   exportBenchmarkUrl: (memoryEnabled: boolean = true) =>
     `${BASE_URL}/evaluation/benchmark/export?memory_enabled=${memoryEnabled}`,
+  getEvaluationOverview: () => request<any>('/evaluation/overview'),
+  getEvaluationComparison: () => request<any>('/evaluation/comparison'),
+  getEvaluationTasks: () => request<any[]>('/evaluation/tasks'),
+  getEvaluationTaskDetail: (taskId: string) => request<any>(`/evaluation/tasks/${taskId}`),
+  getSafetyApprovals: () => request<any[]>('/evaluation/safety-approvals'),
+  postSafetyApprovalAction: (reviewId: string, action: string, notes?: string) =>
+    request<any>(`/evaluation/safety-approvals/${reviewId}/action`, {
+      method: 'POST',
+      body: JSON.stringify({ action, notes }),
+    }),
 };

@@ -5,6 +5,7 @@ from app.core.security import validate_safe_path
 from app.integrations.git.diff_parser import UnifiedDiffParser
 from app.evaluation.ast_analyzer import ASTChangeAnalyzer
 from app.evaluation.runner import pytest_runner
+from app.evaluation.failure_context import FailureContextNormalizer
 
 class DeterministicJudge:
     """
@@ -25,10 +26,12 @@ class DeterministicJudge:
         # 1. Parse and validate diff
         diff_meta = UnifiedDiffParser.parse_patch(diff_text)
         if not diff_meta["is_valid"]:
+            f_ctx = FailureContextNormalizer.from_patch_error(diff_meta["error"])
             return {
                 "verdict": "BLOCKED",
                 "reason": f"Malformed patch: {diff_meta['error']}",
-                "ast_analysis": {}
+                "ast_analysis": {},
+                "failure_context": f_ctx.to_dict()
             }
 
         # Check allowed files scope
@@ -37,17 +40,37 @@ class DeterministicJudge:
             for modified in diff_meta["changed_files"]:
                 mod_clean = modified.lower()
                 if not any(mod_clean.endswith(allow) or allow.endswith(mod_clean) for allow in allowed_normalized):
+                    reason_msg = f"Out-of-scope modification: '{modified}' is not in allowed files {allowed_files}."
+                    f_ctx = FailureContextNormalizer.from_static_policy(
+                        rule_id="boundary_scope",
+                        reason=reason_msg,
+                        allowed_requirement=f"Modify only files in {allowed_files}.",
+                        target_file=modified
+                    )
                     return {
                         "verdict": "BLOCKED",
-                        "reason": f"Out-of-scope modification: '{modified}' is not in allowed files {allowed_files}.",
-                        "ast_analysis": {}
+                        "reason": reason_msg,
+                        "ast_analysis": {},
+                        "failure_context": f_ctx.to_dict(),
+                        "policy_rule_id": "boundary_scope",
+                        "policy_requirement": f"Modify only files in {allowed_files}."
                     }
 
         if diff_meta["protected_files_touched"]:
+            reason_msg = f"Patch touches protected engine files: {diff_meta['protected_files_touched']}"
+            f_ctx = FailureContextNormalizer.from_static_policy(
+                rule_id="protected_path",
+                reason=reason_msg,
+                allowed_requirement="Protected engine files may not be modified by automated repair.",
+                target_file=str(diff_meta["protected_files_touched"])
+            )
             return {
                 "verdict": "NEEDS_HUMAN_REVIEW",
-                "reason": f"Patch touches protected engine files: {diff_meta['protected_files_touched']}",
-                "ast_analysis": {}
+                "reason": reason_msg,
+                "ast_analysis": {},
+                "failure_context": f_ctx.to_dict(),
+                "policy_rule_id": "protected_path",
+                "policy_requirement": "Protected engine files may not be modified by automated repair."
             }
         from app.sandbox.security import analyze_code_security
 
@@ -57,10 +80,19 @@ class DeterministicJudge:
             try:
                 file_path = validate_safe_path(worktree_path, rel_file)
             except ValueError as ve:
+                f_ctx = FailureContextNormalizer.from_static_policy(
+                    rule_id="path_traversal",
+                    reason=str(ve),
+                    allowed_requirement="Paths must remain strictly within workspace boundary.",
+                    target_file=rel_file
+                )
                 return {
                     "verdict": "BLOCKED",
                     "reason": f"Path Security Violation: {ve}",
-                    "ast_analysis": {}
+                    "ast_analysis": {},
+                    "failure_context": f_ctx.to_dict(),
+                    "policy_rule_id": "path_traversal",
+                    "policy_requirement": "Paths must remain strictly within workspace boundary."
                 }
             if file_path.exists() and file_path.suffix == ".py":
                 try:
@@ -70,19 +102,45 @@ class DeterministicJudge:
                     # A. Static AST Syntax Check
                     tree, syntax_err = ASTChangeAnalyzer.parse_python_ast(code_content, rel_file)
                     if syntax_err:
+                        f_ctx = FailureContextNormalizer.from_patch_error(
+                            error_msg=f"Syntax error introduced in {rel_file}: {syntax_err}",
+                            target_file=rel_file
+                        )
                         return {
                             "verdict": "FAIL",
                             "reason": f"Syntax error introduced in {rel_file}: {syntax_err}",
-                            "ast_analysis": {rel_file: {"syntax_valid": False, "error": syntax_err}}
+                            "ast_analysis": {rel_file: {"syntax_valid": False, "error": syntax_err}},
+                            "failure_context": f_ctx.to_dict()
                         }
 
                     # B. Static AST Security Analysis
                     sec_res = analyze_code_security(code_content, filename=rel_file)
                     if not sec_res["is_safe"]:
+                        p_calls = sec_res.get("details", {}).get("prohibited_calls", [])
+                        p_imps = sec_res.get("details", {}).get("prohibited_imports", [])
+                        rule_id = "security_policy"
+                        requirement = "Use standard algorithms and higher-level libraries without prohibited calls or imports."
+                        if p_calls:
+                            rule_id = p_calls[0].get("rule_id", "prohibited_primitive")
+                            requirement = p_calls[0].get("requirement", requirement)
+                        elif p_imps:
+                            rule_id = p_imps[0].get("rule_id", "prohibited_module")
+                            requirement = p_imps[0].get("requirement", requirement)
+
+                        sec_reason = f"Security Policy Violation in {rel_file}: {'; '.join(sec_res['violations'])}"
+                        f_ctx = FailureContextNormalizer.from_static_policy(
+                            rule_id=rule_id,
+                            reason=sec_reason,
+                            allowed_requirement=requirement,
+                            target_file=rel_file
+                        )
                         return {
                             "verdict": "BLOCKED",
-                            "reason": f"Security Policy Violation in {rel_file}: {'; '.join(sec_res['violations'])}",
-                            "ast_analysis": {rel_file: {"security_violations": sec_res["violations"]}}
+                            "reason": sec_reason,
+                            "ast_analysis": {rel_file: {"security_violations": sec_res["violations"]}},
+                            "failure_context": f_ctx.to_dict(),
+                            "policy_rule_id": rule_id,
+                            "policy_requirement": requirement
                         }
 
                     symbols = ASTChangeAnalyzer.extract_symbols(tree)

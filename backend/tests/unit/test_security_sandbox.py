@@ -61,6 +61,39 @@ def calculate_score(values):
     assert res["is_safe"] is True
     assert len(res["violations"]) == 0
 
+def test_ast_security_visitor_re_compile_allowed_and_dynamic_compile_blocked():
+    # 1. re.compile is benign and MUST NOT be blocked
+    regex_code = """
+import re
+SEMVER_REGEX = re.compile(r"^v?(\\d+)\\.(\\d+)\\.(\\d+)")
+def parse_ver(s):
+    return SEMVER_REGEX.match(s)
+"""
+    res_regex = analyze_code_security(regex_code, filename="semver.py")
+    assert res_regex["is_safe"] is True
+    assert len(res_regex["violations"]) == 0
+
+    # 2. Direct built-in compile is a dangerous dynamic primitive and MUST be blocked
+    evil_compile = """
+code_obj = compile("import os; os.system('whoami')", "<string>", "exec")
+"""
+    res_compile = analyze_code_security(evil_compile, filename="dynamic.py")
+    assert res_compile["is_safe"] is False
+    assert len(res_compile["details"]["prohibited_calls"]) == 1
+    call_info = res_compile["details"]["prohibited_calls"][0]
+    assert call_info["rule_id"] == "prohibited_primitive"
+    assert "Execution of dangerous system primitive 'compile' is forbidden" in call_info["reason"]
+    assert "requirement" in call_info
+
+    # 3. builtins.compile is also blocked
+    evil_builtins = """
+import builtins
+code_obj = builtins.compile("1 + 1", "<string>", "eval")
+"""
+    res_builtins = analyze_code_security(evil_builtins, filename="builtins_dyn.py")
+    assert res_builtins["is_safe"] is False
+    assert any("builtins.compile" in v for v in res_builtins["violations"])
+
 def test_judge_rejects_patch_with_security_violation(tmp_path):
     evil_file = tmp_path / "backend" / "app" / "exploit.py"
     evil_file.parent.mkdir(parents=True, exist_ok=True)

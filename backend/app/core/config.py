@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     PHOENIX_ENABLED: bool = True
     PHOENIX_PORT: int = 6006
     PHOENIX_PROJECT_NAME: str = "ouroboros-swarm"
-    PHOENIX_COLLECTOR_ENDPOINT: Optional[str] = None
+    PHOENIX_COLLECTOR_ENDPOINT: Optional[str] = "http://127.0.0.1:6006/v1/traces"
     PHOENIX_CAPTURE_PROMPTS: bool = False
     PHOENIX_MASK_CODE_SNIPPETS: bool = True
 

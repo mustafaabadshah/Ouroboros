@@ -78,4 +78,66 @@ Produce a bounded execution plan in JSON."""
                 "risk_warnings": ["Avoid changing chess legality checks."]
             }
 
+    @staticmethod
+    async def escalate_plan(
+        repo_id: str,
+        ticket: Dict[str, Any],
+        failure_context: Dict[str, Any],
+        current_plan: Dict[str, Any],
+        force_mock: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Escalates repeated or stubborn failure trajectory to the Planner.
+        Reconsiders the problem decomposition, subtasks, and algorithmic strategy using concrete failure diagnostics.
+        """
+        diag_body = failure_context.get("formatted_diagnostic") or failure_context.get("traceback") or "Repeated failure signature encountered."
+        prior_subtasks = current_plan.get("ordered_subtasks", [])
+        candidate_files = ticket.get("candidate_files", [])
+
+        user_prompt = f"""Approved Ticket:
+Title: {ticket.get('title')}
+Problem: {ticket.get('problem_statement')}
+Acceptance Criteria: {ticket.get('acceptance_criteria')}
+Candidate Files: {candidate_files}
+
+FAILURE ESCALATION:
+The previous implementation strategy failed repeatedly.
+Diagnostic Evidence:
+{diag_body}
+
+Previous Subtasks:
+{prior_subtasks}
+
+Produce a revised, alternative execution plan with a different algorithmic approach or refined subtask breakdown in JSON."""
+
+        res = await agent_runtime.execute_task(
+            role="Planner",
+            prompt=user_prompt,
+            system_instruction=PLANNER_SYSTEM_PROMPT,
+            force_mock=force_mock
+        )
+
+        content = res.get("content", "")
+        try:
+            plan = extract_json_from_response(content)
+            logger.info(f"Planner generated revised plan with {len(plan.get('ordered_subtasks', []))} subtasks upon escalation.")
+            return plan
+        except Exception as e:
+            logger.warning(f"Planner escalation fallback: {e}")
+            target_f = candidate_files[0] if candidate_files else (prior_subtasks[0].get("target_file") if prior_subtasks else "target.py")
+            return {
+                "ordered_subtasks": [
+                    {
+                        "subtask_id": "ST-REVISED-1",
+                        "description": f"Refactored strategy: address failing diagnostics '{diag_body[:100]}' directly in {target_f}",
+                        "target_file": target_f,
+                        "relevant_symbols": ticket.get("relevant_graph_entities", []),
+                        "completion_condition": "Diagnostics addressed and all tests pass."
+                    }
+                ],
+                "file_ownership": {target_f: "RepairAgent"},
+                "protected_files": current_plan.get("protected_files", []),
+                "risk_warnings": ["Previous approach repeated failing assertions. Must change algorithmic assumptions."]
+            }
+
 planner_agent = PlannerAgent()

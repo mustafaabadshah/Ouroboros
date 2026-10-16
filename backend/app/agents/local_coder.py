@@ -40,6 +40,10 @@ class LocalCoderAgent:
             "explanation": content.replace(diff_text, "").strip()[:500],
             "provider": res.get("provider"),
             "model": res.get("model"),
+            "input_tokens": res.get("input_tokens"),
+            "output_tokens": res.get("output_tokens"),
+            "is_error": res.get("is_error", False),
+            "error_message": res.get("error_message"),
             "is_fallback": res.get("is_fallback", False)
         }
 

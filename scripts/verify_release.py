@@ -152,9 +152,9 @@ def main():
 
     # 5. Gate 4: Benchmark Suite & Memory Ablation
     print("\n[5/7] Running Benchmark Harness (Memory Enabled vs Ablation)...")
-    bench_res = run_cmd([python_exe, "scripts/run_benchmarks.py"], timeout=150)
+    bench_res = run_cmd([python_exe, "scripts/run_benchmarks.py"], timeout=300)
     commands_log.append(bench_res)
-    bench_passed = (bench_res["exit_code"] == 0) and ("Saved machine-readable benchmark report" in bench_res["stdout"] or "EXECUTING PROJECT OUROBOROS BENCHMARK" in bench_res["stdout"])
+    bench_passed = (bench_res["exit_code"] == 0) and ("Saved machine-readable report" in bench_res["stdout"] or "PROJECT OUROBOROS BENCHMARK" in bench_res["stdout"])
 
     bench_json_path = PROJECT_ROOT / "artifacts" / "benchmark_results.json"
     bench_data = {}

@@ -1,0 +1,281 @@
+{
+  "audit_version": "v0.11",
+  "audit_timestamp_utc": "2026-10-16T11:05:00Z",
+  "git_state": {
+    "branch": "feature/v0.10-benchmark-expansion",
+    "head_commit": "549608c2a212c35e3d98e79656056a40ddef0fd5",
+    "tracked_modified_files_count": 19,
+    "untracked_files_preserved": true,
+    "destructive_operations_performed": 0,
+    "reference_repos": {
+      "agent_chess": {
+        "path": "E:/MM Office/Agent Chess",
+        "clean": true,
+        "modified": false
+      },
+      "meta_graph_codebase_navigator": {
+        "path": "E:/MM Office/Meta-Graph-Codebase-Navigator",
+        "clean": true,
+        "modified": false
+      }
+    }
+  },
+  "overall_verdict": "PASS_FOR_REVIEW",
+  "verdict_rationale": "The v0.11 implementation passes all functional, architectural, security, and API contract gates with zero regressions across 76 verified unit tests and clean frontend production build. Statistical denominators and duration improvements have been reconciled from raw records. Acceptance is subject to the transparent disclosure of statistical sample limits (McNemar two-sided p=0.1250) and dry-run provenance of repeated evaluation trials.",
+  "audits": {
+    "audit_1_evaluation_and_statistics": {
+      "status": "VERIFIED_WITH_RECONCILIATION",
+      "eligible_tasks": {
+        "baseline_denominator": 15,
+        "p2c_denominator": 15,
+        "baseline_passed": 11,
+        "p2c_passed": 15,
+        "baseline_pass_rate": 0.7333333333333333,
+        "p2c_pass_rate": 1.0,
+        "absolute_improvement_pp": 26.666666666666668,
+        "relative_improvement_pct": 36.36363636363637
+      },
+      "adversarial_task": {
+        "task_id": "BENCH-03",
+        "category": "adversarial_security",
+        "status": "BLOCKED_BY_POLICY",
+        "enforcement_rate": 1.0,
+        "strictly_separated_from_eligible_denominator": true
+      },
+      "attempt_distributions": {
+        "baseline_eligible": {
+          "1_attempt": 9,
+          "2_attempts": 2,
+          "3_attempts": 4,
+          "total_attempts": 25,
+          "max_attempts": 3
+        },
+        "p2c_eligible": {
+          "1_attempt": 13,
+          "2_attempts": 2,
+          "3_attempts": 0,
+          "total_attempts": 17,
+          "max_attempts": 2
+        }
+      },
+      "token_consumption": {
+        "baseline_eligible_15": {
+          "prompt_tokens_in": 8205,
+          "completion_tokens_out": 4751,
+          "total_tokens": 12956
+        },
+        "p2c_eligible_15": {
+          "prompt_tokens_in": 7899,
+          "completion_tokens_out": 2788,
+          "total_tokens": 10687
+        },
+        "delta": {
+          "total_token_reduction": 2269,
+          "total_token_reduction_pct": 17.513121333744983,
+          "completion_token_reduction_pct": 41.31761734371711
+        },
+        "p2c_adversarial_tokens": {
+          "prompt_tokens_in": 0,
+          "completion_tokens_out": 0,
+          "total_tokens": 0,
+          "note": "Blocked at pre-flight AST policy gate prior to model invocation"
+        }
+      },
+      "latency_percentiles_ms": {
+        "baseline_eligible_15": {
+          "p50": 42617.0,
+          "p95": 58085.0
+        },
+        "p2c_eligible_15": {
+          "p50": 29316.0,
+          "p95": 47668.0
+        },
+        "p2c_all_16": {
+          "p50": 28665.5,
+          "p95": 47668.0
+        }
+      },
+      "duration_reconciliation": {
+        "baseline_eligible_15_ms": 595725,
+        "baseline_eligible_15_formatted": "9m 55.7s (9.93 min)",
+        "p2c_eligible_15_ms": 446216,
+        "p2c_eligible_15_formatted": "7m 26.2s (7.44 min)",
+        "p2c_all_16_ms": 447697,
+        "p2c_all_16_formatted": "7m 27.7s (7.46 min)",
+        "bench03_duration_ms": 1481,
+        "matched_15_vs_15_reduction_pct": 25.097016072852575,
+        "unmatched_15_vs_16_reduction_pct": 24.84837785891141,
+        "reconciliation_resolution": "Earlier reports quoting ~24.8% reduction mixed the 15-task baseline with the 16-task P2C suite (including BENCH-03 at 1,481ms). Strictly matching the 15 eligible tasks yields an exact duration reduction of 25.10% (from 9.93 min down to 7.44 min)."
+      },
+      "wilson_95_ci": {
+        "p2c_15_of_15": [0.7961, 1.0000],
+        "baseline_11_of_15": [0.4805, 0.8910]
+      },
+      "paired_mcnemar_analysis": {
+        "contingency_table": {
+          "both_pass": 11,
+          "both_fail": 0,
+          "p2c_pass_base_fail": 4,
+          "base_pass_p2c_fail": 0
+        },
+        "discordant_tasks": [
+          "BENCH-05",
+          "BENCH-13",
+          "BENCH-14",
+          "BENCH-15"
+        ],
+        "discordant_pairs_count": 4,
+        "exact_mcnemar_p_value_one_sided": 0.0625,
+        "exact_mcnemar_p_value_two_sided": 0.1250,
+        "statistical_interpretation": "Under the directional hypothesis that failure-memory feedback improves repair outcomes, the one-sided exact binomial p-value is 0.0625. Under non-directional hypothesis testing, the two-sided p-value is 0.1250. Because n=15, the improvement does not achieve two-sided statistical significance at alpha=0.05 despite a 26.67 percentage point increase in repair success."
+      },
+      "repetitions_independence_audit": {
+        "artifact": "artifacts/v0_11/repeated_evaluation.json",
+        "declared_trials": 3,
+        "execution_mode": "dry_run",
+        "finding": "The repeated evaluation artifact was executed with dry_run: true. It validates deterministic trial isolation, checkpoint serialization, and harness integrity across 3 successive iterations without state leakage. It does not represent 3 live stochastic LLM API calls."
+      }
+    },
+    "audit_2_real_repo_pilot": {
+      "status": "VERIFIED",
+      "capabilities": {
+        "preflight_defect_reproduction": {
+          "verdict": "VERIFIED",
+          "evidence": "backend/app/evaluation/real_repo_pilot.py:100-112 executes baseline test before repair and validates failing exit code 1."
+        },
+        "solution_hiding_from_agent": {
+          "verdict": "VERIFIED",
+          "evidence": "backend/app/evaluation/real_repo_pilot.py:130-142 strips patch and presents only problem statement, test signature, and issue description."
+        },
+        "disposable_worktree_isolation_and_cleanup": {
+          "verdict": "VERIFIED",
+          "evidence": "git_worktree_manager creates disposable worktrees; try/finally block guarantees worktree deletion even on failure."
+        },
+        "candidate_patch_execution_in_sandbox": {
+          "verdict": "VERIFIED",
+          "evidence": "Candidate diff is applied in disposable worktree and verified via pytest_runner.run_test_suite_in_container inside Docker."
+        },
+        "verification_of_original_and_regression_tests": {
+          "verdict": "VERIFIED",
+          "evidence": "Pipeline verifies targeted failing test passes and executes repo test suite to prevent regressions."
+        },
+        "scope_and_ast_validation": {
+          "verdict": "VERIFIED",
+          "evidence": "DeterministicJudge and UnifiedDiffParser assert modified files strictly match allowed ticket scope."
+        },
+        "live_model_execution_readiness": {
+          "verdict": "PARTIALLY_VERIFIED",
+          "evidence": "AgentEvaluator and RealRepoPilot support live model routing; unit tests appropriately use force_mock=True to avoid unmetered API spend."
+        }
+      }
+    },
+    "audit_3_security_implementation": {
+      "status": "VERIFIED",
+      "controls": {
+        "secret_and_env_protection": {
+          "verdict": "VERIFIED",
+          "mechanism": "AST visitor checks os.environ/dotenv access; path validator rejects .env, .git, id_rsa, .pem, and credentials.json."
+        },
+        "path_traversal_and_symlink_escape": {
+          "verdict": "VERIFIED",
+          "mechanism": "validate_safe_path resolves canonical paths against repo root, blocking relative traversal ('../') and symlink redirection."
+        },
+        "static_detection_vs_runtime_enforcement": {
+          "verdict": "VERIFIED",
+          "mechanism": "Static AST analyzer catches syntax-level exfiltration. Docker container (--network none, --cap-drop ALL, rootless 1000:1000) provides actual physical runtime enforcement."
+        },
+        "container_network_and_socket_restrictions": {
+          "verdict": "VERIFIED",
+          "mechanism": "Container runs with --network none and forbids mounting /var/run/docker.sock."
+        },
+        "process_timeout_and_cleanup": {
+          "verdict": "VERIFIED",
+          "mechanism": "Subprocess execution enforces strict 30-second timeout and terminates full process trees via taskkill /F /T."
+        },
+        "fail_closed_behavior": {
+          "verdict": "VERIFIED",
+          "mechanism": "When Docker engine is unavailable, pytest_runner and pilot return runtime_unavailable and reject execution rather than falling back to host execution."
+        },
+        "secret_redaction": {
+          "verdict": "VERIFIED",
+          "mechanism": "Telemetry and logging pipelines invoke mask_secret on API keys, authorization headers, and environment tokens."
+        }
+      }
+    },
+    "audit_4_api_and_frontend": {
+      "status": "VERIFIED",
+      "endpoints_verified": [
+        "GET /api/v1/evaluation/overview",
+        "GET /api/v1/evaluation/comparison",
+        "GET /api/v1/evaluation/tasks",
+        "GET /api/v1/evaluation/safety-approvals"
+      ],
+      "api_client_and_types": {
+        "verdict": "VERIFIED",
+        "evidence": "frontend/src/types/index.ts and frontend/src/services/api.ts fully implement EvaluationOverview, ModelComparisonResponse, BenchmarkTaskDetail, and SafetyApproval."
+      },
+      "frontend_production_build": {
+        "verdict": "VERIFIED",
+        "command": "npm.cmd run build",
+        "exit_code": 0,
+        "duration_seconds": 5.91,
+        "modules_transformed": 1935,
+        "bundle_size": {
+          "index_html": "0.45 kB",
+          "index_css": "36.58 kB",
+          "index_js": "345.95 kB"
+        }
+      },
+      "safety_approval_workflow": {
+        "verdict": "VERIFIED",
+        "evidence": "Approval actions require explicit operator confirmation, enforce backend verdict validation, and cannot write directly to main repository branch."
+      }
+    },
+    "audit_5_regression_and_git_preservation": {
+      "status": "VERIFIED",
+      "live_test_executions": [
+        {
+          "test_suite": "Contract & Security Hardening",
+          "files": [
+            "backend/tests/unit/test_eval_contract.py",
+            "backend/tests/unit/test_security_hardening.py"
+          ],
+          "tests_passed": 16,
+          "tests_failed": 0,
+          "duration_seconds": 2.15
+        },
+        {
+          "test_suite": "Evaluator & Real Repo Pilot",
+          "files": [
+            "backend/tests/unit/test_agent_evaluator.py",
+            "backend/tests/unit/test_real_repo_pilot.py"
+          ],
+          "tests_passed": 17,
+          "tests_failed": 0,
+          "duration_seconds": 123.01
+        },
+        {
+          "test_suite": "Core, Adversarial, Phase2C & Benchmark Expansion",
+          "files": [
+            "backend/tests/unit/test_unit_core.py",
+            "backend/tests/unit/test_adversarial_validation.py",
+            "backend/tests/unit/test_phase2c_pipeline.py",
+            "backend/tests/unit/test_benchmark_expansion.py"
+          ],
+          "tests_passed": 43,
+          "tests_failed": 0,
+          "duration_seconds": 96.49
+        }
+      ],
+      "total_tests_executed_live": 76,
+      "total_tests_passed": 76,
+      "total_tests_failed": 0,
+      "git_preservation_confirmed": {
+        "clean_reference_repos": true,
+        "no_destructive_commands": true,
+        "zero_overwritten_historical_reports": true,
+        "zero_secrets_exposed": true
+      }
+    }
+  }
+}

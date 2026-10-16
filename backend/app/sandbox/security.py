@@ -80,12 +80,25 @@ class ASTSecurityVisitor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call):
         call_name = self._get_call_name(node)
         for prohibited in PROHIBITED_CALLS:
-            if call_name == prohibited or call_name.endswith(f".{prohibited}"):
+            # Built-in dynamic execution functions (compile, eval, exec, __import__) are dangerous
+            # when called directly or through builtins namespace, not as unrelated class/library methods (e.g. re.compile)
+            if prohibited in {"compile", "eval", "exec", "__import__"}:
+                is_match = (
+                    call_name == prohibited
+                    or call_name == f"builtins.{prohibited}"
+                    or call_name == f"__builtins__.{prohibited}"
+                )
+            else:
+                is_match = (call_name == prohibited or call_name.endswith(f".{prohibited}"))
+
+            if is_match:
                 self.prohibited_calls.append({
                     "call": call_name,
                     "line": getattr(node, "lineno", 0),
                     "file": self.filename,
-                    "reason": f"Execution of dangerous system primitive '{call_name}' is forbidden."
+                    "rule_id": "prohibited_primitive",
+                    "reason": f"Execution of dangerous system primitive '{call_name}' is forbidden.",
+                    "requirement": "Use standard safe in-process functions and algorithms without invoking dynamic code execution or external system primitives."
                 })
         self.generic_visit(node)
 
@@ -97,7 +110,9 @@ class ASTSecurityVisitor(ast.NodeVisitor):
                     "module": alias.name,
                     "line": getattr(node, "lineno", 0),
                     "file": self.filename,
-                    "reason": f"Direct import of low-level system module '{alias.name}' is prohibited."
+                    "rule_id": "prohibited_module",
+                    "reason": f"Direct import of low-level system module '{alias.name}' is prohibited.",
+                    "requirement": f"Implement the required functionality without importing '{alias.name}'. Use standard higher-level libraries."
                 })
         self.generic_visit(node)
 
@@ -109,8 +124,22 @@ class ASTSecurityVisitor(ast.NodeVisitor):
                     "module": node.module,
                     "line": getattr(node, "lineno", 0),
                     "file": self.filename,
-                    "reason": f"Import from low-level module '{node.module}' is prohibited."
+                    "rule_id": "prohibited_module",
+                    "reason": f"Import from low-level module '{node.module}' is prohibited.",
+                    "requirement": f"Implement the required functionality without importing '{node.module}'. Use standard higher-level libraries."
                 })
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node: ast.Attribute):
+        if isinstance(node.value, ast.Name) and node.value.id == "os" and node.attr in {"environ", "getenv"}:
+            self.security_warnings.append({
+                "attribute": f"os.{node.attr}",
+                "line": getattr(node, "lineno", 0),
+                "file": self.filename,
+                "rule_id": "env_access",
+                "reason": f"Direct access to environment variables via 'os.{node.attr}' is restricted.",
+                "requirement": "Do not inspect host or credential environment variables from synthesized candidate code."
+            })
         self.generic_visit(node)
 
 def analyze_code_security(code_str: str, filename: str = "<candidate>") -> Dict[str, Any]:
@@ -146,12 +175,15 @@ def analyze_code_security(code_str: str, filename: str = "<candidate>") -> Dict[
         violations.append(f"Line {call['line']}: {call['reason']}")
     for imp in visitor.prohibited_imports:
         violations.append(f"Line {imp['line']}: {imp['reason']}")
+    for warn in visitor.security_warnings:
+        violations.append(f"Line {warn['line']}: {warn['reason']}")
 
     return {
         "is_safe": len(violations) == 0,
         "violations": violations,
         "details": {
             "prohibited_calls": visitor.prohibited_calls,
-            "prohibited_imports": visitor.prohibited_imports
+            "prohibited_imports": visitor.prohibited_imports,
+            "security_warnings": visitor.security_warnings
         }
     }

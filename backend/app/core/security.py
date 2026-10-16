@@ -23,6 +23,8 @@ PROTECTED_FILE_PATTERNS = [
     "conftest.py",
     "id_rsa",
     "id_ed25519",
+    "credentials.json",
+    ".pem",
     "docker-compose",
     "docker.sock",
 ]
@@ -52,7 +54,7 @@ def validate_safe_path(base_dir: Path, target_path: str) -> Path:
 
     # Reject secret-bearing files and version control metadata
     file_name = target_resolved.name.lower()
-    if file_name in [".env", ".env.local", "id_rsa", "id_ed25519", "credentials.json"] or file_name.endswith(".pem"):
+    if file_name.startswith(".env") or file_name in ["id_rsa", "id_ed25519", "credentials.json"] or file_name.endswith(".pem"):
         raise ValueError(f"Security Violation: Access to secret file '{file_name}' is forbidden.")
 
     # Block writing directly into .git repository directory

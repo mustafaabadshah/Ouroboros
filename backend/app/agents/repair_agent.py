@@ -28,24 +28,49 @@ class RepairAgent:
         failed_tests = failure_trajectory.get("failed_tests", [])
         traceback_snippet = failure_trajectory.get("traceback", "")
         prior_history = failure_trajectory.get("prior_attempts", [])
+        formatted_diagnostic = failure_trajectory.get("formatted_diagnostic")
+
+        if formatted_diagnostic:
+            diag_body = formatted_diagnostic
+        else:
+            lines = []
+            if failed_tests:
+                lines.append(f"Failed Tests: {', '.join(failed_tests)}")
+            if failure_trajectory.get("assertion"):
+                lines.append(f"Assertion: {failure_trajectory['assertion']}")
+            if failure_trajectory.get("expected") or failure_trajectory.get("actual"):
+                lines.append(f"Expected: {failure_trajectory.get('expected')}")
+                lines.append(f"Actual:   {failure_trajectory.get('actual')}")
+            if failure_trajectory.get("policy_rule_id"):
+                lines.append(f"Policy Rule: [{failure_trajectory['policy_rule_id']}] {failure_trajectory.get('policy_reason')}")
+                if failure_trajectory.get("policy_requirement"):
+                    lines.append(f"Requirement: {failure_trajectory['policy_requirement']}")
+            if traceback_snippet:
+                lines.append(f"Traceback:\n{traceback_snippet}")
+            diag_body = "\n".join(lines) if lines else "Test assertion failed."
+
+        history_summary = []
+        for p in prior_history:
+            history_summary.append(
+                f"- Attempt {p.get('attempt')}: [{p.get('status')}] tests={p.get('failed_tests')} hash={p.get('patch_hash')}"
+            )
+        history_text = "\n".join(history_summary) if history_summary else "None"
 
         user_prompt = f"""Ticket: {ticket.get('title')}
 Target File: {target_file}
 
-FAILURE DIAGNOSTIC:
-Failed Tests: {failed_tests}
-Traceback Excerpt:
-{traceback_snippet}
+STRUCTURED FAILURE DIAGNOSTICS:
+{diag_body}
 
-Prior Rejected Attempts:
-{prior_history}
+Prior Attempt Trajectories:
+{history_text}
 
 Current File Content:
 ```python
-{current_code[:3000]}
+{current_code[:3500]}
 ```
 
-Analyze why the previous patch failed and provide a corrected Unified Diff patch."""
+Analyze the failure diagnostics, address the exact failing assertion or policy constraint, and provide a corrected Unified Diff patch."""
 
         res = await agent_runtime.execute_task(
             role="RepairAgent",
@@ -60,7 +85,11 @@ Analyze why the previous patch failed and provide a corrected Unified Diff patch
             "diff_text": diff_text,
             "explanation": content.replace(diff_text, "").strip()[:500],
             "provider": res.get("provider"),
-            "model": res.get("model")
+            "model": res.get("model"),
+            "input_tokens": res.get("input_tokens"),
+            "output_tokens": res.get("output_tokens"),
+            "is_error": res.get("is_error", False),
+            "error_message": res.get("error_message")
         }
 
 repair_agent = RepairAgent()

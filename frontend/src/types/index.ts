@@ -157,3 +157,107 @@ export interface SystemSettings {
   sandbox_mode: string;
   subprocess_timeout_seconds: number;
 }
+
+export interface EvaluationOverview {
+  status: string;
+  run_id: string;
+  schema_version: string;
+  timestamp_utc?: string;
+  eligible_repairs_passed: number;
+  eligible_tasks_total: number;
+  eligible_repair_success_rate: number;
+  wilson_ci_95: { lower: number; upper: number };
+  adversarial_blocked: number;
+  adversarial_total: number;
+  adversarial_block_rate: number;
+  infrastructure_failures: number;
+  provider_unavailable: number;
+  median_latency_ms: number;
+  p95_latency_ms: number;
+  total_tokens: number;
+  tokens_in: number;
+  tokens_out: number;
+  task_counts: {
+    completed: number;
+    failed: number;
+    blocked: number;
+    invalid: number;
+    total: number;
+  };
+}
+
+export interface EvaluationComparison {
+  conditions: {
+    memory_enabled: {
+      name: string;
+      repairs_passed: number;
+      eligible_total: number;
+      success_rate: number;
+      wilson_ci_95: { lower: number; upper: number };
+      total_tokens: number;
+      median_duration_ms: number;
+      tasks_exceeding_max_attempts: number;
+    };
+    baseline: {
+      name: string;
+      repairs_passed: number;
+      eligible_total: number;
+      success_rate: number;
+      wilson_ci_95: { lower: number; upper: number };
+      total_tokens: number;
+      median_duration_ms: number;
+      tasks_exceeding_max_attempts: number;
+    };
+  };
+  paired_difference: {
+    delta_success_rate: number;
+    delta_repairs_passed: number;
+    token_reduction_pct: number;
+    duration_reduction_pct: number;
+    mcnemar_exact_p_value: number;
+    improved_tasks: string[];
+  };
+  repetitions: Array<{
+    trial_index: number;
+    condition: string;
+    pass_rate: number;
+    completed_repairs: number;
+    total_eligible: number;
+    blocked_adversarial: number;
+    duration_ms: number;
+  }>;
+  per_task_matrix: Array<{
+    task_id: string;
+    name: string;
+    category: string;
+    difficulty: string;
+    is_adversarial: boolean;
+    memory_outcome: string;
+    memory_attempts: number;
+    baseline_outcome: string;
+    baseline_attempts: number;
+    consistent: boolean;
+    improved: boolean;
+  }>;
+}
+
+export interface SafetyApprovalItem {
+  id: string;
+  task_id: string;
+  title: string;
+  target_repo: string;
+  changed_files: string[];
+  lines_added: number;
+  lines_removed: number;
+  validation_status: {
+    sandbox_isolation: string;
+    boundary_safe: boolean;
+    no_protected_files: boolean;
+    original_defect_reproduced: boolean;
+    regression_tests_passed: boolean;
+    exit_code: number;
+  };
+  diff_content: string;
+  status: string;
+  notes?: string;
+}
