@@ -78,7 +78,7 @@ def test_direct_hunk_applier_blocks_path_traversal(tmp_path):
     assert "Security Violation" in msg or "Path traversal" in msg
 
 @pytest.mark.asyncio
-async def test_pytest_runner_fails_closed_when_container_required(monkeypatch):
+async def test_pytest_runner_fails_closed_when_container_required(monkeypatch, tmp_path):
     """
     SEC-03 Regression Test:
     When REQUIRE_CONTAINER_SANDBOX is enabled and Docker is offline,
@@ -87,7 +87,8 @@ async def test_pytest_runner_fails_closed_when_container_required(monkeypatch):
     monkeypatch.setattr(settings, "REQUIRE_CONTAINER_SANDBOX", True)
     
     # Run test in temporary directory
-    target_dir = Path("E:/MM Office/Ouroboros")
+    target_dir = tmp_path / "sandbox"
+    target_dir.mkdir()
     res = await pytest_runner.run_tests(working_dir=target_dir, test_path="backend/tests/unit")
     
     status = await SandboxDetector().detect_capabilities()
@@ -326,7 +327,7 @@ async def test_rel02_subprocess_timeout_process_tree_termination():
     """
     code, out, err = await run_safe_subprocess(
         cmd_args=[sys.executable, "-c", "import time; time.sleep(10)"],
-        cwd=Path("E:/MM Office/Ouroboros"),
+        cwd=Path.cwd(),
         timeout=1
     )
     assert code == -1
@@ -462,7 +463,7 @@ async def test_pytest_runner_returns_runtime_unavailable_code_when_blocked(monke
     monkeypatch.setattr(settings, "REQUIRE_CONTAINER_SANDBOX", True)
     status = await SandboxDetector().detect_capabilities()
     if not status["docker_running"]:
-        res = await pytest_runner.run_tests(working_dir=Path("E:/MM Office/Ouroboros"))
+        res = await pytest_runner.run_tests(working_dir=Path.cwd())
         assert res["passed"] is False
         assert res["command"] == "BLOCKED"
         assert res.get("reason_code") == "RUNTIME_UNAVAILABLE"

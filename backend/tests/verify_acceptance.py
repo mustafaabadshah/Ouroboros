@@ -100,12 +100,12 @@ try:
     prot_engine = is_protected_path("backend/app/chess/validator.py")
     traversal_blocked = False
     try:
-        validate_safe_path(Path("E:/MM Office/Ouroboros"), "../../../Windows/System32")
+        validate_safe_path(Path.cwd(), "../../../Windows/System32")
     except ValueError:
         traversal_blocked = True
 
     try:
-        validate_safe_path(Path("E:/MM Office/Ouroboros"), ".env")
+        validate_safe_path(Path.cwd(), ".env")
         env_traversal_blocked = False
     except ValueError:
         env_traversal_blocked = True
@@ -152,7 +152,7 @@ try:
     res1 = deterministic_judge.evaluate_patch_static(
         diff_text=malformed_diff,
         allowed_files=["backend/app/agents/groq_agent.py"],
-        worktree_path=Path("E:/MM Office/Ouroboros")
+        worktree_path=Path.cwd()
     )
     protected_diff = """--- a/backend/app/chess/validator.py
 +++ b/backend/app/chess/validator.py
@@ -162,7 +162,7 @@ try:
     res2 = deterministic_judge.evaluate_patch_static(
         diff_text=protected_diff,
         allowed_files=["backend/app/chess/validator.py"],
-        worktree_path=Path("E:/MM Office/Ouroboros")
+        worktree_path=Path.cwd()
     )
     ok = (res1["verdict"] == "BLOCKED") and (res2["verdict"] == "NEEDS_HUMAN_REVIEW")
     checks["10. Known-Bad Patch Rejected by Judge"] = (ok, f"Malformed: {res1['verdict']}, Protected: {res2['verdict']}")
@@ -182,7 +182,7 @@ try:
     res = deterministic_judge.evaluate_patch_static(
         diff_text=good_diff,
         allowed_files=["backend/app/agents/groq_agent.py"],
-        worktree_path=Path("E:/MM Office/Ouroboros")
+        worktree_path=Path.cwd()
     )
     ok = res["verdict"] == "PASS"
     checks["11. Known-Good Patch Passes Evaluation"] = (ok, f"Verdict: {res['verdict']}")

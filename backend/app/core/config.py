@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # Execution Security & Sandbox Policy ('auto', 'docker', 'restricted_local', 'fail_closed')
     SANDBOX_MODE: str = "auto"
     REQUIRE_CONTAINER_SANDBOX: bool = False
+    DOCKER_SANDBOX_IMAGE: str = "ouroboros-pytest-sandbox:3.12"
     ISOLATED_WORKTREE_DIR: str = str(BACKEND_DIR / "worktrees")
     AUTONOMY_MODE: str = "SUPERVISED"
 

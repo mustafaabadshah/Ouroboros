@@ -230,12 +230,23 @@ class RealRepoEvaluator:
         fixture_id = fixture["fixture_id"]
         start_time = time.perf_counter()
         temp_dir = Path(tempfile.mkdtemp(prefix=f"ouro_realrepo_{fixture_id}_"))
+        if os.name != "nt":
+            try:
+                os.chmod(temp_dir, 0o775)
+            except Exception:
+                pass
 
         try:
             repo_dir = temp_dir / "fixture_repo"
             worktrees_dir = temp_dir / "worktrees"
             repo_dir.mkdir(parents=True)
             worktrees_dir.mkdir(parents=True)
+            if os.name != "nt":
+                try:
+                    os.chmod(repo_dir, 0o775)
+                    os.chmod(worktrees_dir, 0o775)
+                except Exception:
+                    pass
 
             # 1. Initialize Git repository
             await run_safe_subprocess(["git", "init"], cwd=repo_dir)

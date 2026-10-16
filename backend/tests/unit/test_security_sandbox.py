@@ -9,8 +9,11 @@ from app.evaluation.judge import deterministic_judge
 from app.integrations.git.diff_parser import UnifiedDiffParser
 from app.core.config import settings
 
-def test_validate_safe_path_boundary_enforcement():
-    base_dir = Path("E:/MM Office/Ouroboros")
+def test_validate_safe_path_boundary_enforcement(tmp_path):
+    base_dir = tmp_path / "workspace"
+    base_dir.mkdir()
+    (base_dir / "backend" / "app").mkdir(parents=True)
+    (base_dir / "backend" / "app" / "main.py").write_text("# main", encoding="utf-8")
 
     # 1. Traversal outside root raises ValueError
     with pytest.raises(ValueError, match="Path traversal detected"):

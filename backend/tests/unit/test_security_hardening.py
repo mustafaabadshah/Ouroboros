@@ -29,9 +29,10 @@ from app.core.config import settings
 CANARY_SECRET = "ouro_canary_test_secret_9999"
 
 
-def test_protected_files_and_canary_secret_enforcement():
+def test_protected_files_and_canary_secret_enforcement(tmp_path):
     """Control: Protected paths. Enforced: Path validator. Attack: Reading/writing secrets. Blocked: ValueError."""
-    base_dir = Path("E:/MM Office/Ouroboros")
+    base_dir = tmp_path / "workspace"
+    base_dir.mkdir()
 
     # Synthetic canary paths
     protected_cases = [
@@ -53,30 +54,50 @@ def test_protected_files_and_canary_secret_enforcement():
             validate_safe_path(base_dir, p)
 
 
-def test_path_traversal_and_symlink_escape_blocked():
+def test_path_traversal_and_symlink_escape_blocked(tmp_path):
     """Control: Base dir boundary. Enforced: Path resolution. Attack: Traversal escape. Blocked: ValueError."""
-    base_dir = Path("E:/MM Office/Ouroboros")
+    base_dir = tmp_path / "workspace"
+    base_dir.mkdir()
 
     traversal_attacks = [
         "../outside.txt",
         "../../etc/passwd",
         "..\\..\\Windows\\System32\\cmd.exe",
+        "..\\outside.txt",
         "backend/../../..",
-        "app/../../secret.txt"
+        "app/../../secret.txt",
+        "\\\\evil-server\\share\\leak.txt",
+        "//evil-server/share/leak.txt"
     ]
 
     for attack in traversal_attacks:
         with pytest.raises(ValueError, match="Path traversal detected"):
             validate_safe_path(base_dir, attack)
 
+    # Symlink escape verification
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    secret_file = outside_dir / "secret.txt"
+    secret_file.write_text("CONFIDENTIAL", encoding="utf-8")
+    symlink_file = base_dir / "symlink_escape.txt"
+    try:
+        symlink_file.symlink_to(secret_file)
+        with pytest.raises(ValueError, match="Path traversal detected"):
+            validate_safe_path(base_dir, "symlink_escape.txt")
+    except (OSError, NotImplementedError):
+        # Symlink creation may require elevated privileges on older Windows versions
+        pass
 
-def test_unauthorized_absolute_path_escape_blocked():
+
+def test_unauthorized_absolute_path_escape_blocked(tmp_path):
     """Control: Absolute path restriction. Attack: Direct root access. Blocked: ValueError."""
-    base_dir = Path("E:/MM Office/Ouroboros")
+    base_dir = tmp_path / "workspace"
+    base_dir.mkdir()
 
     absolute_attacks = [
         "C:/Windows/System32/calc.exe",
         "C:\\Windows\\win.ini",
+        "D:outside.txt",
         "/etc/shadow",
         "/var/run/docker.sock"
     ]
@@ -85,9 +106,26 @@ def test_unauthorized_absolute_path_escape_blocked():
         with pytest.raises(ValueError, match="Path traversal detected|escapes base directory"):
             validate_safe_path(base_dir, attack)
 
+    # Legitimate in-base paths (relative, windows-style, and absolute within base) must succeed
+    legit_file = base_dir / "app" / "main.py"
+    legit_file.parent.mkdir(parents=True)
+    legit_file.write_text("print('ok')", encoding="utf-8")
 
-def test_malicious_patch_diff_headers_blocked():
+    res_rel = validate_safe_path(base_dir, "app/main.py")
+    assert res_rel.resolve() == legit_file.resolve()
+
+    res_win = validate_safe_path(base_dir, "app\\main.py")
+    assert res_win.resolve() == legit_file.resolve()
+
+    res_abs = validate_safe_path(base_dir, str(legit_file))
+    assert res_abs.resolve() == legit_file.resolve()
+
+
+def test_malicious_patch_diff_headers_blocked(tmp_path):
     """Control: Unified diff parser boundary enforcement. Attack: Path traversal inside patch headers."""
+    worktree_path = tmp_path / "worktree"
+    worktree_path.mkdir()
+
     malicious_diff = """--- a/../../../etc/passwd
 +++ b/../../../etc/passwd
 @@ -1,1 +1,1 @@
@@ -101,7 +139,7 @@ def test_malicious_patch_diff_headers_blocked():
     judge_res = DeterministicJudge.evaluate_patch_static(
         diff_text=malicious_diff,
         allowed_files=["main.py"],
-        worktree_path=Path("E:/MM Office/Ouroboros")
+        worktree_path=worktree_path
     )
     assert judge_res["verdict"] in ["BLOCKED", "FAIL"]
 
@@ -122,13 +160,13 @@ def test_shell_command_injection_and_env_exfiltration_blocked():
         assert len(analysis["violations"]) > 0
 
 
-def test_network_isolation_and_docker_socket_protection():
+def test_network_isolation_and_docker_socket_protection(tmp_path):
     """Control: Container flags. Enforced: rootless user, --network none, no socket mount."""
     from app.evaluation.runner import PytestRunner
     runner = PytestRunner()
 
     # Construct the canonical container execution command
-    test_dir = Path("E:/MM Office/Ouroboros/worktrees/cand-test")
+    test_dir = tmp_path / "cand-test"
     cmd = [
         "docker", "run", "--rm",
         "--network", "none",
@@ -141,7 +179,7 @@ def test_network_isolation_and_docker_socket_protection():
         "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
         "-v", f"{test_dir.resolve()}:/workspace:rw",
         "-w", "/workspace",
-        "python:3.12-slim",
+        settings.DOCKER_SANDBOX_IMAGE,
         "pytest"
     ]
 
