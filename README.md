@@ -24,7 +24,7 @@ The Ouroboros architecture strictly isolates the autonomous agent swarm, model r
 
 ---
 
-## 3. Machine Environment & Strict Resource Policies
+## 3. Machine Environment & Strict Resource Policiess
 
 Designed and verified on Windows 10/11 x64 under an **8 GB physical RAM constraint**:
 - **Processor:** Intel Core with integrated Intel HD Graphics 620 (**No CUDA / GPU requirements**).
