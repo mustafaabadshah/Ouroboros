@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
     try:
         from app.integrations.git.worktree import git_worktree_manager
         await git_worktree_manager.garbage_collect_stale_worktrees(
-            repo_path=default_repo_path if default_repo_path.exists() else None,
+            repo_path=resolved_repo_path if resolved_repo_path and resolved_repo_path.exists() else None,
             max_age_hours=24
         )
     except Exception as gc_err:
@@ -99,6 +99,18 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan
 )
+
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    tb = traceback.format_exc()
+    logger.error(f"Global unhandled error on {request.url.path}: {exc}\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "traceback": tb.splitlines()}
+    )
 
 # CORS configuration with multi-domain cloud support
 _origins = settings.cors_origins_list
