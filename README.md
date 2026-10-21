@@ -8,7 +8,91 @@
 
 ![Project Ouroboros System Architecture](docs/images/architecture_diagram.jpg)
 
+```mermaid
+flowchart TD
+    subgraph UI["1. Operator & Presentation Tier (React 19 + Vite)"]
+        DASH["Dashboard & Hardware Telemetry"]
+        GRAPH_V["Meta-Graph AST Explorer"]
+        RUNS_V["Live Agent Runs (SSE Stream)"]
+        DIFF_V["Side-by-Side Diff Inspector"]
+        GATE_V["Human Merge Gate (Approve / Reject)"]
+    end
+
+    subgraph API["2. Backend & Orchestration Tier (FastAPI)"]
+        ROUTERS["REST API Routers (/api/tickets, /api/runs, /api/models)"]
+        EVENTBUS["Polymorphic EventBus (SSE Broadcast)"]
+        WF["Workflow State Machine Controller"]
+        ROUTER["Dynamic Model Router (Groq / Ollama / Mock)"]
+    end
+
+    subgraph SWARM["3. Hierarchical Autonomous Swarm"]
+        ARCH["Architect Agent\n(Technical Debt Identification)"]
+        PLANNER["Planner Agent\n(AST Dependency DAG Splitting)"]
+        CODER["LocalCoder Swarm\n(Isolated Unified Diff Synthesis)"]
+        JUDGE["Judge Agent\n(Zero-Trust Validation & Verification)"]
+        REPAIR["Repair Agent\n(Failure-Memory Injected Retry Loop)"]
+    end
+
+    subgraph NAV["4. Codebase Navigation & Analysis"]
+        AST_NAV["Meta-Graph Codebase Navigator\n(AST Nodes & Call Graphs)"]
+        IMPACT["AST Fail-Fast Impact Analyzer\n(Targeted Caller Discovery)"]
+    end
+
+    subgraph HARNESS["5. Deterministic Evaluation Sandbox"]
+        WORKTREE["Isolated Git Worktree\n(worktrees/ouro-xxxx)"]
+        AST_SEC["Static AST Security Visitor\n(Forbidden Imports & Call Blocker)"]
+        IMPACT_TEST["Fast Impact Tests (<3s Target Execution)"]
+        REG_TEST["Full Pytest Regression Suite (Zero-Regression Gate)"]
+    end
+
+    subgraph MEMORY["6. Institutional Memory & Observability"]
+        FLYWHEEL[("SQLite Failure Memory Flywheel\n(Tracebacks, AST Diffs, Historical Fixes)")]
+        PHOENIX["Arize Phoenix OpenTelemetry\n(Spans, Token Costs, Latency & Prompts)"]
+    end
+
+    subgraph PROD_REPO["7. Production Codebase"]
+        MAIN_REPO[("User Primary Git Repository\n(e.g., Agent Chess)")]
+    end
+
+    %% Workflow Connections
+    MAIN_REPO -. Read AST .-> AST_NAV
+    AST_NAV --> ARCH
+    ARCH -->|"Synthesizes Jira Ticket"| ROUTERS
+    ROUTERS -->|"Operator Approves"| WF
+    WF --> PLANNER
+    PLANNER -->|"Ordered Subtasks"| CODER
+    CODER -->|"Generates patch.diff"| WORKTREE
+    MAIN_REPO -->|"Creates Branch & Isolated Copy"| WORKTREE
+    
+    %% Evaluation
+    WORKTREE --> AST_SEC
+    AST_SEC -->|"Safe AST"| IMPACT
+    IMPACT --> IMPACT_TEST
+    IMPACT_TEST -->|"Pass"| REG_TEST
+    REG_TEST -->|"Pass: All Invariants Met"| GATE_V
+    
+    %% Failure & Repair Loop
+    IMPACT_TEST -.->|"Fail"| FLYWHEEL
+    REG_TEST -.->|"Fail"| FLYWHEEL
+    AST_SEC -.->|"Violation"| FLYWHEEL
+    FLYWHEEL -.->|"Retry Context (Attempt 1-3)"| REPAIR
+    REPAIR --> CODER
+
+    %% Human Merge Gate
+    GATE_V -->|"Human Confirmed Merge"| MAIN_REPO
+
+    %% Observability & Telemetry
+    ROUTER --> PHOENIX
+    WF --> EVENTBUS
+    EVENTBUS --> RUNS_V
+    ROUTER --> ARCH
+    ROUTER --> PLANNER
+    ROUTER --> CODER
+    ROUTER --> REPAIR
+```
+
 The Ouroboros architecture strictly isolates the autonomous agent swarm, model routers, and execution harnesses from the user's primary code repository.
+
 
 ---
 
