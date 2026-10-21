@@ -39,6 +39,7 @@ from app.providers.router import model_router
 from app.providers.groq_provider import groq_provider
 from app.providers.mock_provider import mock_provider
 from app.providers.budget import EvaluationBudgetController, ProviderErrorCategory
+from app.core.config import settings
 from app.database.session import Base
 repo_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(repo_root) not in sys.path:
@@ -216,38 +217,39 @@ async def test_scenario_c_provider_failure_fails_closed():
     model_router.set_budget_controller(None)
 
     try:
-        # 1. Simulated 429 Rate Limit
-        fake_429 = {
-            "content": "",
-            "provider": "groq",
-            "model": "qwen/qwen3.8-27b",
-            "is_error": True,
-            "error_message": "Rate limit reached: 429 Too Many Requests"
-        }
-        with patch.object(groq_provider, "generate", new_callable=AsyncMock, return_value=fake_429) as mock_groq, \
-             patch.object(mock_provider, "generate", new_callable=AsyncMock) as mock_mock:
-            res = await model_router.route_task("Planner", "Create execution plan")
-            assert res["is_error"] is True
-            assert res["error_type"] == ProviderErrorCategory.RATE_LIMITED.value
-            assert res["diff_text"] == ""
-            mock_groq.assert_called_once()
-            mock_mock.assert_not_called()
+        with patch.object(settings, "GROQ_API_KEY", "test_synthetic_key_for_offline_ci"):
+            # 1. Simulated 429 Rate Limit
+            fake_429 = {
+                "content": "",
+                "provider": "groq",
+                "model": "qwen/qwen3.8-27b",
+                "is_error": True,
+                "error_message": "Rate limit reached: 429 Too Many Requests"
+            }
+            with patch.object(groq_provider, "generate", new_callable=AsyncMock, return_value=fake_429) as mock_groq, \
+                 patch.object(mock_provider, "generate", new_callable=AsyncMock) as mock_mock:
+                res = await model_router.route_task("Planner", "Create execution plan")
+                assert res["is_error"] is True
+                assert res["error_type"] == ProviderErrorCategory.RATE_LIMITED.value
+                assert res["diff_text"] == ""
+                mock_groq.assert_called_once()
+                mock_mock.assert_not_called()
 
-        # 2. Simulated Timeout
-        fake_timeout = {
-            "content": "",
-            "provider": "groq",
-            "model": "qwen/qwen3.8-27b",
-            "is_error": True,
-            "error_message": "Connection timed out after 30s"
-        }
-        with patch.object(groq_provider, "generate", new_callable=AsyncMock, return_value=fake_timeout) as mock_groq, \
-             patch.object(mock_provider, "generate", new_callable=AsyncMock) as mock_mock:
-            res = await model_router.route_task("LocalCoder", "Generate patch")
-            assert res["is_error"] is True
-            assert res["error_type"] == ProviderErrorCategory.TIMEOUT.value
-            mock_groq.assert_called_once()
-            mock_mock.assert_not_called()
+            # 2. Simulated Timeout
+            fake_timeout = {
+                "content": "",
+                "provider": "groq",
+                "model": "qwen/qwen3.8-27b",
+                "is_error": True,
+                "error_message": "Connection timed out after 30s"
+            }
+            with patch.object(groq_provider, "generate", new_callable=AsyncMock, return_value=fake_timeout) as mock_groq, \
+                 patch.object(mock_provider, "generate", new_callable=AsyncMock) as mock_mock:
+                res = await model_router.route_task("LocalCoder", "Generate patch")
+                assert res["is_error"] is True
+                assert res["error_type"] == ProviderErrorCategory.TIMEOUT.value
+                mock_groq.assert_called_once()
+                mock_mock.assert_not_called()
 
     finally:
         model_router.set_mode(orig_mode)
