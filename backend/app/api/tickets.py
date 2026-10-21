@@ -59,28 +59,27 @@ async def generate_ticket(
     use_mock: bool = Query(False),
     db: Session = Depends(get_db)
 ):
-    repo = get_repository(db, req.repo_id)
-    if not repo:
-        all_repos = list_repositories(db)
-        if all_repos:
-            repo = all_repos[0]
-            logger.info(f"Repository '{req.repo_id}' not found, falling back to registered repository: {repo.id}")
-        else:
-            raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found. Please clone or register a repository first.")
+    try:
+        repo = get_repository(db, req.repo_id)
+        if not repo:
+            all_repos = list_repositories(db)
+            if all_repos:
+                repo = all_repos[0]
+                logger.info(f"Repository '{req.repo_id}' not found, falling back to registered repository: {repo.id}")
+            else:
+                raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found. Please clone or register a repository first.")
 
-    actual_repo_id = repo.id
-    summary = meta_graph_adapter.get_architectural_summary(actual_repo_id)
-    existing_titles = [t.title for t in list_tickets(db, repo_id=actual_repo_id)]
-    generated = await architect_agent.generate_ticket(
-        repo_id=actual_repo_id,
-        repo_summary=summary,
-        target_focus=req.target_area or req.custom_prompt,
-        existing_tickets=existing_titles,
-        force_mock=use_mock
-    )
+        actual_repo_id = repo.id
+        summary = meta_graph_adapter.get_architectural_summary(actual_repo_id)
+        existing_titles = [t.title for t in list_tickets(db, repo_id=actual_repo_id)]
+        generated = await architect_agent.generate_ticket(
+            repo_id=actual_repo_id,
+            repo_summary=summary,
+            target_focus=req.target_area or req.custom_prompt,
+            existing_tickets=existing_titles,
+            force_mock=use_mock
+        )
 
-    from app.observability.phoenix_service import phoenix_service
-    with phoenix_service.trace_step("ticket.validate", repo_id=actual_repo_id, title=generated.title):
         ticket_record = create_ticket(db, {
             "repo_id": actual_repo_id,
             "title": generated.title,
@@ -101,30 +100,40 @@ async def generate_ticket(
             "status": "PROPOSED"
         })
 
-        record_audit_event(db, "TICKET_GENERATED", details={"ticket_id": ticket_record.id, "title": ticket_record.title})
+        try:
+            record_audit_event(db, "TICKET_GENERATED", details={"ticket_id": ticket_record.id, "title": ticket_record.title})
+        except Exception as audit_err:
+            logger.warning(f"Audit event recording notice: {audit_err}")
 
-    return TicketResponse(
-        id=ticket_record.id,
-        repo_id=ticket_record.repo_id,
-        title=ticket_record.title,
-        problem_statement=ticket_record.problem_statement,
-        motivation=ticket_record.motivation,
-        current_behavior=ticket_record.current_behavior,
-        desired_behavior=ticket_record.desired_behavior,
-        acceptance_criteria=ticket_record.acceptance_criteria_json or [],
-        proposed_tests=ticket_record.proposed_tests_json or [],
-        relevant_graph_entities=ticket_record.relevant_graph_entities_json or [],
-        candidate_files=ticket_record.candidate_files_json or [],
-        risk_level=ticket_record.risk_level,
-        expected_complexity=ticket_record.expected_complexity,
-        estimated_resources=ticket_record.estimated_resources,
-        evidence=ticket_record.evidence_json or [],
-        out_of_scope=ticket_record.out_of_scope,
-        acceptance_test_template=ticket_record.acceptance_test_template,
-        status=ticket_record.status,
-        created_at=ticket_record.created_at,
-        updated_at=ticket_record.updated_at
-    )
+        return TicketResponse(
+            id=ticket_record.id,
+            repo_id=ticket_record.repo_id,
+            title=ticket_record.title,
+            problem_statement=ticket_record.problem_statement,
+            motivation=ticket_record.motivation,
+            current_behavior=ticket_record.current_behavior,
+            desired_behavior=ticket_record.desired_behavior,
+            acceptance_criteria=ticket_record.acceptance_criteria_json or [],
+            proposed_tests=ticket_record.proposed_tests_json or [],
+            relevant_graph_entities=ticket_record.relevant_graph_entities_json or [],
+            candidate_files=ticket_record.candidate_files_json or [],
+            risk_level=ticket_record.risk_level,
+            expected_complexity=ticket_record.expected_complexity,
+            estimated_resources=ticket_record.estimated_resources,
+            evidence=ticket_record.evidence_json or [],
+            out_of_scope=ticket_record.out_of_scope,
+            acceptance_test_template=ticket_record.acceptance_test_template,
+            status=ticket_record.status,
+            created_at=ticket_record.created_at,
+            updated_at=ticket_record.updated_at
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        err_trace = traceback.format_exc()
+        logger.error(f"Error in generate_ticket: {e}\n{err_trace}")
+        raise HTTPException(status_code=500, detail=f"Ticket generation error: {str(e)}")
 
 @router.get("/{ticket_id}", response_model=TicketResponse)
 async def get_ticket_by_id(ticket_id: str, db: Session = Depends(get_db)):
