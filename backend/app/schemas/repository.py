@@ -7,6 +7,16 @@ class RepositoryRegisterRequest(BaseModel):
     name: str
     path: str
 
+class RepositoryCloneRequest(BaseModel):
+    id: str
+    name: str
+    git_url: str
+    target_path: Optional[str] = None
+
+class RepositoryUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    path: Optional[str] = None
+
 class RepositoryResponse(BaseModel):
     id: str
     name: str

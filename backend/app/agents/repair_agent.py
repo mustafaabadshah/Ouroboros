@@ -9,6 +9,8 @@ Rules:
 1. DO NOT repeat previously rejected approaches or syntax.
 2. Read the traceback carefully to locate the exact failing line or assertion.
 3. Respond with a valid Unified Diff inside ```diff ... ``` code blocks.
+4. CRITICAL PYTHON SYNTAX: Every compound statement ('with', 'try', 'except', 'def', 'class', 'if', 'for', 'while') MUST contain valid indented body statements. Never leave an empty or unindented block.
+5. UNIFIED DIFF INTEGRITY: Context lines (starting with a single space ' ') must exactly match the existing file content. Ensure all modifications apply cleanly without syntax or indentation errors.
 """
 
 class RepairAgent:
@@ -49,12 +51,24 @@ class RepairAgent:
                 lines.append(f"Traceback:\n{traceback_snippet}")
             diag_body = "\n".join(lines) if lines else "Test assertion failed."
 
-        history_summary = []
+        # Negative Hypothesis Pruning
+        pruned_antipatterns = []
         for p in prior_history:
-            history_summary.append(
-                f"- Attempt {p.get('attempt')}: [{p.get('status')}] tests={p.get('failed_tests')} hash={p.get('patch_hash')}"
+            hsh = p.get('patch_hash') or 'unknown'
+            tb_short = (p.get('traceback') or '')[:120].replace('\n', ' ')
+            pruned_antipatterns.append(
+                f"- Attempt {p.get('attempt')} (patch: {hsh}): {tb_short}. Prohibited: DO NOT reproduce this diff!"
             )
-        history_text = "\n".join(history_summary) if history_summary else "None"
+        anti_pattern_text = "\n".join(pruned_antipatterns) if pruned_antipatterns else "None (first repair attempt)"
+
+        # Swarm Institutional Memory (Cross-Ticket Lessons)
+        cross_insights = failure_trajectory.get("cross_ticket_insights", [])
+        cross_summary = []
+        for ci in cross_insights:
+            cross_summary.append(
+                f"- Past Ticket {ci.get('source_ticket_id')}: {ci.get('repair_hint')} (Hypothesis: {ci.get('root_cause_hypothesis', '')[:100]})"
+            )
+        cross_text = "\n".join(cross_summary) if cross_summary else "No cross-ticket historical patterns found"
 
         user_prompt = f"""Ticket: {ticket.get('title')}
 Target File: {target_file}
@@ -62,15 +76,18 @@ Target File: {target_file}
 STRUCTURED FAILURE DIAGNOSTICS:
 {diag_body}
 
-Prior Attempt Trajectories:
-{history_text}
+NEGATIVE HYPOTHESIS PRUNING (PROHIBITED APPROACHES):
+{anti_pattern_text}
+
+SWARM INSTITUTIONAL MEMORY (PROVEN CROSS-TICKET LESSONS):
+{cross_text}
 
 Current File Content:
 ```python
 {current_code[:3500]}
 ```
 
-Analyze the failure diagnostics, address the exact failing assertion or policy constraint, and provide a corrected Unified Diff patch."""
+Analyze the failure diagnostics, avoid all pruned negative hypotheses, synthesize lessons from institutional memory, and provide a corrected Unified Diff patch."""
 
         res = await agent_runtime.execute_task(
             role="RepairAgent",

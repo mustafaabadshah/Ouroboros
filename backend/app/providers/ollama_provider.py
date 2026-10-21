@@ -22,25 +22,41 @@ class OllamaProvider(BaseLLMProvider):
         self.model_name = model_name or settings.LOCAL_MODEL_NAME
         self.context_tokens = settings.LOCAL_MODEL_CONTEXT_TOKENS
         self._lock = asyncio.Lock()  # Hardware guardrail: global local inference lock
+        self._health_cache: Optional[Dict[str, Any]] = None
+        self._health_cache_time: float = 0.0
+        self._health_cache_ttl: float = 30.0  # 30s cache prevents 2s offline connection timeouts on status polls
 
-    async def check_health(self) -> Dict[str, Any]:
+    def reset_health_cache(self) -> None:
+        """Invalidates the cached health response."""
+        self._health_cache = None
+        self._health_cache_time = 0.0
+
+    async def check_health(self, force_refresh: bool = False) -> Dict[str, Any]:
+        now = time.monotonic()
+        if not force_refresh and self._health_cache is not None and (now - self._health_cache_time) < self._health_cache_ttl:
+            return dict(self._health_cache)
+
+        res: Dict[str, Any]
         try:
-            async with httpx.AsyncClient(timeout=2.0) as client:
-                res = await client.get(f"{self.base_url}/api/tags")
-                if res.status_code == 200:
-                    data = res.json()
+            async with httpx.AsyncClient(timeout=1.5) as client:
+                resp = await client.get(f"{self.base_url}/api/tags")
+                if resp.status_code == 200:
+                    data = resp.json()
                     models = [m.get("name") for m in data.get("models", [])]
-                    return {
+                    res = {
                         "available": True,
                         "url": self.base_url,
                         "installed_models": models,
                         "selected_model": self.model_name,
                         "model_installed": any(self.model_name in m for m in models)
                     }
+                    self._health_cache = res
+                    self._health_cache_time = now
+                    return dict(res)
         except Exception as e:
             logger.debug(f"Ollama health check offline: {e}")
 
-        return {
+        res = {
             "available": False,
             "url": self.base_url,
             "installed_models": [],
@@ -48,6 +64,9 @@ class OllamaProvider(BaseLLMProvider):
             "model_installed": False,
             "message": "Ollama service is offline or not installed."
         }
+        self._health_cache = res
+        self._health_cache_time = now
+        return dict(res)
 
     async def generate(
         self,

@@ -1,0 +1,155 @@
+{
+  "schema_version": "v1.0.0",
+  "audit_name": "phase5_1_evidence_audit_and_metric_reconciliation",
+  "audit_timestamp_utc": "2026-10-18T15:05:00Z",
+  "git_context": {
+    "branch": "hotfix/python-package-discovery",
+    "head_commit": "dd36b27007bb369972ecd502a82c4ce15a8a8c94",
+    "remote_url": "https://github.com/mustafaabadshah/Ouroboros.git",
+    "working_tree_clean": true
+  },
+  "source_artifacts": {
+    "primary_json": {
+      "path": "artifacts/v0_11/phase5_live_llm_pilot_4tasks.json",
+      "bytes": 33504,
+      "sha256": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442"
+    },
+    "archival_json": {
+      "path": "artifacts/evaluations/20261018_104036_agent_eval/agent_eval_run.json",
+      "bytes": 33504,
+      "sha256": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442"
+    },
+    "byte_identical": true,
+    "reported_hash_in_markdown": "86f9e31d4597bce29b9f56644f80072b0c36cb3adfa414a331a61ae9ae06fb76",
+    "hash_audit_result": "DISCREPANCY_DOCUMENTED_TRANSCRIPTION_ERROR_RAW_FILES_BYTE_IDENTICAL"
+  },
+  "model_under_test": {
+    "provider": "groq",
+    "model_id": "qwen/qwen3.8-27b",
+    "temperature": 0.2,
+    "mode": "live_remote_inference"
+  },
+  "recomputed_metrics": {
+    "tasks_selected": 4,
+    "complete_pairs": 4,
+    "flywheel_escalation": {
+      "repairs_passed": 4,
+      "eligible_tasks": 4,
+      "pass_rate": 1.0,
+      "wilson_ci_95": {
+        "lower": 0.5101,
+        "upper": 1.0
+      },
+      "attempt_counts": [2, 3, 1, 2],
+      "mean_attempts_all_tasks": 2.0,
+      "mean_attempts_passed_tasks_only": 2.0,
+      "durations_ms": [45856, 91276, 150779, 170538],
+      "codebase_p50_ms": 150779,
+      "standard_mathematical_median_ms": 121027.5,
+      "arithmetic_mean_ms": 114612.25,
+      "tokens_in": 4094,
+      "tokens_out": 1393,
+      "total_tokens": 5487
+    },
+    "naive_retry": {
+      "repairs_passed": 1,
+      "eligible_tasks": 4,
+      "pass_rate": 0.25,
+      "wilson_ci_95": {
+        "lower": 0.0456,
+        "upper": 0.6994
+      },
+      "attempt_counts": [3, 3, 1, 3],
+      "mean_attempts_all_tasks": 2.5,
+      "mean_attempts_passed_tasks_only": 1.0,
+      "durations_ms": [44455, 92537, 92940, 137862],
+      "codebase_p50_ms": 92940,
+      "standard_mathematical_median_ms": 92738.5,
+      "arithmetic_mean_ms": 91948.5,
+      "tokens_in": 3885,
+      "tokens_out": 1789,
+      "total_tokens": 5674
+    },
+    "grand_totals": {
+      "tokens_in": 7979,
+      "tokens_out": 3182,
+      "total_tokens": 11161,
+      "invoiced_api_cost_usd": 0.0
+    },
+    "paired_analysis": {
+      "concordance_table": {
+        "mutual_pass_a": 1,
+        "flywheel_only_win_b": 3,
+        "naive_only_win_c": 0,
+        "mutual_fail_d": 0
+      },
+      "delta_percentage_points": 75.0,
+      "mcnemar_exact_test": {
+        "n_discordant": 3,
+        "one_tailed_p_value": 0.125,
+        "two_tailed_p_value": 0.25,
+        "statistically_significant_alpha_0_05": false,
+        "scientific_interpretation": "Directional and exploratory pilot evidence; does not achieve statistical significance due to small sample size N=4."
+      }
+    }
+  },
+  "per_task_audit": [
+    {
+      "task_id": "BENCH-05",
+      "category": "boundary_edge_case",
+      "flywheel_attempts": 2,
+      "flywheel_verdict": "PASS",
+      "naive_attempts": 3,
+      "naive_verdict": "FAIL",
+      "cold_parity_verified": true,
+      "semantic_adaptation_evidence": "Attempt 2 corrected exception regex pattern mismatch based on Attempt 1 pytest traceback.",
+      "audit_status": "VERIFIED"
+    },
+    {
+      "task_id": "BENCH-13",
+      "category": "serialization",
+      "flywheel_attempts": 3,
+      "flywheel_verdict": "PASS",
+      "naive_attempts": 3,
+      "naive_verdict": "FAIL",
+      "cold_parity_verified": true,
+      "semantic_adaptation_evidence": "Consecutive failures triggered Planner escalation on Attempt 3, decomposing subtask to handle non-string types.",
+      "audit_status": "VERIFIED"
+    },
+    {
+      "task_id": "BENCH-14",
+      "category": "serialization",
+      "flywheel_attempts": 1,
+      "flywheel_verdict": "PASS",
+      "naive_attempts": 1,
+      "naive_verdict": "PASS",
+      "cold_parity_verified": true,
+      "semantic_adaptation_evidence": "Mutual cold pass on Attempt 1; zero discriminative learning signal.",
+      "audit_status": "VERIFIED"
+    },
+    {
+      "task_id": "BENCH-15",
+      "category": "logic_exception",
+      "flywheel_attempts": 2,
+      "flywheel_verdict": "PASS",
+      "naive_attempts": 3,
+      "naive_verdict": "FAIL",
+      "cold_parity_verified": true,
+      "semantic_adaptation_evidence": "Attempt 2 read dictionary failure diff to include missing {'item': -2}.",
+      "audit_status": "VERIFIED"
+    }
+  ],
+  "observability_audit": {
+    "state_1_span_created_locally": "VERIFIED",
+    "state_2_span_handed_to_exporter": "VERIFIED",
+    "state_3_export_acknowledged": "PROBABLE",
+    "state_4_collector_received": "NOT_VERIFIED_VIA_API_QUERY",
+    "state_5_queryable_in_phoenix": "NOT_VERIFIED_VIA_API_QUERY",
+    "hardening_action": "Added graceful phoenix_service.flush() and shutdown() in runner finally block."
+  },
+  "governance_verdict": {
+    "phase5_data_integrity": "APPROVED",
+    "phase6_readiness": "GO_EXECUTION_GATED",
+    "next_action": "Awaiting explicit interactive user command before running Phase 6 full-catalog sweep."
+  }
+}

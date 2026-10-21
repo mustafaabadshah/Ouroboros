@@ -47,25 +47,28 @@ class MetricsCalculator:
 
         # Eligible attempted runs for repair (runs that entered evaluation)
         eligible_attempted = sum(1 for r in runs if r.state in ["COMPLETED", "FAILED", "AWAITING_APPROVAL"])
-        repair_success_rate = (passing_count / eligible_attempted) if eligible_attempted > 0 else 0.0
+        repair_success_rate = (passing_count / eligible_attempted) if eligible_attempted > 0 else None
 
         # Candidate test pass rate
         candidate_tests = [t for t in test_results if t.test_type in ["acceptance", "regression"]]
         total_cand_tests = len(candidate_tests)
         passed_cand_tests = sum(1 for t in candidate_tests if t.exit_code == 0)
-        candidate_test_pass_rate = (passed_cand_tests / total_cand_tests) if total_cand_tests > 0 else 0.0
+        candidate_test_pass_rate = (passed_cand_tests / total_cand_tests) if total_cand_tests > 0 else None
 
-        # Regression detection rate
+        # Regression detection rate (denominator is runs that executed regression tests)
+        evaluated_runs_for_regression = 0
         runs_with_regression = 0
         for r in runs:
             run_tests = [t for t in test_results if t.run_id == r.id and t.test_type == "regression"]
-            if any(t.failed_count > 0 for t in run_tests):
-                runs_with_regression += 1
-        regression_rate = (runs_with_regression / total_runs) if total_runs > 0 else 0.0
+            if run_tests:
+                evaluated_runs_for_regression += 1
+                if any(t.failed_count > 0 for t in run_tests):
+                    runs_with_regression += 1
+        regression_rate = (runs_with_regression / evaluated_runs_for_regression) if evaluated_runs_for_regression > 0 else None
 
-        # Attempts per repair
+        # Attempts per repair (return None when no passing runs exist to indicate undefined average)
         attempts_passing = [r.retry_count + 1 for r in passing_runs]
-        avg_attempts = (sum(attempts_passing) / len(attempts_passing)) if attempts_passing else 1.0
+        avg_attempts = (sum(attempts_passing) / len(attempts_passing)) if attempts_passing else None
 
         # Durations & Latencies
         durations = [t.duration_ms for t in test_results if t.duration_ms > 0]
@@ -90,13 +93,14 @@ class MetricsCalculator:
             "cancelled_runs": cancelled_runs,
             "passing_runs_count": passing_count,
             "eligible_attempted_runs": eligible_attempted,
-            "repair_success_rate": round(repair_success_rate, 4),
+            "repair_success_rate": round(repair_success_rate, 4) if repair_success_rate is not None else None,
             "total_candidate_test_executions": total_cand_tests,
             "passed_candidate_test_executions": passed_cand_tests,
-            "candidate_test_pass_rate": round(candidate_test_pass_rate, 4),
+            "candidate_test_pass_rate": round(candidate_test_pass_rate, 4) if candidate_test_pass_rate is not None else None,
+            "evaluated_runs_for_regression": evaluated_runs_for_regression,
             "runs_with_regression": runs_with_regression,
-            "regression_rate": round(regression_rate, 4),
-            "avg_attempts_per_successful_repair": round(avg_attempts, 2),
+            "regression_rate": round(regression_rate, 4) if regression_rate is not None else None,
+            "avg_attempts_per_successful_repair": round(avg_attempts, 2) if avg_attempts is not None else None,
             "latency_p50_ms": latency_p50_ms,
             "latency_p95_ms": latency_p95_ms,
             "total_failure_trajectories_recorded": len(failures),

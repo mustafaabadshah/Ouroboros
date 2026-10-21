@@ -2,27 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   XCircle,
-  AlertTriangle,
-  Terminal,
   RefreshCw,
   Play,
   Download,
   BarChart2,
   Cpu,
-  Layers,
   ShieldCheck,
   Brain,
-  GitBranch,
-  ShieldAlert,
   FileCode,
   Clock,
-  ArrowRight,
   TrendingUp,
   Check,
   X,
-  Lock,
-  Eye,
-  Sliders
+  Lock
 } from 'lucide-react';
 import { api } from '../services/api';
 import { TestResult, Run, EvaluationOverview, EvaluationComparison, SafetyApprovalItem } from '../types';

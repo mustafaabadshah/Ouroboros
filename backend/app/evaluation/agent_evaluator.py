@@ -220,7 +220,7 @@ class AgentRepairEvaluator:
                 }
 
             # 5. Production Multi-Agent Repair Loop
-            runner = PytestRunner(default_timeout=25)
+            runner = PytestRunner(default_timeout=120)
             evaluation_passed = False
 
             # Phase 1: Planning
@@ -321,11 +321,13 @@ class AgentRepairEvaluator:
                 # Detect provider errors
                 if coder_res.get("is_error"):
                     err_msg = coder_res.get("error_message", "Provider returned error")
+                    err_type = coder_res.get("error_type", "PROVIDER_UNAVAILABLE")
                     verdict = "ERROR"
-                    outcome = "PROVIDER_UNAVAILABLE"
+                    outcome = err_type
                     error_detail = redact_sensitive_strings(err_msg)
                     attempt_meta["verdict"] = "ERROR"
                     attempt_meta["error"] = error_detail
+                    attempt_meta["error_type"] = err_type
                     attempt_history.append(attempt_meta)
                     break
 
@@ -609,17 +611,26 @@ class AgentRepairEvaluator:
         repairs_failed = sum(1 for r in results if r.get("outcome") == "FAILED_REPAIR")
         policy_blocked = sum(1 for r in results if r.get("outcome") == "BLOCKED_BY_POLICY")
         timed_out = sum(1 for r in results if r.get("outcome") == "TIMED_OUT")
-        infra_failures = sum(1 for r in results if r.get("outcome") == "INFRASTRUCTURE_ERROR")
-        provider_unavail = sum(1 for r in results if r.get("outcome") == "PROVIDER_UNAVAILABLE")
+        infra_failures = sum(
+            1 for r in results
+            if r.get("outcome") in (
+                "INFRASTRUCTURE_ERROR", "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_ERROR",
+                "PROVIDER_RATE_LIMITED", "PROVIDER_TIMEOUT", "BUDGET_EXHAUSTED",
+                "TOKEN_CEILING_EXCEEDED", "COST_CEILING_EXCEEDED"
+            )
+        )
+        provider_unavail = sum(1 for r in results if str(r.get("outcome", "")).startswith("PROVIDER_"))
+        budget_exhausted = sum(1 for r in results if "BUDGET" in str(r.get("outcome", "")) or "CEILING" in str(r.get("outcome", "")))
 
         # Explicit denominator calculations
         attempted_repair_rate = (repairs_passed / tasks_attempted) if tasks_attempted > 0 else None
         eligible_repair_rate = (repairs_passed / eligible_tasks) if eligible_tasks > 0 else None
         adversarial_block_rate = (policy_blocked / adversarial_tasks) if adversarial_tasks > 0 else None
 
+        import statistics
         durations = [r["duration_ms"] for r in results if r.get("duration_ms", 0) > 0]
         durations.sort()
-        p50 = durations[len(durations) // 2] if durations else 0
+        p50 = int(round(statistics.median(durations))) if durations else 0
 
         outcome_dist = {
             "PASSED_REPAIR": repairs_passed,
@@ -628,6 +639,7 @@ class AgentRepairEvaluator:
             "TIMED_OUT": timed_out,
             "INFRASTRUCTURE_ERROR": infra_failures,
             "PROVIDER_UNAVAILABLE": provider_unavail,
+            "BUDGET_EXHAUSTED": budget_exhausted,
             "NOT_RUN": tasks_not_run
         }
 

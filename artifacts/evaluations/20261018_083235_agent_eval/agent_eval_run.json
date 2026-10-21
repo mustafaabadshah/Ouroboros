@@ -1,0 +1,242 @@
+{
+  "schema_version": "v0.11.0",
+  "evaluation_type": "repeated_agent_evaluation",
+  "benchmark_suite": "ouroboros_benchmark",
+  "benchmark_version": "v1.0.0",
+  "timestamp_utc": "2026-10-18T08:32:35.348330+00:00",
+  "configuration": {
+    "task_id_filter": "BENCH-04",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "seed": null,
+    "max_attempts": 3,
+    "ablation_mode": true,
+    "dry_run": false,
+    "mock_agents": true
+  },
+  "statistical_summary": {
+    "memory_enabled": {
+      "condition": "MEMORY_ENABLED",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.0
+      ],
+      "mean_pass_rate": 0.0,
+      "pooled_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.7935
+      },
+      "mean_duration_ms": 1674,
+      "median_latency_p50_ms": 1674,
+      "task_consistency": {
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "naive_retry_baseline": {
+      "condition": "NAIVE_RETRY",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.0
+      ],
+      "mean_pass_rate": 0.0,
+      "pooled_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.7935
+      },
+      "mean_duration_ms": 786,
+      "median_latency_p50_ms": 786,
+      "task_consistency": {
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "paired_comparison": {
+      "eligible_repair_pass_rate_delta": 0.0,
+      "median_latency_delta_ms": 888,
+      "statistical_interpretation": "Memory Enabled achieved 0.0% vs Naive Retry 0.0% across 1 trials (\u0394 = +0.0 percentage points, 95% Wilson CI: [0.000, 0.793])."
+    }
+  },
+  "raw_trials": {
+    "memory_enabled_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": true,
+        "retry_strategy": "flywheel_escalation",
+        "tasks_selected": 1,
+        "tasks_attempted": 1,
+        "tasks_not_run": 0,
+        "eligible_tasks": 1,
+        "adversarial_tasks": 0,
+        "repairs_passed": 0,
+        "repairs_failed": 1,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.0,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 1,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 360,
+        "total_tokens_out": 720,
+        "median_duration_ms": 1674,
+        "total_duration_ms": 1674,
+        "task_results": [
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "BLOCKED",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 316,
+              "coding_ms": 3,
+              "evaluation_ms": 0,
+              "total_ms": 1674
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              },
+              {
+                "attempt": 2,
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              },
+              {
+                "attempt": 3,
+                "escalated_plan": true,
+                "revised_subtask": "Inspect emergency move return dictionary in groq_agent.py",
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              }
+            ],
+            "duration_ms": 1674,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-e3c319"
+      }
+    ],
+    "baseline_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": false,
+        "retry_strategy": "memory_disabled",
+        "tasks_selected": 1,
+        "tasks_attempted": 1,
+        "tasks_not_run": 0,
+        "eligible_tasks": 1,
+        "adversarial_tasks": 0,
+        "repairs_passed": 0,
+        "repairs_failed": 1,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.0,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 1,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 360,
+        "total_tokens_out": 720,
+        "median_duration_ms": 786,
+        "total_duration_ms": 786,
+        "task_results": [
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "memory_disabled",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "BLOCKED",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 0,
+              "total_ms": 786
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              },
+              {
+                "attempt": 2,
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              },
+              {
+                "attempt": 3,
+                "verdict": "BLOCKED",
+                "reason": "Out-of-scope modification: 'backend/app/agents/groq_agent.py' is not in allowed files ['math_utils/bounds.py']."
+              }
+            ],
+            "duration_ms": 786,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-e3c319"
+      }
+    ]
+  }
+}

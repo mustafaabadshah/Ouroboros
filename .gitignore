@@ -30,6 +30,7 @@ env/
 .env
 *.local.env
 secrets/
+docs/chat_history/
 *.pem
 *.key
 

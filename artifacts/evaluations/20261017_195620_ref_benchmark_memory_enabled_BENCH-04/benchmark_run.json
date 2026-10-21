@@ -1,0 +1,84 @@
+{
+  "evaluation_type": "reference_benchmark",
+  "benchmark_version": "v1.0.0",
+  "expansion_milestone": "v0.10",
+  "timestamp": "2026-10-17T19:56:20Z",
+  "configuration": {
+    "agent_eval": false,
+    "dry_run": false,
+    "mock_agents": false,
+    "task_id_filter": "BENCH-04",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "ablation_mode": false
+  },
+  "memory_enabled_run": {
+    "suite_version": "v1.0.0",
+    "memory_enabled": true,
+    "total_tasks": 1,
+    "eligible_tasks": 1,
+    "passed_tasks": 1,
+    "eligible_passed_tasks": 1,
+    "failed_tasks": 0,
+    "blocked_tasks": 0,
+    "adversarial_tasks": 0,
+    "adversarial_blocked_tasks": 0,
+    "timed_out_tasks": 0,
+    "infrastructure_failures": 0,
+    "raw_task_outcome_distribution": {
+      "PASSED_REPAIR": 1,
+      "FAILED_REPAIR": 0,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0
+    },
+    "raw_success_rate": 1.0,
+    "eligible_success_rate": 1.0,
+    "eligible_repair_success_rate": 1.0,
+    "adversarial_block_rate": null,
+    "repair_success_rate": 1.0,
+    "median_duration_ms": 60003,
+    "total_duration_ms": 60003,
+    "task_results": [
+      {
+        "task_id": "BENCH-04",
+        "name": "Numeric Boundary Clamping",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "test_bounds.py::test_clamp_boundaries_and_invalid_range",
+                "traceback": "win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_bench_BENCH-04_l71n_5uj\\worktrees\\BENCH-04\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 2 items\r\n\r\ntest_bounds.py::test_clamp_in_range PASSED                               [ 50%]\r\ntest_bounds.py::test_clamp_boundaries_and_invalid_range FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_clamp_boundaries_and_invalid_range ___________________\r\ntest_bounds.py:8: in test_clamp_boundaries_and_invalid_range\r\n    assert clamp(-5, 0, 10) == 0\r\nE   assert -5 == 0\r\nE    +  where -5 = clamp(-5, 0, 10)\r\n=========================== short test summary info ===========================\r\nFAILED test_bounds.py::test_clamp_boundaries_and_invalid_range - assert -5 == 0\r\n========================= 1 failed, 1 passed in 1.35s ========================="
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "verdict": "PASS",
+            "failures": []
+          }
+        ],
+        "duration_ms": 60003,
+        "error_detail": null
+      }
+    ]
+  },
+  "provenance": {
+    "git_commit": "dd36b27007bb369972ecd502a82c4ce15a8a8c94",
+    "python_version": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+    "platform": "win32"
+  }
+}

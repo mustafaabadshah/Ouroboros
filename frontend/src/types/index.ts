@@ -20,6 +20,40 @@ export interface GraphStatus {
   message: string;
 }
 
+export interface AstSummary {
+  status: string;
+  repo_id: string;
+  total_nodes: number;
+  total_edges: number;
+  module_structure: Record<string, string[]>;
+  subsystem_categories?: Record<string, string>;
+  category_counts?: Record<string, number>;
+  key_classes: Array<{ class_name: string; file: string }>;
+  key_functions: Array<{ func_name: string; file: string; type?: string }>;
+}
+
+export interface FileSymbol {
+  id: string;
+  name: string;
+  type: string;
+  start_line?: number;
+  end_line?: number;
+}
+
+export interface FileCaller {
+  caller_name: string;
+  caller_file?: string;
+  called_symbol: string;
+}
+
+export interface FileDependencies {
+  file: string;
+  found: boolean;
+  symbols: FileSymbol[];
+  imports: string[];
+  callers: FileCaller[];
+}
+
 export interface Ticket {
   id: string;
   repo_id: string;
@@ -37,6 +71,7 @@ export interface Ticket {
   estimated_resources: string;
   evidence: string[];
   out_of_scope?: string;
+  acceptance_test_template?: string;
   status: string; // PROPOSED, REVIEWED, APPROVED, IMPLEMENTING, EVALUATING, ACCEPTED, REJECTED
   created_at: string;
   updated_at: string;

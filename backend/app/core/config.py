@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     PORT: int = 8000
     LOG_LEVEL: str = "INFO"
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,*"
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'ouroboros.db'}"
 
     # Target Repository Paths
@@ -61,8 +61,8 @@ class Settings(BaseSettings):
     PHOENIX_PORT: int = 6006
     PHOENIX_PROJECT_NAME: str = "ouroboros-swarm"
     PHOENIX_COLLECTOR_ENDPOINT: Optional[str] = "http://127.0.0.1:6006/v1/traces"
-    PHOENIX_CAPTURE_PROMPTS: bool = False
-    PHOENIX_MASK_CODE_SNIPPETS: bool = True
+    PHOENIX_CAPTURE_PROMPTS: bool = True
+    PHOENIX_MASK_CODE_SNIPPETS: bool = False
 
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"),

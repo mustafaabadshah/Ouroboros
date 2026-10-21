@@ -12,16 +12,23 @@ Write-Host "==========================================================" -Foregro
 Write-Host "   STARTING PROJECT OUROBOROS (Backend + Frontend)" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 1. Start Backend in Background
+# 1. Start Arize Phoenix in Background
+Write-Host "Starting Arize Phoenix on http://127.0.0.1:6006..." -ForegroundColor Yellow
+$phoenixScript = Join-Path $projectRoot "scripts\run_phoenix.py"
+$phoenixProcess = Start-Process -FilePath $venvPython -ArgumentList $phoenixScript -WorkingDirectory $projectRoot -PassThru
+Start-Sleep -Seconds 2
+
+# 2. Start Backend in Background
 Write-Host "Starting FastAPI Backend on http://127.0.0.1:8000..." -ForegroundColor Yellow
 $backendProcess = Start-Process -FilePath $venvPython -ArgumentList "-m", "uvicorn", "app.main:app", "--app-dir", "backend", "--host", "127.0.0.1", "--port", "8000", "--reload" -WorkingDirectory $projectRoot -PassThru
 
-# 2. Start Frontend in Background
+# 3. Start Frontend in Background
 Write-Host "Starting React + Vite Frontend on http://localhost:5173..." -ForegroundColor Yellow
 $frontendProcess = Start-Process -FilePath "npm.cmd" -ArgumentList "run", "dev" -WorkingDirectory $frontendDir -PassThru
 
 # Save PIDs for stop script
 $pids = @{
+    phoenix_pid = $phoenixProcess.Id
     backend_pid = $backendProcess.Id
     frontend_pid = $frontendProcess.Id
 }

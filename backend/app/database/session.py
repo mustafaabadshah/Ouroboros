@@ -28,7 +28,15 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initializes tables in the SQLite database."""
+    """Initializes tables in the SQLite database and applies non-destructive column additions."""
     from app.database import models  # noqa: F401
     Base.metadata.create_all(bind=engine)
+    if "sqlite" in settings.DATABASE_URL:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            try:
+                conn.execute(text("ALTER TABLE tickets ADD COLUMN acceptance_test_template TEXT"))
+                conn.commit()
+            except Exception:
+                pass
     logger.info("Project Ouroboros SQLite database schema initialized.")

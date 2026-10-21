@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { History, Download, Trash2, AlertCircle, RefreshCw, Filter } from 'lucide-react';
-import { api } from '../services/api';
+import { api, BASE_URL } from '../services/api';
 import { FailureTrajectory } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 
@@ -30,7 +30,7 @@ export const FailureTrajectoriesPage: React.FC = () => {
   };
 
   const handleExport = () => {
-    window.open('/api/failures/export', '_blank');
+    window.open(`${BASE_URL}/failures/export`, '_blank');
   };
 
   const handleDelete = async (id: string) => {

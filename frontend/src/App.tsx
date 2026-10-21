@@ -18,6 +18,7 @@ export const App: React.FC = () => {
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [autonomyMode, setAutonomyMode] = useState('SUPERVISED');
   const [isDark, setIsDark] = useState(true);
+  const [ticketPromptPrefill, setTicketPromptPrefill] = useState<string>('');
 
   // System Status
   const [freeRamMb, setFreeRamMb] = useState(1380);
@@ -28,8 +29,23 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     fetchSystemStatus();
-    const interval = setInterval(fetchSystemStatus, 6000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchSystemStatus();
+      }
+    }, 15000);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchSystemStatus();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, []);
 
   const fetchSystemStatus = async () => {
@@ -85,7 +101,14 @@ export const App: React.FC = () => {
               }}
             />
           )}
-          {currentTab === 'repositories' && <RepositoriesPage />}
+          {currentTab === 'repositories' && (
+            <RepositoriesPage
+              onNavigateToTickets={(prompt) => {
+                setTicketPromptPrefill(prompt);
+                setCurrentTab('tickets');
+              }}
+            />
+          )}
           {currentTab === 'runs' && (
             <AgentRunsPage
               selectedRunId={selectedRunId}
@@ -100,6 +123,8 @@ export const App: React.FC = () => {
                 setCurrentTab('runs');
               }}
               setCurrentTab={setCurrentTab}
+              initialPrompt={ticketPromptPrefill}
+              onClearInitialPrompt={() => setTicketPromptPrefill('')}
             />
           )}
           {currentTab === 'changes' && <CodeChangesPage selectedRunId={selectedRunId} />}

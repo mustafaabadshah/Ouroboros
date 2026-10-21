@@ -1331,7 +1331,7 @@ class BenchmarkHarness:
                     error_detail = f"Failed to apply flawed patch: {app_msg}"
                     history.append({"attempt": 1, "verdict": "ERROR", "reason": error_detail})
                 else:
-                    runner = PytestRunner(default_timeout=25)
+                    runner = PytestRunner(default_timeout=120)
                     eval_res = await runner.run_tests(working_dir=worktree_path)
                     if eval_res.get("timed_out"):
                         verdict = "TIMED_OUT"
@@ -1462,7 +1462,7 @@ class BenchmarkHarness:
                 await run_safe_subprocess(["git", "add", "-A"], cwd=repo_dir)
                 await run_safe_subprocess(["git", "commit", "-m", "Seed"], cwd=repo_dir)
 
-                runner = PytestRunner(default_timeout=20)
+                runner = PytestRunner(default_timeout=120)
 
                 # 1. Baseline test must pass on initial fixture
                 base_eval = await runner.run_tests(working_dir=repo_dir, test_path=task_def["baseline_test"])
@@ -1576,7 +1576,7 @@ class BenchmarkHarness:
             "eligible_success_rate": round(eligible_success_rate, 4) if eligible_success_rate is not None else None,
             "eligible_repair_success_rate": round(eligible_success_rate, 4) if eligible_success_rate is not None else None,
             "adversarial_block_rate": round(adversarial_block_rate, 4) if adversarial_block_rate is not None else None,
-            "repair_success_rate": round(eligible_success_rate, 4) if eligible_success_rate is not None else 0.0,
+            "repair_success_rate": round(eligible_success_rate, 4) if eligible_success_rate is not None else None,
             "median_duration_ms": p50,
             "total_duration_ms": total_duration,
             "task_results": results

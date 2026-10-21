@@ -138,6 +138,13 @@ class FailureFlywheel:
             else (latest.traceback_excerpt if latest else "")
         )
 
+        cross_insights = FailureFlywheel.get_cross_ticket_insights(
+            db=db,
+            current_ticket_id=ticket_id,
+            error_snippet=resolved_traceback,
+            max_insights=3
+        )
+
         res: Dict[str, Any] = {
             "has_history": True,
             "has_repeated_failure": has_repeated,
@@ -147,6 +154,7 @@ class FailureFlywheel:
             "failed_tests": resolved_failed_tests,
             "traceback": resolved_traceback,
             "prior_attempts": history_items,
+            "cross_ticket_insights": cross_insights,
         }
 
         if latest_ctx:
@@ -166,6 +174,114 @@ class FailureFlywheel:
             res["formatted_diagnostic"] = f"Failed Tests: {', '.join(latest.failed_tests_json or [])}\nTraceback:\n{latest.traceback_excerpt}"
 
         return res
+
+    @staticmethod
+    def get_cross_ticket_insights(
+        db: Session,
+        current_ticket_id: str,
+        error_snippet: str = "",
+        target_file: Optional[str] = None,
+        max_insights: int = 3
+    ) -> List[Dict[str, Any]]:
+        """
+        Discovers proven repair patterns and resolutions from other tickets in institutional memory.
+        Matches error classes (SyntaxError, TypeError, ImportError, etc.) and module targets.
+        """
+        import re
+        all_trajs = list_failure_trajectories(db)
+        other_trajs = [t for t in all_trajs if t.ticket_id != current_ticket_id]
+        if not other_trajs:
+            return []
+
+        error_keywords = set(re.findall(r"\b[A-Za-z]+(?:Error|Exception|Timeout|Failure)\b", error_snippet or ""))
+        if target_file:
+            error_keywords.add(Path(target_file).stem.lower())
+
+        scored_insights = []
+        for t in other_trajs:
+            score = 0
+            t_text = f"{t.traceback_excerpt or ''} {t.root_cause_hypothesis or ''} {t.repair_hint or ''}".lower()
+            for kw in error_keywords:
+                if kw.lower() in t_text:
+                    score += 2
+            if t.status in ("REPAIRED", "UNRESOLVED") and t.repair_hint:
+                score += 1
+
+            if score > 0 and t.repair_hint:
+                scored_insights.append((score, {
+                    "source_ticket_id": t.ticket_id,
+                    "attempt": t.attempt,
+                    "matched_pattern": list(error_keywords)[:3],
+                    "repair_hint": t.repair_hint,
+                    "root_cause_hypothesis": t.root_cause_hypothesis,
+                    "traceback_summary": (t.traceback_excerpt or "")[:150]
+                }))
+
+        scored_insights.sort(key=lambda x: x[0], reverse=True)
+        return [item[1] for item in scored_insights[:max_insights]]
+
+    @staticmethod
+    def get_institutional_coder_seed(
+        db: Session,
+        target_file: str,
+        problem_statement: str,
+        max_patterns: int = 2
+    ) -> str:
+        """
+        Cross-Ticket Institutional Memory:
+        Searches past resolved tickets and historical successful repair trajectories
+        to seed the initial LocalCoder agent with proven fix patterns before coding begins.
+        """
+        import re
+        try:
+            from app.database.models import TicketModel, FailureTrajectoryModel
+            accepted_tickets = db.query(TicketModel).filter(
+                TicketModel.status.in_(["ACCEPTED", "REVIEWED", "APPROVED"])
+            ).all()
+
+            target_stem = Path(target_file).stem.lower()
+            problem_words = set(re.findall(r"\b[A-Za-z]{4,}\b", problem_statement.lower()))
+
+            matched_hints = []
+            for t in accepted_tickets:
+                t_cand_files = [f.lower() for f in (t.candidate_files_json or [])]
+                is_same_file = any(target_stem in cf for cf in t_cand_files)
+                t_words = set(re.findall(r"\b[A-Za-z]{4,}\b", t.problem_statement.lower()))
+                common_words = problem_words.intersection(t_words)
+
+                if is_same_file or len(common_words) >= 2:
+                    criteria_str = "; ".join(t.acceptance_criteria_json[:2]) if t.acceptance_criteria_json else t.desired_behavior
+                    matched_hints.append(
+                        f"- Past Ticket '{t.title[:60]}' (target: {t.candidate_files_json[0] if t.candidate_files_json else 'same module'}):\n"
+                        f"  Proven pattern: {criteria_str}"
+                    )
+                if len(matched_hints) >= max_patterns:
+                    break
+
+            if len(matched_hints) < max_patterns:
+                repaired_trajs = db.query(FailureTrajectoryModel).filter(
+                    FailureTrajectoryModel.status == "REPAIRED"
+                ).order_by(FailureTrajectoryModel.created_at.desc()).limit(5).all()
+
+                for r in repaired_trajs:
+                    if r.repair_hint:
+                        matched_hints.append(
+                            f"- Institutional repair lesson (Ticket {r.ticket_id}):\n"
+                            f"  Proven fix hint: {r.repair_hint[:180]}"
+                        )
+                    if len(matched_hints) >= max_patterns:
+                        break
+
+            if matched_hints:
+                return (
+                    "\n### Swarm Institutional Memory (Proven Prior Fix Patterns):\n"
+                    + "\n".join(matched_hints)
+                    + "\nApply these proven patterns to avoid repeating past failure modes.\n"
+                )
+            return ""
+        except Exception as e:
+            logger.debug(f"Institutional memory query notice: {e}")
+            return ""
 
     @staticmethod
     def export_trajectories_json(db: Session, ticket_id: Optional[str] = None) -> str:

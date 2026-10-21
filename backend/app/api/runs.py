@@ -12,6 +12,7 @@ from app.database.repositories import (
     get_run,
     create_run,
     get_ticket,
+    update_ticket_status,
     get_repository,
     get_latest_candidate,
     get_run_test_results,
@@ -255,6 +256,7 @@ async def approve_merge(req: RunApprovalRequest, run_id: str, db: Session = Depe
 
         # Complete run
         update_run_state(db, run_id, "COMPLETED")
+        update_ticket_status(db, run.ticket_id, "ACCEPTED")
         record_audit_event(db, "MERGE_APPROVED", details={"run_id": run_id, "notes": req.notes})
 
         return {"success": True, "message": "Candidate patch successfully merged into main branch."}
@@ -273,6 +275,8 @@ async def reject_merge(req: RunApprovalRequest, run_id: str, db: Session = Depen
     await git_worktree_manager.remove_worktree(repo_path, run.ticket_id, run.candidate_branch)
 
     update_run_state(db, run_id, "FAILED", error_message="Rejected by operator.")
+    update_ticket_status(db, run.ticket_id, "REJECTED")
     record_audit_event(db, "MERGE_REJECTED", details={"run_id": run_id, "notes": req.notes})
 
     return {"success": True, "message": "Candidate patch rejected. Worktree cleaned."}
+

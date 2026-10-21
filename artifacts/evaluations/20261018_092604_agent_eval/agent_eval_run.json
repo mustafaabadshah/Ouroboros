@@ -1,0 +1,1800 @@
+{
+  "schema_version": "v0.11.0",
+  "evaluation_type": "repeated_agent_evaluation",
+  "benchmark_suite": "ouroboros_benchmark",
+  "benchmark_version": "v1.0.0",
+  "timestamp_utc": "2026-10-18T09:26:04.123613+00:00",
+  "configuration": {
+    "task_id_filter": null,
+    "eligible_only": true,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "seed": null,
+    "max_attempts": 3,
+    "ablation_mode": true,
+    "dry_run": false,
+    "mock_agents": true
+  },
+  "statistical_summary": {
+    "memory_enabled": {
+      "condition": "MEMORY_ENABLED",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.9333
+      ],
+      "mean_pass_rate": 0.9333,
+      "pooled_pass_rate": 0.9333,
+      "wilson_ci_95": {
+        "lower": 0.7018,
+        "upper": 0.9881
+      },
+      "mean_duration_ms": 1548046,
+      "median_latency_p50_ms": 87459,
+      "task_consistency": {
+        "BENCH-01": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-05": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-06": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-07": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-08": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-09": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-10": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-11": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-12": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-02": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-16": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        }
+      }
+    },
+    "naive_retry_baseline": {
+      "condition": "NAIVE_RETRY",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.0
+      ],
+      "mean_pass_rate": 0.0,
+      "pooled_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.2039
+      },
+      "mean_duration_ms": 672224,
+      "median_latency_p50_ms": 38579,
+      "task_consistency": {
+        "BENCH-01": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-05": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-06": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-07": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-08": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-09": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-10": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-11": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-12": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-02": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-16": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "paired_comparison": {
+      "eligible_repair_pass_rate_delta": 0.9333,
+      "median_latency_delta_ms": 48880,
+      "statistical_interpretation": "Memory Enabled achieved 93.3% vs Naive Retry 0.0% across 1 trials (\u0394 = +93.3 percentage points, 95% Wilson CI: [0.702, 0.988])."
+    }
+  },
+  "raw_trials": {
+    "memory_enabled_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": true,
+        "retry_strategy": "flywheel_escalation",
+        "tasks_selected": 15,
+        "tasks_attempted": 15,
+        "tasks_not_run": 0,
+        "eligible_tasks": 15,
+        "adversarial_tasks": 0,
+        "repairs_passed": 14,
+        "repairs_failed": 1,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.9333,
+        "eligible_repair_success_rate": 0.9333,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 14,
+          "FAILED_REPAIR": 1,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 3720,
+        "total_tokens_out": 7440,
+        "median_duration_ms": 87459,
+        "total_duration_ms": 1548046,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 317,
+              "coding_ms": 2,
+              "evaluation_ms": 120074,
+              "total_ms": 126082
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_input_parser.py::test_parse_negative_raises_value_error",
+                    "traceback": "============================ test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-01_ki0ypflc\\worktrees\\BENCH-01\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_input_parser.py::test_parse_negative_raises_value_error FAILED      [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_parse_negative_raises_value_error ____________________\r\ntest_input_parser.py:8: in test_parse_negative_raises_value_error\r\n    with pytest.raises(ValueError):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_input_parser.py::test_parse_negative_raises_value_error - Failed:...\r\n============================== 1 failed in 1.29s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 126082,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 168649,
+              "total_ms": 172205
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": false,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_bounds.py::test_clamp_boundaries_and_invalid_range",
+                    "traceback": "================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-04_y8wrznwf\\worktrees\\BENCH-04\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_bounds.py::test_clamp_boundaries_and_invalid_range FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_clamp_boundaries_and_invalid_range ___________________\r\ntest_bounds.py:8: in test_clamp_boundaries_and_invalid_range\r\n    assert clamp(-5, 0, 10) == 0\r\nE   assert -5 == 0\r\nE    +  where -5 = clamp(-5, 0, 10)\r\n=========================== short test summary info ===========================\r\nFAILED test_bounds.py::test_clamp_boundaries_and_invalid_range - assert -5 == 0\r\n============================== 1 failed in 1.67s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": []
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: math_utils/bounds.py:1\nerror: math_utils/bounds.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 172205,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 1,
+              "evaluation_ms": 91031,
+              "total_ms": 92706
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": "n starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_1ygdgnlo\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Failed: D...\r\n============================== 1 failed in 1.63s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 92706,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-06",
+            "name": "Nested Dictionary Key Traversal",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 1,
+              "evaluation_ms": 103510,
+              "total_ms": 104656
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": false,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_dict_traversal.py::test_deep_get_missing_and_none",
+                    "traceback": "fice\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-06_nmwvqieq\\worktrees\\BENCH-06\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_dict_traversal.py::test_deep_get_missing_and_none FAILED            [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_deep_get_missing_and_none ________________________\r\ntest_dict_traversal.py:10: in test_deep_get_missing_and_none\r\n    assert deep_get(data, 'a.b.missing', default='default') == 'default'\r\nE   AssertionError: assert {'c': 42} == 'default'\r\nE    +  where {'c': 42} = deep_get({'a': {'b': {'c': 42}}, 'x': None}, 'a.b.missing', default='default')\r\n=========================== short test summary info ===========================\r\nFAILED test_dict_traversal.py::test_deep_get_missing_and_none - AssertionErro...\r\n============================== 1 failed in 1.43s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 104656,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-07",
+            "name": "Configuration Value Coercer",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 152527,
+              "total_ms": 156418
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": false,
+                "verdict": "FAIL",
+                "failures": []
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 156418,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-08",
+            "name": "Event Dispatcher Signature Adapter",
+            "category": "type_and_interface",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 99434,
+              "total_ms": 101772
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_dispatcher.py::test_dispatch_fixed_signature_handler",
+                    "traceback": "\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-08_bx_hcqxq\\worktrees\\BENCH-08\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_dispatcher.py::test_dispatch_fixed_signature_handler FAILED         [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_dispatch_fixed_signature_handler ____________________\r\ntest_dispatcher.py:16: in test_dispatch_fixed_signature_handler\r\n    assert res == ['logout:user1']\r\nE   AssertionError: assert [None] == ['logout:user1']\r\nE     \r\nE     At index 0 diff: None != 'logout:user1'\r\nE     \r\nE     Full diff:\r\nE       [\r\nE     -     'logout:user1',\r\nE     +     None,\r\nE       ]\r\n=========================== short test summary info ===========================\r\nFAILED test_dispatcher.py::test_dispatch_fixed_signature_handler - AssertionE...\r\n============================== 1 failed in 1.66s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 101772,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-09",
+            "name": "Cross-Module Entity Loader",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 1,
+              "evaluation_ms": 82763,
+              "total_ms": 84126
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_loader.py::test_service_load_entities",
+                    "traceback": "fice\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-09_de28o9s6\\worktrees\\BENCH-09\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_loader.py::test_service_load_entities FAILED                        [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________ test_service_load_entities __________________________\r\ntest_loader.py:11: in test_service_load_entities\r\n    loaded = load_entities(raw)\r\n             ^^^^^^^^^^^^^^^^^^\r\nservices\\loader.py:6: in load_entities\r\n    item = Entity(r['id'])\r\n           ^^^^^^^^^^^^^^^\r\nE   TypeError: Entity.__init__() missing 1 required positional argument: 'name'\r\n=========================== short test summary info ===========================\r\nFAILED test_loader.py::test_service_load_entities - TypeError: Entity.__init_...\r\n============================== 1 failed in 2.64s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 84126,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-10",
+            "name": "Workflow State Machine Transitions",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 81709,
+              "total_ms": 82727
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_state_machine.py::test_valid_and_invalid_transitions",
+                    "traceback": "====== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-10_hq6bm_ab\\worktrees\\BENCH-10\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_state_machine.py::test_valid_and_invalid_transitions FAILED         [100%]\r\n\r\n================================== FAILURES ===================================\r\n_____________________ test_valid_and_invalid_transitions ______________________\r\ntest_state_machine.py:21: in test_valid_and_invalid_transitions\r\n    with pytest.raises(InvalidTransitionError):\r\nE   Failed: DID NOT RAISE InvalidTransitionError\r\n=========================== short test summary info ===========================\r\nFAILED test_state_machine.py::test_valid_and_invalid_transitions - Failed: DI...\r\n============================== 1 failed in 1.81s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 82727,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-11",
+            "name": "Token Bucket Rate Limiter Shared State",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 3,
+              "evaluation_ms": 86468,
+              "total_ms": 87459
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_bucket.py::test_isolated_bucket_instances",
+                    "traceback": "thon 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-11_cyt1hb_e\\worktrees\\BENCH-11\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_bucket.py::test_isolated_bucket_instances FAILED                    [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_isolated_bucket_instances ________________________\r\ntest_bucket.py:12: in test_isolated_bucket_instances\r\n    assert b1.consume(2) is False\r\nE   assert True is False\r\nE    +  where True = consume(2)\r\nE    +    where consume = <rate_limiter.bucket.TokenBucket object at 0x0000028BE4C1EF30>.consume\r\n=========================== short test summary info ===========================\r\nFAILED test_bucket.py::test_isolated_bucket_instances - assert True is False\r\n============================== 1 failed in 1.14s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 87459,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-12",
+            "name": "ISO Timestamp Normalizer",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 3,
+              "evaluation_ms": 77733,
+              "total_ms": 78750
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_iso_parser.py::test_parse_offsets_and_z",
+                    "traceback": "\\ouro_agenteval_BENCH-12_6pblxw_m\\worktrees\\BENCH-12\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_iso_parser.py::test_parse_offsets_and_z FAILED                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n__________________________ test_parse_offsets_and_z ___________________________\r\ntest_iso_parser.py:17: in test_parse_offsets_and_z\r\n    assert dt_offset.tzinfo == timezone.utc\r\nE   assert datetime.timezone(datetime.timedelta(seconds=7200)) == datetime.timezone.utc\r\nE    +  where datetime.timezone(datetime.timedelta(seconds=7200)) = datetime.datetime(2026, 5, 1, 14, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))).tzinfo\r\nE    +  and   datetime.timezone.utc = timezone.utc\r\n=========================== short test summary info ===========================\r\nFAILED test_iso_parser.py::test_parse_offsets_and_z - assert datetime.timezon...\r\n============================== 1 failed in 1.62s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 78750,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 149452,
+              "total_ms": 151940
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": false,
+                "verdict": "FAIL",
+                "failures": []
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 151940,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 2,
+              "coding_ms": 3,
+              "evaluation_ms": 76271,
+              "total_ms": 79415
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_semver.py::test_parse_complex_semver_tags",
+                    "traceback": "m win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-14_n4lfnr64\\worktrees\\BENCH-14\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_semver.py::test_parse_complex_semver_tags FAILED                    [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_parse_complex_semver_tags ________________________\r\ntest_semver.py:13: in test_parse_complex_semver_tags\r\n    assert res_pre == {'major': 0, 'minor': 9, 'patch': 1, 'prerelease': 'rc2'}\r\nE   AssertionError: assert None == {'major': 0, 'minor': 9, 'patch': 1, 'prerelease': 'rc2'}\r\n=========================== short test summary info ===========================\r\nFAILED test_semver.py::test_parse_complex_semver_tags - AssertionError: asser...\r\n============================== 1 failed in 1.13s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 79415,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-02",
+            "name": "Arithmetic Exponentiation Repair",
+            "category": "logic_and_exception",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 2,
+              "coding_ms": 2,
+              "evaluation_ms": 75258,
+              "total_ms": 76666
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_math_ops.py::test_power",
+                    "traceback": "====================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-02_dy4vliof\\worktrees\\BENCH-02\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_math_ops.py::test_power FAILED                                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________________ test_power __________________________________\r\ntest_math_ops.py:8: in test_power\r\n    assert math_ops.power(2, 3) == 8\r\nE   assert 6 == 8\r\nE    +  where 6 = <function power at 0x000001F2E94DBA60>(2, 3)\r\nE    +    where <function power at 0x000001F2E94DBA60> = math_ops.power\r\n=========================== short test summary info ===========================\r\nFAILED test_math_ops.py::test_power - assert 6 == 8\r\n============================== 1 failed in 1.15s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 76666,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 2,
+              "coding_ms": 3,
+              "evaluation_ms": 76469,
+              "total_ms": 77893
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_processor.py::test_process_records_collects_errors",
+                    "traceback": "=========================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-15_dwg3_dp2\\worktrees\\BENCH-15\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_processor.py::test_process_records_collects_errors FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_process_records_collects_errors _____________________\r\ntest_processor.py:24: in test_process_records_collects_errors\r\n    assert len(res['errors']) == 2\r\nE   assert 0 == 2\r\nE    +  where 0 = len([])\r\n=========================== short test summary info ===========================\r\nFAILED test_processor.py::test_process_records_collects_errors - assert 0 == 2\r\n============================== 1 failed in 1.19s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 77893,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-16",
+            "name": "Idempotent Transaction Tracker",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 2,
+              "evaluation_ms": 73750,
+              "total_ms": 75231
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_registry.py::test_duplicate_transaction_deduplication",
+                    "traceback": "========================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-16_9t62p5kj\\worktrees\\BENCH-16\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_registry.py::test_duplicate_transaction_deduplication FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n__________________ test_duplicate_transaction_deduplication ___________________\r\ntest_registry.py:23: in test_duplicate_transaction_deduplication\r\n    assert len(calls) == 1\r\nE   assert 2 == 1\r\nE    +  where 2 = len([1, 1])\r\n=========================== short test summary info ===========================\r\nFAILED test_registry.py::test_duplicate_transaction_deduplication - assert 2 ...\r\n============================== 1 failed in 1.09s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 75231,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-43df7b"
+      }
+    ],
+    "baseline_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": false,
+        "retry_strategy": "naive_retry",
+        "tasks_selected": 15,
+        "tasks_attempted": 15,
+        "tasks_not_run": 0,
+        "eligible_tasks": 15,
+        "adversarial_tasks": 0,
+        "repairs_passed": 0,
+        "repairs_failed": 15,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.0,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 15,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 5400,
+        "total_tokens_out": 10800,
+        "median_duration_ms": 38579,
+        "total_duration_ms": 672224,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 1,
+              "coding_ms": 1,
+              "evaluation_ms": 49457,
+              "total_ms": 51087
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_input_parser.py::test_parse_negative_raises_value_error",
+                    "traceback": "============================ test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-01_jqx_9b_m\\worktrees\\BENCH-01\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_input_parser.py::test_parse_negative_raises_value_error FAILED      [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_parse_negative_raises_value_error ____________________\r\ntest_input_parser.py:8: in test_parse_negative_raises_value_error\r\n    with pytest.raises(ValueError):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_input_parser.py::test_parse_negative_raises_value_error - Failed:...\r\n============================== 1 failed in 1.70s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/input_parser.py:1\nerror: utils/input_parser.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/input_parser.py:1\nerror: utils/input_parser.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 51087,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 1,
+              "evaluation_ms": 38788,
+              "total_ms": 41112
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_bounds.py::test_clamp_boundaries_and_invalid_range",
+                    "traceback": "================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-04_1vppdq27\\worktrees\\BENCH-04\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_bounds.py::test_clamp_boundaries_and_invalid_range FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_clamp_boundaries_and_invalid_range ___________________\r\ntest_bounds.py:8: in test_clamp_boundaries_and_invalid_range\r\n    assert clamp(-5, 0, 10) == 0\r\nE   assert -5 == 0\r\nE    +  where -5 = clamp(-5, 0, 10)\r\n=========================== short test summary info ===========================\r\nFAILED test_bounds.py::test_clamp_boundaries_and_invalid_range - assert -5 == 0\r\n============================== 1 failed in 1.10s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: math_utils/bounds.py:3\nerror: math_utils/bounds.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: math_utils/bounds.py:3\nerror: math_utils/bounds.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 41112,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 2,
+              "evaluation_ms": 36906,
+              "total_ms": 38332
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": "n starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_yhiojtfv\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Failed: D...\r\n============================== 1 failed in 1.14s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: pagination/paginator.py:1\nerror: pagination/paginator.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: pagination/paginator.py:1\nerror: pagination/paginator.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 38332,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-06",
+            "name": "Nested Dictionary Key Traversal",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 38464,
+              "total_ms": 39909
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_dict_traversal.py::test_deep_get_missing_and_none",
+                    "traceback": "fice\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-06_94s17bf1\\worktrees\\BENCH-06\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_dict_traversal.py::test_deep_get_missing_and_none FAILED            [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_deep_get_missing_and_none ________________________\r\ntest_dict_traversal.py:10: in test_deep_get_missing_and_none\r\n    assert deep_get(data, 'a.b.missing', default='default') == 'default'\r\nE   AssertionError: assert {'c': 42} == 'default'\r\nE    +  where {'c': 42} = deep_get({'a': {'b': {'c': 42}}, 'x': None}, 'a.b.missing', default='default')\r\n=========================== short test summary info ===========================\r\nFAILED test_dict_traversal.py::test_deep_get_missing_and_none - AssertionErro...\r\n============================== 1 failed in 1.12s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/dict_traversal.py:3\nerror: utils/dict_traversal.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/dict_traversal.py:3\nerror: utils/dict_traversal.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 39909,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-07",
+            "name": "Configuration Value Coercer",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 37016,
+              "total_ms": 38432
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_coercer.py::test_coerce_false_and_none",
+                    "traceback": "====================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-07_qixm4q2o\\worktrees\\BENCH-07\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_coercer.py::test_coerce_false_and_none FAILED                       [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________ test_coerce_false_and_none __________________________\r\ntest_coercer.py:14: in test_coerce_false_and_none\r\n    assert coerce_boolean_setting('False') is False\r\nE   AssertionError: assert True is False\r\nE    +  where True = coerce_boolean_setting('False')\r\n=========================== short test summary info ===========================\r\nFAILED test_coercer.py::test_coerce_false_and_none - AssertionError: assert T...\r\n============================== 1 failed in 1.14s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: config/coercer.py:2\nerror: config/coercer.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: config/coercer.py:2\nerror: config/coercer.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 38432,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-08",
+            "name": "Event Dispatcher Signature Adapter",
+            "category": "type_and_interface",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 37166,
+              "total_ms": 38579
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_dispatcher.py::test_dispatch_fixed_signature_handler",
+                    "traceback": "\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-08_5na108n4\\worktrees\\BENCH-08\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_dispatcher.py::test_dispatch_fixed_signature_handler FAILED         [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_dispatch_fixed_signature_handler ____________________\r\ntest_dispatcher.py:16: in test_dispatch_fixed_signature_handler\r\n    assert res == ['logout:user1']\r\nE   AssertionError: assert [None] == ['logout:user1']\r\nE     \r\nE     At index 0 diff: None != 'logout:user1'\r\nE     \r\nE     Full diff:\r\nE       [\r\nE     -     'logout:user1',\r\nE     +     None,\r\nE       ]\r\n=========================== short test summary info ===========================\r\nFAILED test_dispatcher.py::test_dispatch_fixed_signature_handler - AssertionE...\r\n============================== 1 failed in 1.09s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: events/dispatcher.py:5\nerror: events/dispatcher.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: events/dispatcher.py:5\nerror: events/dispatcher.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 38579,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-09",
+            "name": "Cross-Module Entity Loader",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 36767,
+              "total_ms": 38220
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_loader.py::test_service_load_entities",
+                    "traceback": "fice\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-09_wtr38czv\\worktrees\\BENCH-09\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_loader.py::test_service_load_entities FAILED                        [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________ test_service_load_entities __________________________\r\ntest_loader.py:11: in test_service_load_entities\r\n    loaded = load_entities(raw)\r\n             ^^^^^^^^^^^^^^^^^^\r\nservices\\loader.py:6: in load_entities\r\n    item = Entity(r['id'])\r\n           ^^^^^^^^^^^^^^^\r\nE   TypeError: Entity.__init__() missing 1 required positional argument: 'name'\r\n=========================== short test summary info ===========================\r\nFAILED test_loader.py::test_service_load_entities - TypeError: Entity.__init_...\r\n============================== 1 failed in 1.08s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: services/loader.py:1\nerror: services/loader.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: services/loader.py:1\nerror: services/loader.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 38220,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-10",
+            "name": "Workflow State Machine Transitions",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 35398,
+              "total_ms": 36865
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_state_machine.py::test_valid_and_invalid_transitions",
+                    "traceback": "====== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-10_6ihmieaj\\worktrees\\BENCH-10\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_state_machine.py::test_valid_and_invalid_transitions FAILED         [100%]\r\n\r\n================================== FAILURES ===================================\r\n_____________________ test_valid_and_invalid_transitions ______________________\r\ntest_state_machine.py:21: in test_valid_and_invalid_transitions\r\n    with pytest.raises(InvalidTransitionError):\r\nE   Failed: DID NOT RAISE InvalidTransitionError\r\n=========================== short test summary info ===========================\r\nFAILED test_state_machine.py::test_valid_and_invalid_transitions - Failed: DI...\r\n============================== 1 failed in 1.05s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: workflow/state_machine.py:15\nerror: workflow/state_machine.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: workflow/state_machine.py:15\nerror: workflow/state_machine.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 36865,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-11",
+            "name": "Token Bucket Rate Limiter Shared State",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 36216,
+              "total_ms": 37631
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_bucket.py::test_isolated_bucket_instances",
+                    "traceback": "thon 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-11_wa_3x5r9\\worktrees\\BENCH-11\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_bucket.py::test_isolated_bucket_instances FAILED                    [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_isolated_bucket_instances ________________________\r\ntest_bucket.py:12: in test_isolated_bucket_instances\r\n    assert b1.consume(2) is False\r\nE   assert True is False\r\nE    +  where True = consume(2)\r\nE    +    where consume = <rate_limiter.bucket.TokenBucket object at 0x000001CBA09FAE70>.consume\r\n=========================== short test summary info ===========================\r\nFAILED test_bucket.py::test_isolated_bucket_instances - assert True is False\r\n============================== 1 failed in 1.07s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: rate_limiter/bucket.py:6\nerror: rate_limiter/bucket.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: rate_limiter/bucket.py:6\nerror: rate_limiter/bucket.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 37631,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-12",
+            "name": "ISO Timestamp Normalizer",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 37080,
+              "total_ms": 38602
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_iso_parser.py::test_parse_offsets_and_z",
+                    "traceback": "\\ouro_agenteval_BENCH-12_jihfnrjb\\worktrees\\BENCH-12\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_iso_parser.py::test_parse_offsets_and_z FAILED                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n__________________________ test_parse_offsets_and_z ___________________________\r\ntest_iso_parser.py:17: in test_parse_offsets_and_z\r\n    assert dt_offset.tzinfo == timezone.utc\r\nE   assert datetime.timezone(datetime.timedelta(seconds=7200)) == datetime.timezone.utc\r\nE    +  where datetime.timezone(datetime.timedelta(seconds=7200)) = datetime.datetime(2026, 5, 1, 14, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))).tzinfo\r\nE    +  and   datetime.timezone.utc = timezone.utc\r\n=========================== short test summary info ===========================\r\nFAILED test_iso_parser.py::test_parse_offsets_and_z - assert datetime.timezon...\r\n============================== 1 failed in 1.08s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: datetime_utils/iso_parser.py:3\nerror: datetime_utils/iso_parser.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: datetime_utils/iso_parser.py:3\nerror: datetime_utils/iso_parser.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 38602,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 37897,
+              "total_ms": 39311
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                    "traceback": "============================= test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-13_03kdwmli\\worktrees\\BENCH-13\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_safe_loader.py::test_load_invalid_and_fallback FAILED               [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_load_invalid_and_fallback ________________________\r\ntest_safe_loader.py:12: in test_load_invalid_and_fallback\r\n    assert err is not None\r\nE   assert None is not None\r\n=========================== short test summary info ===========================\r\nFAILED test_safe_loader.py::test_load_invalid_and_fallback - assert None is n...\r\n============================== 1 failed in 1.15s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: json_parser/safe_loader.py:3\nerror: json_parser/safe_loader.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: json_parser/safe_loader.py:3\nerror: json_parser/safe_loader.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 39311,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 35450,
+              "total_ms": 36833
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_semver.py::test_parse_complex_semver_tags",
+                    "traceback": "m win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-14_twhkg3a3\\worktrees\\BENCH-14\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_semver.py::test_parse_complex_semver_tags FAILED                    [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_parse_complex_semver_tags ________________________\r\ntest_semver.py:13: in test_parse_complex_semver_tags\r\n    assert res_pre == {'major': 0, 'minor': 9, 'patch': 1, 'prerelease': 'rc2'}\r\nE   AssertionError: assert None == {'major': 0, 'minor': 9, 'patch': 1, 'prerelease': 'rc2'}\r\n=========================== short test summary info ===========================\r\nFAILED test_semver.py::test_parse_complex_semver_tags - AssertionError: asser...\r\n============================== 1 failed in 1.09s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: semver/parser.py:3\nerror: semver/parser.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: semver/parser.py:3\nerror: semver/parser.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 36833,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-02",
+            "name": "Arithmetic Exponentiation Repair",
+            "category": "logic_and_exception",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 115550,
+              "total_ms": 116954
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_math_ops.py::test_power",
+                    "traceback": "====================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-02_04ogxbok\\worktrees\\BENCH-02\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_math_ops.py::test_power FAILED                                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________________ test_power __________________________________\r\ntest_math_ops.py:8: in test_power\r\n    assert math_ops.power(2, 3) == 8\r\nE   assert 6 == 8\r\nE    +  where 6 = <function power at 0x000001A73575FA60>(2, 3)\r\nE    +    where <function power at 0x000001A73575FA60> = math_ops.power\r\n=========================== short test summary info ===========================\r\nFAILED test_math_ops.py::test_power - assert 6 == 8\r\n============================== 1 failed in 1.06s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_math_ops.py::test_power",
+                    "traceback": "====================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-02_04ogxbok\\worktrees\\BENCH-02\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_math_ops.py::test_power FAILED                                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________________ test_power __________________________________\r\ntest_math_ops.py:8: in test_power\r\n    assert math_ops.power(2, 3) == 8\r\nE   assert 6 == 8\r\nE    +  where 6 = <function power at 0x000001E19448FB00>(2, 3)\r\nE    +    where <function power at 0x000001E19448FB00> = math_ops.power\r\n=========================== short test summary info ===========================\r\nFAILED test_math_ops.py::test_power - assert 6 == 8\r\n============================== 1 failed in 1.06s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 3,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_math_ops.py::test_power",
+                    "traceback": "====================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-02_04ogxbok\\worktrees\\BENCH-02\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_math_ops.py::test_power FAILED                                      [100%]\r\n\r\n================================== FAILURES ===================================\r\n_________________________________ test_power __________________________________\r\ntest_math_ops.py:8: in test_power\r\n    assert math_ops.power(2, 3) == 8\r\nE   assert 6 == 8\r\nE    +  where 6 = <function power at 0x0000028432CDBA60>(2, 3)\r\nE    +    where <function power at 0x0000028432CDBA60> = math_ops.power\r\n=========================== short test summary info ===========================\r\nFAILED test_math_ops.py::test_power - assert 6 == 8\r\n============================== 1 failed in 1.12s =============================="
+                  }
+                ]
+              }
+            ],
+            "duration_ms": 116954,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 42037,
+              "total_ms": 43712
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_processor.py::test_process_records_collects_errors",
+                    "traceback": "=========================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-15_3uyfatqn\\worktrees\\BENCH-15\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_processor.py::test_process_records_collects_errors FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_process_records_collects_errors _____________________\r\ntest_processor.py:24: in test_process_records_collects_errors\r\n    assert len(res['errors']) == 2\r\nE   assert 0 == 2\r\nE    +  where 0 = len([])\r\n=========================== short test summary info ===========================\r\nFAILED test_processor.py::test_process_records_collects_errors - assert 0 == 2\r\n============================== 1 failed in 1.50s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: batch/processor.py:2\nerror: batch/processor.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: batch/processor.py:2\nerror: batch/processor.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 43712,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-16",
+            "name": "Idempotent Transaction Tracker",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 0,
+              "coding_ms": 0,
+              "evaluation_ms": 35208,
+              "total_ms": 36645
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_registry.py::test_duplicate_transaction_deduplication",
+                    "traceback": "========================== test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-16_2lgo9aot\\worktrees\\BENCH-16\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_registry.py::test_duplicate_transaction_deduplication FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n__________________ test_duplicate_transaction_deduplication ___________________\r\ntest_registry.py:23: in test_duplicate_transaction_deduplication\r\n    assert len(calls) == 1\r\nE   assert 2 == 1\r\nE    +  where 2 = len([1, 1])\r\n=========================== short test summary info ===========================\r\nFAILED test_registry.py::test_duplicate_transaction_deduplication - assert 2 ...\r\n============================== 1 failed in 1.05s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: transactions/registry.py:6\nerror: transactions/registry.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: transactions/registry.py:6\nerror: transactions/registry.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 36645,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-43df7b"
+      }
+    ]
+  }
+}

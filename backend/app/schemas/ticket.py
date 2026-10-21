@@ -17,6 +17,7 @@ class TicketBase(BaseModel):
     estimated_resources: str = Field(default="1 LLM call, 1 pytest run", description="Estimated compute and test budget")
     evidence: List[str] = Field(default_factory=list, description="Concrete evidence found in AST or logs")
     out_of_scope: Optional[Union[str, List[str]]] = Field(default=None, description="Explicitly protected or excluded files and behaviors")
+    acceptance_test_template: Optional[str] = Field(default=None, description="Auto-synthesized candidate acceptance test template based on AST caller graphs")
 
     @field_validator("out_of_scope", mode="before")
     @classmethod
@@ -36,6 +37,7 @@ class TicketUpdate(BaseModel):
     desired_behavior: Optional[str] = None
     acceptance_criteria: Optional[List[str]] = None
     proposed_tests: Optional[List[str]] = None
+    acceptance_test_template: Optional[str] = None
     candidate_files: Optional[List[str]] = None
     risk_level: Optional[str] = None
     status: Optional[str] = None

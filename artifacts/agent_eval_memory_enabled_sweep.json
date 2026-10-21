@@ -1,0 +1,695 @@
+{
+  "evaluation_type": "real_agent_evaluation",
+  "benchmark_version": "v1.0.0",
+  "expansion_milestone": "v0.10",
+  "timestamp": "2026-10-15T19:32:51Z",
+  "configuration": {
+    "task_id_filter": null,
+    "eligible_only": true,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "ablation_mode": false,
+    "dry_run": false,
+    "mock_agents": false
+  },
+  "memory_enabled_run": {
+    "evaluation_engine": "OuroborosAgentRepairEvaluator",
+    "benchmark_version": "v1.0.0",
+    "memory_enabled": true,
+    "tasks_selected": 15,
+    "tasks_attempted": 15,
+    "tasks_not_run": 0,
+    "eligible_tasks": 15,
+    "adversarial_tasks": 0,
+    "repairs_passed": 11,
+    "repairs_failed": 4,
+    "policy_blocked": 0,
+    "timed_out": 0,
+    "infrastructure_failures": 0,
+    "provider_unavailable": 0,
+    "attempted_repair_success_rate": 0.7333,
+    "eligible_repair_success_rate": 0.7333,
+    "adversarial_block_rate": null,
+    "outcome_distribution": {
+      "PASSED_REPAIR": 11,
+      "FAILED_REPAIR": 4,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0,
+      "PROVIDER_UNAVAILABLE": 0,
+      "NOT_RUN": 0
+    },
+    "total_tokens_in": 8615,
+    "total_tokens_out": 4664,
+    "median_duration_ms": 38945,
+    "total_duration_ms": 541721,
+    "task_results": [
+      {
+        "task_id": "BENCH-01",
+        "name": "Input Validation Boundary Guard",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 303,
+        "tokens_out": 79,
+        "phase_timings": {
+          "planning_ms": 19643,
+          "coding_ms": 3091,
+          "evaluation_ms": 3256,
+          "total_ms": 27649
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 27649,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-04",
+        "name": "Numeric Boundary Clamping",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 365,
+        "tokens_out": 105,
+        "phase_timings": {
+          "planning_ms": 2557,
+          "coding_ms": 3359,
+          "evaluation_ms": 4093,
+          "total_ms": 11634
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 11634,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-05",
+        "name": "Pagination Window Slice Calculator",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts_executed": 3,
+        "max_attempts": 3,
+        "tokens_in": 1146,
+        "tokens_out": 1217,
+        "phase_timings": {
+          "planning_ms": 1202,
+          "coding_ms": 25215,
+          "evaluation_ms": 15303,
+          "total_ms": 44090
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          },
+          {
+            "attempt": 3,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          }
+        ],
+        "duration_ms": 44090,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-06",
+        "name": "Nested Dictionary Key Traversal",
+        "category": "type_and_interface",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 374,
+        "tokens_out": 106,
+        "phase_timings": {
+          "planning_ms": 29231,
+          "coding_ms": 26623,
+          "evaluation_ms": 5376,
+          "total_ms": 63113
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 63113,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-07",
+        "name": "Configuration Value Coercer",
+        "category": "type_and_interface",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 354,
+        "tokens_out": 100,
+        "phase_timings": {
+          "planning_ms": 550,
+          "coding_ms": 2970,
+          "evaluation_ms": 4550,
+          "total_ms": 10237
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 10237,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-08",
+        "name": "Event Dispatcher Signature Adapter",
+        "category": "type_and_interface",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 358,
+        "tokens_out": 146,
+        "phase_timings": {
+          "planning_ms": 6420,
+          "coding_ms": 25208,
+          "evaluation_ms": 5474,
+          "total_ms": 38945
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 38945,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-09",
+        "name": "Cross-Module Entity Loader",
+        "category": "multi_file_and_state",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 347,
+        "tokens_out": 105,
+        "phase_timings": {
+          "planning_ms": 980,
+          "coding_ms": 24972,
+          "evaluation_ms": 4046,
+          "total_ms": 32306
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 32306,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-10",
+        "name": "Workflow State Machine Transitions",
+        "category": "multi_file_and_state",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 427,
+        "tokens_out": 116,
+        "phase_timings": {
+          "planning_ms": 1163,
+          "coding_ms": 28098,
+          "evaluation_ms": 4293,
+          "total_ms": 35576
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 35576,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-11",
+        "name": "Token Bucket Rate Limiter Shared State",
+        "category": "multi_file_and_state",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 378,
+        "tokens_out": 150,
+        "phase_timings": {
+          "planning_ms": 476,
+          "coding_ms": 8310,
+          "evaluation_ms": 4166,
+          "total_ms": 15454
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 15454,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-12",
+        "name": "ISO Timestamp Normalizer",
+        "category": "serialization_and_parsing",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 328,
+        "tokens_out": 116,
+        "phase_timings": {
+          "planning_ms": 1726,
+          "coding_ms": 10971,
+          "evaluation_ms": 4605,
+          "total_ms": 20466
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 20466,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-13",
+        "name": "JSON Config Parser and Fallback",
+        "category": "serialization_and_parsing",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts_executed": 3,
+        "max_attempts": 3,
+        "tokens_in": 1105,
+        "tokens_out": 528,
+        "phase_timings": {
+          "planning_ms": 4094,
+          "coding_ms": 24208,
+          "evaluation_ms": 12178,
+          "total_ms": 42778
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                "traceback": "- AssertionError: ..."
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                "traceback": "- AssertionError: ..."
+              }
+            ]
+          },
+          {
+            "attempt": 3,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                "traceback": "- AssertionError: ..."
+              }
+            ]
+          }
+        ],
+        "duration_ms": 42778,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-14",
+        "name": "SemVer Tag Regex Extractor",
+        "category": "serialization_and_parsing",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "BLOCKED",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts_executed": 3,
+        "max_attempts": 3,
+        "tokens_in": 1227,
+        "tokens_out": 978,
+        "phase_timings": {
+          "planning_ms": 3881,
+          "coding_ms": 59628,
+          "evaluation_ms": 0,
+          "total_ms": 65618
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "BLOCKED",
+            "reason": "Security Policy Violation in semver/parser.py: Line 3: Execution of dangerous system primitive 're.compile' is forbidden."
+          },
+          {
+            "attempt": 2,
+            "verdict": "BLOCKED",
+            "reason": "Security Policy Violation in semver/parser.py: Line 3: Execution of dangerous system primitive 're.compile' is forbidden."
+          },
+          {
+            "attempt": 3,
+            "verdict": "BLOCKED",
+            "reason": "Security Policy Violation in semver/parser.py: Line 3: Execution of dangerous system primitive 're.compile' is forbidden."
+          }
+        ],
+        "duration_ms": 65618,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-02",
+        "name": "Arithmetic Exponentiation Repair",
+        "category": "logic_and_exception",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 291,
+        "tokens_out": 58,
+        "phase_timings": {
+          "planning_ms": 20778,
+          "coding_ms": 12182,
+          "evaluation_ms": 3861,
+          "total_ms": 44680
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 44680,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-15",
+        "name": "Batch Record Processor Error Propagation",
+        "category": "logic_and_exception",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts_executed": 3,
+        "max_attempts": 3,
+        "tokens_in": 1228,
+        "tokens_out": 757,
+        "phase_timings": {
+          "planning_ms": 804,
+          "coding_ms": 30307,
+          "evaluation_ms": 12842,
+          "total_ms": 46032
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_processor.py::test_process_records_collects_errors",
+                "traceback": "- AssertionErr..."
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_processor.py::test_process_records_collects_errors",
+                "traceback": "- AssertionErr..."
+              }
+            ]
+          },
+          {
+            "attempt": 3,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_processor.py::test_process_records_collects_errors",
+                "traceback": "- AssertionErr..."
+              }
+            ]
+          }
+        ],
+        "duration_ms": 46032,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-16",
+        "name": "Idempotent Transaction Tracker",
+        "category": "logic_and_exception",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 384,
+        "tokens_out": 103,
+        "phase_timings": {
+          "planning_ms": 11500,
+          "coding_ms": 24582,
+          "evaluation_ms": 4651,
+          "total_ms": 43143
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 43143,
+        "error_detail": null
+      }
+    ]
+  }
+}

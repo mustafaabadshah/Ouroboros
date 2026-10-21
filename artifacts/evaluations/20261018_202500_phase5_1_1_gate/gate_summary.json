@@ -1,0 +1,74 @@
+{
+  "schema_version": "v1.0.0",
+  "gate_name": "phase5_1_1_audit_integrity_gate",
+  "timestamp_utc": "2026-10-18T15:25:00Z",
+  "git_status": {
+    "branch": "hotfix/python-package-discovery",
+    "head_commit": "dd36b27007bb369972ecd502a82c4ce15a8a8c94",
+    "tracking_branch": "origin/hotfix/python-package-discovery",
+    "tracked_modified_files_count": 12,
+    "untracked_files_count": 25,
+    "working_tree_clean_strict": false,
+    "git_diff_check_clean": true
+  },
+  "three_identical_json_investigation": {
+    "files": [
+      "artifacts/v0_11/phase5_live_llm_pilot_4tasks.json",
+      "artifacts/evaluations/20261018_104036_agent_eval/agent_eval_run.json",
+      "artifacts/v0_11/memory_ablation.json"
+    ],
+    "bytes": 33504,
+    "sha256": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442",
+    "root_cause": "scripts/run_agent_eval.py line 245 unconditionally writes final_report to artifacts/v0_11/memory_ablation.json whenever --ablation is passed, overwriting historical file.",
+    "historical_data_recoverable": true,
+    "historical_data_sources": [
+      "artifacts/agent_eval_p2c_sweep.json",
+      "artifacts/agent_eval_memory_disabled_sweep.json"
+    ]
+  },
+  "phase6_preflight_audit": {
+    "target_command": "python scripts/run_agent_eval.py --repeat 1 --ablation --output artifacts/v0_11/phase6_live_llm_15tasks.json",
+    "selected_task_ids": [
+      "BENCH-01",
+      "BENCH-02",
+      "BENCH-04",
+      "BENCH-05",
+      "BENCH-06",
+      "BENCH-07",
+      "BENCH-08",
+      "BENCH-09",
+      "BENCH-10",
+      "BENCH-11",
+      "BENCH-12",
+      "BENCH-13",
+      "BENCH-14",
+      "BENCH-15",
+      "BENCH-16"
+    ],
+    "excluded_task_ids": ["BENCH-03"],
+    "strategy_conditions": ["memory_enabled (flywheel_escalation)", "naive_retry_baseline (naive_retry)"],
+    "max_possible_task_attempts": 90,
+    "controls_status": {
+      "live_calls_guaranteed_disabled": false,
+      "output_path_protected_against_overwrite": false,
+      "memory_ablation_protected_against_overwrite": false,
+      "token_ceiling_enforced_in_code": false,
+      "spend_ceiling_enforced_in_code": false,
+      "rate_limit_pacing_enforced_in_code": false,
+      "incomplete_pair_handling_enforced_in_code": false,
+      "silent_mock_fallback_on_error": true
+    }
+  },
+  "gate_findings": {
+    "git_tracking_state": "VERIFIED",
+    "sha256_digests": "VERIFIED",
+    "memory_ablation_root_cause": "VERIFIED",
+    "phase5_metrics_recalculation": "VERIFIED",
+    "phase5_contract_tests": "VERIFIED",
+    "live_execution_code_gate": "BLOCKER",
+    "memory_ablation_overwrite": "BLOCKER",
+    "silent_mock_fallback": "BLOCKER",
+    "token_spend_circuit_breakers": "BLOCKER"
+  },
+  "official_recommendation": "NOT READY — FIX AND RE-AUDIT"
+}

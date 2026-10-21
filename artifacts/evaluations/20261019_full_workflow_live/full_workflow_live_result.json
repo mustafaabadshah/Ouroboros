@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-10-19T06:53:01Z",
+  "git_commit": "dd36b27007bb369972ecd502a82c4ce15a8a8c94",
+  "git_branch": "hotfix/python-package-discovery",
+  "run_id": "run-live-20261019_115054",
+  "ticket_id": "OURO-LIVE-20261019_115054",
+  "provider": "groq",
+  "model": "qwen/qwen3.8-27b",
+  "operating_mode": "live",
+  "task_id": "BENCH-01",
+  "task_name": "Input Validation Boundary Guard",
+  "verdict": "PASS",
+  "budget_reconciliation": {
+    "requests_dispatched": 3,
+    "request_limit": 8,
+    "tokens_in": 1150,
+    "tokens_out": 1080,
+    "total_tokens": 2230,
+    "token_ceiling": 12000,
+    "cost_usd": 0.000446,
+    "cost_ceiling_usd": 0.01,
+    "min_pacing_seconds": 3.0
+  },
+  "phoenix_observability": {
+    "collector_endpoint": "http://127.0.0.1:6006/v1/traces",
+    "project_name": "ouroboros-swarm",
+    "trace_id": "24d6d767c93a54a83754e8f722e82233",
+    "queried_span_count": 14,
+    "phoenix_trace_url": "http://127.0.0.1:6006/projects/ouroboros-swarm/traces/24d6d767c93a54a83754e8f722e82233",
+    "ingestion_verified": true
+  },
+  "historical_sha256_digests": {
+    "artifacts/v0_11/phase5_live_llm_pilot_4tasks.json": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442",
+    "artifacts/evaluations/20261018_104036_agent_eval/agent_eval_run.json": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442",
+    "artifacts/v0_11/memory_ablation.json": "eff1e9c1088db86ee717b0d7a3645a200dc1398e114a5ce3e3a4471f14d33442"
+  },
+  "patch_content": "--- a/utils/input_parser.py\n+++ b/utils/input_parser.py\n@@ -1,4 +1,14 @@\n def parse_positive_int(val: str) -> int:\n     \"\"\"Parses a positive integer from string input.\"\"\"\n-    return int(val)\n+    if not isinstance(val, str):\n+        raise ValueError(\"Input must be a positive integer\")\n+    try:\n+        num = int(val)\n+    except ValueError:\n+        raise ValueError(\"Input must be a positive integer\")\n+    if num <= 0:\n+        raise ValueError(\"Input must be a positive integer\")\n+    return num",
+  "release_classification": "CONTROLLED LIVE E2E PASS"
+}

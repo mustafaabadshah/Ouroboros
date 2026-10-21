@@ -15,6 +15,39 @@ class DeterministicJudge:
     """
 
     @staticmethod
+    def _simulate_patched_content(original_content: str, diff_text: str, rel_file: str) -> str:
+        """
+        Simulates the post-patch content of rel_file in memory using unified diff hunks.
+        Ensures that AST syntax checks evaluate the candidate code after changes,
+        preventing false rejections when a patch is fixing an existing baseline syntax error.
+        """
+        import re
+        norm_rel = rel_file.replace("\\", "/").lower()
+
+        hunk_blocks = re.split(r"(^@@\s+-\d+(?:,\d+)?\s+\+\d+(?:,\d+)?\s+@@.*$)", diff_text, flags=re.MULTILINE)
+        modified_content = original_content
+
+        for i in range(1, len(hunk_blocks), 2):
+            hunk_body = hunk_blocks[i + 1] if i + 1 < len(hunk_blocks) else ""
+            hunk_lines = [l for l in hunk_body.splitlines() if not l.startswith("---") and not l.startswith("+++")]
+            old_lines = [l[1:] for l in hunk_lines if l.startswith(" ") or l.startswith("-")]
+            new_lines = [l[1:] for l in hunk_lines if l.startswith(" ") or l.startswith("+")]
+
+            old_block = "\n".join(old_lines)
+            new_block = "\n".join(new_lines)
+
+            if old_block and old_block in modified_content:
+                modified_content = modified_content.replace(old_block, new_block, 1)
+
+        # If file is brand new, assemble from added lines
+        if not original_content.strip() and not modified_content.strip():
+            added_lines = [l[1:] for l in diff_text.splitlines() if l.startswith("+") and not l.startswith("+++")]
+            if added_lines:
+                modified_content = "\n".join(added_lines)
+
+        return modified_content
+
+    @staticmethod
     def evaluate_patch_static(
         diff_text: str,
         allowed_files: List[str],
@@ -94,10 +127,15 @@ class DeterministicJudge:
                     "policy_rule_id": "path_traversal",
                     "policy_requirement": "Paths must remain strictly within workspace boundary."
                 }
-            if file_path.exists() and file_path.suffix == ".py":
+            if file_path.suffix == ".py":
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        code_content = f.read()
+                    original_content = ""
+                    if file_path.exists():
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            original_content = f.read()
+
+                    # Simulate applying diff hunks to original_content to validate post-patch syntax
+                    code_content = DeterministicJudge._simulate_patched_content(original_content, diff_text, rel_file)
 
                     # A. Static AST Syntax Check
                     tree, syntax_err = ASTChangeAnalyzer.parse_python_ast(code_content, rel_file)
@@ -159,30 +197,47 @@ class DeterministicJudge:
         worktree_path: Path,
         baseline_results: Dict[str, Any],
         acceptance_test_file: Optional[str] = None,
+        impact_test_files: Optional[List[str]] = None,
         regression_test_dir: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Runs acceptance and regression test suites and compares outcomes against baseline.
+        Runs AST-directed impact tests first (fail-fast within 2-3s), then full regression suite.
+        Compares outcomes against baseline to prevent any collateral regressions.
         """
         logger.info(f"DeterministicJudge evaluating candidate in {worktree_path}")
 
-        # 1. Run Candidate Acceptance Tests
-        acceptance_res = None
-        if acceptance_test_file and (worktree_path / acceptance_test_file).exists():
-            acceptance_res = await pytest_runner.run_tests(
-                working_dir=worktree_path,
-                test_path=acceptance_test_file
-            )
-            if not acceptance_res["passed"]:
-                return {
-                    "verdict": "FAIL",
-                    "reason": f"Acceptance tests failed ({acceptance_res['failed_count']} failed, {acceptance_res['error_count']} errors).",
-                    "acceptance": acceptance_res,
-                    "regression": None
-                }
+        # 1. AST-Directed Impact Tests (Fail-Fast Priority)
+        impact_tests_to_run = list(impact_test_files or [])
+        if acceptance_test_file and acceptance_test_file not in impact_tests_to_run:
+            impact_tests_to_run.insert(0, acceptance_test_file)
 
-        # 2. Run Regression Suite
+        acceptance_res = None
+        for impact_file in impact_tests_to_run:
+            test_path_obj = worktree_path / impact_file
+            if test_path_obj.exists():
+                logger.info(f"[Fail-Fast Gate] Executing AST-directed impact test: {impact_file}")
+                impact_res = await pytest_runner.run_tests(
+                    working_dir=worktree_path,
+                    test_path=impact_file
+                )
+                if not impact_res["passed"]:
+                    logger.warning(f"[Fail-Fast Gate] Impact test {impact_file} failed in {impact_res.get('duration_ms', 0)}ms. Aborting early.")
+                    return {
+                        "verdict": "FAIL",
+                        "is_fail_fast": True,
+                        "fail_fast_test": impact_file,
+                        "duration_ms": impact_res.get("duration_ms", 0),
+                        "reason": f"Acceptance tests failed (⚡ Fail-Fast Gate Triggered: {impact_file} failed in {impact_res.get('duration_ms', 0)}ms with {impact_res['failed_count']} failed, {impact_res['error_count']} errors). Aborted regression suite to trigger repair in 3s.",
+                        "acceptance": impact_res,
+                        "regression": impact_res,
+                        "impact_failure_file": impact_file
+                    }
+                if not acceptance_res:
+                    acceptance_res = impact_res
+
+        # 2. Run Full Regression Suite (Zero Collateral Breakage Verification)
         regression_target = regression_test_dir or "backend/tests"
+        logger.info(f"[Regression Gate] Executing full regression suite across {regression_target}...")
         regression_res = await pytest_runner.run_tests(
             working_dir=worktree_path,
             test_path=regression_target

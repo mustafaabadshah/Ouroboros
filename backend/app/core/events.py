@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from app.core.logging import logger
 
 class EventBus:
@@ -26,17 +26,30 @@ class EventBus:
                 del self._subscribers[run_id]
         logger.debug(f"SSE subscriber removed from run {run_id}")
 
-    async def publish(self, run_id: str, event_type: str, data: Dict[str, Any]):
-        """Publishes an event to all subscribers listening to this run_id and a global 'all' channel."""
+    async def publish(self, run_id: Any, event_type: Optional[str] = None, data: Optional[Dict[str, Any]] = None):
+        """
+        Publishes an event to all subscribers listening to this run_id and a global channel.
+        Supports both positional (run_id, event_type, data) and single-dictionary payload signatures.
+        """
+        if isinstance(run_id, dict):
+            payload_dict = run_id
+            target_run_id = str(payload_dict.get("run_id", "global"))
+            ev_type = str(event_type or payload_dict.get("event_type") or payload_dict.get("type", "EVENT"))
+            data_dict = data if data is not None else payload_dict.get("data", payload_dict)
+        else:
+            target_run_id = str(run_id)
+            ev_type = str(event_type or "EVENT")
+            data_dict = data if data is not None else {}
+
         message = {
-            "run_id": run_id,
-            "event_type": event_type,
-            "data": data,
+            "run_id": target_run_id,
+            "event_type": ev_type,
+            "data": data_dict,
         }
         json_payload = json.dumps(message)
 
         # Notify run-specific subscribers
-        target_queues = list(self._subscribers.get(run_id, []))
+        target_queues = list(self._subscribers.get(target_run_id, []))
         # Also notify global subscribers
         global_queues = list(self._subscribers.get("global", []))
 
@@ -44,6 +57,6 @@ class EventBus:
             try:
                 q.put_nowait(json_payload)
             except asyncio.QueueFull:
-                logger.warning(f"Subscriber queue full for run {run_id}. Dropping event.")
+                logger.warning(f"Subscriber queue full for run {target_run_id}. Dropping event.")
 
 event_bus = EventBus()

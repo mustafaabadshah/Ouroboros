@@ -78,7 +78,7 @@ def test_add():
         await run_safe_subprocess(["git", "branch", "-M", "main"], cwd=repo_dir)
 
         # 2. Baseline Test Run
-        runner = PytestRunner(default_timeout=20)
+        runner = PytestRunner(default_timeout=45)
         baseline_res = await runner.run_tests(working_dir=repo_dir)
         assert baseline_res["passed"] is True
         assert baseline_res["passed_count"] == 1

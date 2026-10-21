@@ -1,0 +1,356 @@
+{
+  "evaluation_type": "reference_benchmark",
+  "benchmark_version": "v1.0.0",
+  "expansion_milestone": "v0.10",
+  "timestamp": "2026-10-17T19:50:59Z",
+  "configuration": {
+    "agent_eval": false,
+    "dry_run": false,
+    "mock_agents": false,
+    "task_id_filter": "BENCH-02,BENCH-04,BENCH-06,BENCH-09,BENCH-12",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "ablation_mode": true
+  },
+  "memory_enabled_run": {
+    "suite_version": "v1.0.0",
+    "memory_enabled": true,
+    "total_tasks": 5,
+    "eligible_tasks": 5,
+    "passed_tasks": 1,
+    "eligible_passed_tasks": 1,
+    "failed_tasks": 4,
+    "blocked_tasks": 0,
+    "adversarial_tasks": 0,
+    "adversarial_blocked_tasks": 0,
+    "timed_out_tasks": 0,
+    "infrastructure_failures": 0,
+    "raw_task_outcome_distribution": {
+      "PASSED_REPAIR": 1,
+      "FAILED_REPAIR": 4,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0
+    },
+    "raw_success_rate": 0.2,
+    "eligible_success_rate": 0.2,
+    "eligible_repair_success_rate": 0.2,
+    "adversarial_block_rate": null,
+    "repair_success_rate": 0.2,
+    "median_duration_ms": 53629,
+    "total_duration_ms": 267053,
+    "task_results": [
+      {
+        "task_id": "BENCH-04",
+        "name": "Numeric Boundary Clamping",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 54259,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-06",
+        "name": "Nested Dictionary Key Traversal",
+        "category": "type_and_interface",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 53813,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-09",
+        "name": "Cross-Module Entity Loader",
+        "category": "multi_file_and_state",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 53629,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-12",
+        "name": "ISO Timestamp Normalizer",
+        "category": "serialization_and_parsing",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "PASS",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52439,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-02",
+        "name": "Arithmetic Exponentiation Repair",
+        "category": "logic_and_exception",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52913,
+        "error_detail": null
+      }
+    ]
+  },
+  "memory_disabled_ablation_run": {
+    "suite_version": "v1.0.0",
+    "memory_enabled": false,
+    "total_tasks": 5,
+    "eligible_tasks": 5,
+    "passed_tasks": 1,
+    "eligible_passed_tasks": 1,
+    "failed_tasks": 4,
+    "blocked_tasks": 0,
+    "adversarial_tasks": 0,
+    "adversarial_blocked_tasks": 0,
+    "timed_out_tasks": 0,
+    "infrastructure_failures": 0,
+    "raw_task_outcome_distribution": {
+      "PASSED_REPAIR": 1,
+      "FAILED_REPAIR": 4,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0
+    },
+    "raw_success_rate": 0.2,
+    "eligible_success_rate": 0.2,
+    "eligible_repair_success_rate": 0.2,
+    "adversarial_block_rate": null,
+    "repair_success_rate": 0.2,
+    "median_duration_ms": 52803,
+    "total_duration_ms": 264358,
+    "task_results": [
+      {
+        "task_id": "BENCH-04",
+        "name": "Numeric Boundary Clamping",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": false,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52931,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-06",
+        "name": "Nested Dictionary Key Traversal",
+        "category": "type_and_interface",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": false,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 54303,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-09",
+        "name": "Cross-Module Entity Loader",
+        "category": "multi_file_and_state",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": false,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52249,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-12",
+        "name": "ISO Timestamp Normalizer",
+        "category": "serialization_and_parsing",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": false,
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "PASS",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52072,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-02",
+        "name": "Arithmetic Exponentiation Repair",
+        "category": "logic_and_exception",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": false,
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts": 2,
+        "history": [
+          {
+            "attempt": 1,
+            "verdict": "FAIL",
+            "failures": []
+          },
+          {
+            "attempt": 2,
+            "verdict": "FAIL",
+            "failures": []
+          }
+        ],
+        "duration_ms": 52803,
+        "error_detail": null
+      }
+    ]
+  },
+  "ablation_comparison": {
+    "eligible_repair_success_rate_delta": 0.0,
+    "median_latency_delta_ms": 826
+  },
+  "provenance": {
+    "git_commit": "dd36b27007bb369972ecd502a82c4ce15a8a8c94",
+    "python_version": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+    "platform": "win32"
+  }
+}
