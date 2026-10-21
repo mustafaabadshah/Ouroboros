@@ -35,6 +35,22 @@ async def lifespan(app: FastAPI):
         Path("/opt/render/project/agent_chess")
     ]
     resolved_repo_path = next((p for p in candidate_paths if p.exists() and p.is_dir()), None)
+    
+    if not resolved_repo_path:
+        default_cloud_path = Path("/opt/render/project/multi_agent_ai_chess_arena")
+        try:
+            if default_cloud_path.parent.exists() and not default_cloud_path.exists():
+                logger.info("Auto-cloning default repo for cloud startup...")
+                import subprocess
+                subprocess.run(
+                    ["git", "clone", "--depth", "1", "https://github.com/mustafaabadshah/Multi-Agent-AI-Chess-Arena.git", str(default_cloud_path)],
+                    capture_output=True, timeout=60
+                )
+                if default_cloud_path.exists() and default_cloud_path.is_dir():
+                    resolved_repo_path = default_cloud_path
+        except Exception as clone_err:
+            logger.warning(f"Startup cloud auto-clone notice: {clone_err}")
+
     if resolved_repo_path:
         db = SessionLocal()
         try:
@@ -133,6 +149,14 @@ app.include_router(runs_router, prefix="/api")
 app.include_router(failures_router, prefix="/api")
 app.include_router(settings_router, prefix="/api")
 app.include_router(evaluation_router)
+
+@app.get("/")
+async def root_index():
+    return {"message": "Project Ouroboros API is running", "docs": "/docs", "health": "/health"}
+
+@app.get("/health")
+async def root_health():
+    return {"status": "ok", "app": settings.APP_NAME, "version": "0.1.0"}
 
 if __name__ == "__main__":
     import uvicorn

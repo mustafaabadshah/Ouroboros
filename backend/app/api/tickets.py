@@ -1,7 +1,10 @@
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from app.core.config import settings
+from app.core.logging import logger
 from app.database.session import get_db
 from app.database.repositories import (
     list_tickets,
@@ -9,7 +12,9 @@ from app.database.repositories import (
     create_ticket,
     update_ticket_status,
     record_audit_event,
-    get_repository
+    get_repository,
+    list_repositories,
+    get_or_create_repository
 )
 from app.schemas.ticket import (
     TicketResponse,
@@ -67,7 +72,25 @@ async def generate_ticket(
                 repo = all_repos[0]
                 logger.info(f"Repository '{req.repo_id}' not found, falling back to registered repository: {repo.id}")
             else:
-                raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found. Please clone or register a repository first.")
+                # Check candidate paths on disk
+                candidate_paths = [
+                    Path(settings.DEFAULT_REPO_PATH),
+                    Path("/opt/render/project/multi_agent_ai_chess_arena"),
+                    Path.cwd().parent / "multi_agent_ai_chess_arena",
+                    Path.cwd() / "repos" / "multi_agent_ai_chess_arena",
+                    Path("/opt/render/project/agent_chess")
+                ]
+                resolved_repo_path = next((p for p in candidate_paths if p.exists() and p.is_dir()), None)
+                if resolved_repo_path:
+                    repo = get_or_create_repository(
+                        db=db,
+                        repo_id=req.repo_id or "multi_agent_ai_chess_arena",
+                        name="Multi-Agent-AI-Chess-Arena",
+                        path=str(resolved_repo_path),
+                        file_count=48
+                    )
+                else:
+                    raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found. Please clone or register a repository first.")
 
         actual_repo_id = repo.id
         summary = meta_graph_adapter.get_architectural_summary(actual_repo_id)
