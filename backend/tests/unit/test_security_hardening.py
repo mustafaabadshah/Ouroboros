@@ -228,10 +228,11 @@ def test_reference_repositories_read_only_invariance():
 async def test_fail_closed_sandbox_behavior(monkeypatch):
     """Control: Fail-closed fallback. If container engine is absent and required, uncontained execution is rejected."""
     from app.core.config import settings
+    SandboxDetector.reset_cache()
     monkeypatch.setattr(settings, "REQUIRE_CONTAINER_SANDBOX", True)
     monkeypatch.setattr("shutil.which", lambda _: None)
 
-    res = await SandboxDetector.detect_capabilities()
+    res = await SandboxDetector.detect_capabilities(force_refresh=True)
     assert res["can_execute"] is False
     assert res["reason_code"] == "RUNTIME_UNAVAILABLE"
     assert "EXECUTION BLOCKED" in res["message"]

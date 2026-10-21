@@ -35,19 +35,19 @@ class SandboxDetector:
         from app.core.config import settings
 
         fail_closed_required = bool(settings.REQUIRE_CONTAINER_SANDBOX or settings.SANDBOX_MODE == "fail_closed")
+        sandbox_mode = getattr(settings, "SANDBOX_MODE", "auto")
 
         if (
             not force_refresh
             and cls._cache is not None
             and (now - cls._cache_time) < cls._cache_ttl_seconds
             and cls._cache.get("fail_closed_required") == fail_closed_required
+            and cls._cache.get("sandbox_mode") == sandbox_mode
         ):
             return dict(cls._cache)
 
-        if not force_refresh and cls._docker_probe_time > 0 and (now - cls._docker_probe_time) < cls._cache_ttl_seconds:
-            docker_cli = cls._docker_cli
-            docker_running = cls._docker_running
-        else:
+        # Re-probe Docker if force_refresh or probe expired
+        if force_refresh or cls._docker_probe_time == 0 or (now - cls._docker_probe_time) >= cls._cache_ttl_seconds:
             docker_cli = bool(shutil.which("docker") or shutil.which("docker.exe"))
             docker_running = False
 
@@ -66,19 +66,55 @@ class SandboxDetector:
             cls._docker_cli = docker_cli
             cls._docker_running = docker_running
             cls._docker_probe_time = now
+        else:
+            docker_cli = cls._docker_cli
+            docker_running = cls._docker_running
 
         can_execute = True
         reason_code = "OK"
 
-        if not docker_running and fail_closed_required:
+        if sandbox_mode == "restricted_local":
+            if fail_closed_required:
+                preferred_mode = "blocked"
+                can_execute = False
+                reason_code = "RUNTIME_UNAVAILABLE"
+                message = "EXECUTION BLOCKED: Strict container sandbox required by policy, but restricted_local mode configured."
+            else:
+                preferred_mode = "restricted_local"
+                reason_code = "NONE"
+                message = "Restricted local subprocess worktree sandbox enforced by configuration."
+        elif not docker_running and fail_closed_required:
             preferred_mode = "blocked"
             can_execute = False
             reason_code = "RUNTIME_UNAVAILABLE"
             message = "EXECUTION BLOCKED: Strict container sandbox required by policy, but Docker is offline."
         elif docker_running:
-            preferred_mode = "docker"
-            reason_code = "NONE"
-            message = "Docker container sandbox active."
+            # Check if required sandbox image is present locally before committing to docker mode
+            sandbox_image = getattr(settings, "DOCKER_SANDBOX_IMAGE", "ouroboros-pytest-sandbox:3.12")
+            image_exists = False
+            try:
+                code, out, _ = await run_safe_subprocess(
+                    ["docker", "image", "inspect", sandbox_image],
+                    cwd=Path("."),
+                    timeout=3
+                )
+                image_exists = (code == 0)
+            except Exception:
+                image_exists = False
+
+            if image_exists:
+                preferred_mode = "docker"
+                reason_code = "NONE"
+                message = "Docker container sandbox active."
+            elif fail_closed_required:
+                preferred_mode = "blocked"
+                can_execute = False
+                reason_code = "RUNTIME_UNAVAILABLE"
+                message = f"EXECUTION BLOCKED: Strict container sandbox required, but image '{sandbox_image}' is not found locally."
+            else:
+                preferred_mode = "restricted_local"
+                reason_code = "NONE"
+                message = f"Docker active but sandbox image '{sandbox_image}' absent. Restricted local sandbox active."
         else:
             preferred_mode = "restricted_local"
             reason_code = "NONE"
@@ -91,6 +127,7 @@ class SandboxDetector:
             "can_execute": can_execute,
             "reason_code": reason_code,
             "fail_closed_required": fail_closed_required,
+            "sandbox_mode": sandbox_mode,
             "message": message
         }
         cls._cache = result

@@ -49,6 +49,7 @@ jobs:
       OUROBOROS_LIVE_AUTH: ""
       OUROBOROS_MOCK_ONLY: "1"
       PHOENIX_ENABLED: "false"
+      SANDBOX_MODE: "restricted_local"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
