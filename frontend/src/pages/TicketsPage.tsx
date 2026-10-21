@@ -20,7 +20,7 @@ import {
   Play
 } from 'lucide-react';
 import { api } from '../services/api';
-import { Ticket } from '../types';
+import { Ticket, Repository } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { TabType } from '../components/Sidebar';
 
@@ -41,6 +41,8 @@ const PRESET_CHIPS = [
 
 export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurrentTab, initialPrompt, onClearInitialPrompt }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [selectedRepoId, setSelectedRepoId] = useState<string>('');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -59,6 +61,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   const [editCriteria, setEditCriteria] = useState('');
 
   useEffect(() => {
+    loadRepositories();
     loadTickets();
   }, []);
 
@@ -69,6 +72,18 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
       onClearInitialPrompt?.();
     }
   }, [initialPrompt]);
+
+  const loadRepositories = async () => {
+    try {
+      const repos = await api.getRepositories();
+      setRepositories(repos);
+      if (repos.length > 0 && !selectedRepoId) {
+        setSelectedRepoId(repos[0].id);
+      }
+    } catch (e) {
+      console.error('Error loading repositories:', e);
+    }
+  };
 
   const loadTickets = async () => {
     try {
@@ -88,7 +103,8 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   const handleGenerateTicket = async () => {
     try {
       setGenerating(true);
-      const newTicket = await api.generateTicket('agent_chess', customPrompt);
+      const targetRepo = selectedRepoId || (repositories.length > 0 ? repositories[0].id : 'agent_chess');
+      const newTicket = await api.generateTicket(targetRepo, customPrompt);
       setShowGenModal(false);
       setCustomPrompt('');
       await loadTickets();
@@ -578,8 +594,28 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
             </div>
 
             <p className="text-xs text-zinc-400 leading-relaxed">
-              The Architect Agent will analyze Meta-Graph AST summaries for Agent Chess and synthesize a structured Jira ticket with frozen deterministic criteria.
+              The Architect Agent will analyze Meta-Graph AST summaries and synthesize a structured Jira ticket with frozen deterministic criteria.
             </p>
+
+            {/* Target Repository Selector */}
+            <div>
+              <label className="block text-xs font-mono text-zinc-400 mb-1">Target Repository:</label>
+              <select
+                value={selectedRepoId}
+                onChange={(e) => setSelectedRepoId(e.target.value)}
+                className="w-full bg-zinc-900/90 border border-zinc-700/80 rounded-lg px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-emerald-500"
+              >
+                {repositories.length > 0 ? (
+                  repositories.map((repo) => (
+                    <option key={repo.id} value={repo.id}>
+                      {repo.name} ({repo.id})
+                    </option>
+                  ))
+                ) : (
+                  <option value="agent_chess">Agent Chess (agent_chess)</option>
+                )}
+              </select>
+            </div>
 
             {/* Quick Focus Preset Chips */}
             <div>

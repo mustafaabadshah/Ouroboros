@@ -27,20 +27,34 @@ async def lifespan(app: FastAPI):
     phoenix_service.initialize()
 
     # Seed default repository registration if present on disk
-    default_repo_path = Path(settings.DEFAULT_REPO_PATH)
-    if default_repo_path.exists():
+    candidate_paths = [
+        Path(settings.DEFAULT_REPO_PATH),
+        Path("/opt/render/project/multi_agent_ai_chess_arena"),
+        Path.cwd().parent / "multi_agent_ai_chess_arena",
+        Path.cwd() / "repos" / "multi_agent_ai_chess_arena",
+        Path("/opt/render/project/agent_chess")
+    ]
+    resolved_repo_path = next((p for p in candidate_paths if p.exists() and p.is_dir()), None)
+    if resolved_repo_path:
         db = SessionLocal()
         try:
             get_or_create_repository(
                 db=db,
                 repo_id="agent_chess",
                 name="Agent Chess (ChessMind Arena)",
-                path=str(default_repo_path),
+                path=str(resolved_repo_path),
                 file_count=48
             )
-            logger.info(f"Registered default target repository: {default_repo_path}")
+            get_or_create_repository(
+                db=db,
+                repo_id="multi_agent_ai_chess_arena",
+                name="Multi-Agent-AI-Chess-Arena",
+                path=str(resolved_repo_path),
+                file_count=48
+            )
+            logger.info(f"Registered default target repositories at: {resolved_repo_path}")
         except Exception as e:
-            logger.warning(f"Could not seed default repository: {e}")
+            logger.warning(f"Could not seed default repositories: {e}")
         finally:
             db.close()
 

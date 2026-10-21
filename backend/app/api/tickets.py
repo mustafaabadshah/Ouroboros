@@ -61,12 +61,18 @@ async def generate_ticket(
 ):
     repo = get_repository(db, req.repo_id)
     if not repo:
-        raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found.")
+        all_repos = list_repositories(db)
+        if all_repos:
+            repo = all_repos[0]
+            logger.info(f"Repository '{req.repo_id}' not found, falling back to registered repository: {repo.id}")
+        else:
+            raise HTTPException(status_code=404, detail=f"Repository '{req.repo_id}' not found. Please clone or register a repository first.")
 
-    summary = meta_graph_adapter.get_architectural_summary(req.repo_id)
-    existing_titles = [t.title for t in list_tickets(db, repo_id=req.repo_id)]
+    actual_repo_id = repo.id
+    summary = meta_graph_adapter.get_architectural_summary(actual_repo_id)
+    existing_titles = [t.title for t in list_tickets(db, repo_id=actual_repo_id)]
     generated = await architect_agent.generate_ticket(
-        repo_id=req.repo_id,
+        repo_id=actual_repo_id,
         repo_summary=summary,
         target_focus=req.target_area or req.custom_prompt,
         existing_tickets=existing_titles,
@@ -74,9 +80,9 @@ async def generate_ticket(
     )
 
     from app.observability.phoenix_service import phoenix_service
-    with phoenix_service.trace_step("ticket.validate", repo_id=req.repo_id, title=generated.title):
+    with phoenix_service.trace_step("ticket.validate", repo_id=actual_repo_id, title=generated.title):
         ticket_record = create_ticket(db, {
-            "repo_id": req.repo_id,
+            "repo_id": actual_repo_id,
             "title": generated.title,
             "problem_statement": generated.problem_statement,
             "motivation": generated.motivation,

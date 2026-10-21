@@ -48,7 +48,22 @@ def list_repositories(db: Session) -> List[RepositoryModel]:
     return db.query(RepositoryModel).order_by(RepositoryModel.name).all()
 
 def get_repository(db: Session, repo_id: str) -> Optional[RepositoryModel]:
-    return db.query(RepositoryModel).filter(RepositoryModel.id == repo_id).first()
+    repo = db.query(RepositoryModel).filter(RepositoryModel.id == repo_id).first()
+    if repo:
+        return repo
+    # Check aliases for chess projects
+    clean_id = repo_id.lower().replace("-", "_")
+    if clean_id in ("agent_chess", "chess", "multi_agent_ai_chess_arena"):
+        alt = db.query(RepositoryModel).filter(
+            RepositoryModel.id.in_(["agent_chess", "multi_agent_ai_chess_arena", "chess", "multi-agent-ai-chess-arena"])
+        ).first()
+        if alt:
+            return alt
+    # If only one repository exists in the DB, gracefully fall back to it
+    all_repos = db.query(RepositoryModel).all()
+    if len(all_repos) == 1:
+        return all_repos[0]
+    return None
 
 def update_repository(
     db: Session,
