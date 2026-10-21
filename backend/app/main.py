@@ -26,6 +26,18 @@ async def lifespan(app: FastAPI):
     init_db()
     phoenix_service.initialize()
 
+    # Ensure test harness dependencies (pytest, pytest-asyncio) are available
+    try:
+        import pytest
+    except ImportError:
+        logger.info("pytest not found in runtime environment. Auto-installing pytest...")
+        try:
+            import subprocess, sys
+            subprocess.run([sys.executable, "-m", "pip", "install", "pytest>=8.0.0", "pytest-asyncio>=0.23.0"], check=False)
+            logger.info("pytest installation check finished.")
+        except Exception as pi_err:
+            logger.error(f"Failed to auto-install pytest: {pi_err}")
+
     # Seed default repository registration if present on disk
     candidate_paths = [
         Path(settings.DEFAULT_REPO_PATH),

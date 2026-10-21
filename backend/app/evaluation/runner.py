@@ -132,6 +132,15 @@ class PytestRunner:
                 ]
             else:
                 py_exe = self.resolve_python_executable(working_dir)
+                # Verify that py_exe has pytest installed; auto-install if missing in cloud container
+                try:
+                    import subprocess
+                    check_proc = subprocess.run([py_exe, "-c", "import pytest"], capture_output=True, timeout=5)
+                    if check_proc.returncode != 0:
+                        logger.warning(f"pytest not found in {py_exe}, auto-installing pytest and pytest-asyncio...")
+                        subprocess.run([py_exe, "-m", "pip", "install", "pytest>=8.0.0", "pytest-asyncio>=0.23.0"], capture_output=True, timeout=120)
+                except Exception as auto_ins_err:
+                    logger.debug(f"Pytest pre-check notice: {auto_ins_err}")
                 cmd = [py_exe, "-m", "pytest"]
 
             if test_path:
