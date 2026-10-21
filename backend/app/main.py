@@ -62,9 +62,19 @@ async def lifespan(app: FastAPI):
             rec_db.commit()
             logger.info(f"Reconciled {len(interrupted)} interrupted run(s) on startup.")
     except Exception as rec_err:
-        logger.warning(f"Could not reconcile interrupted runs: {rec_err}")
+        logger.debug(f"Startup run reconciliation notice: {rec_err}")
     finally:
         rec_db.close()
+
+    # Clean up stale candidate worktrees
+    try:
+        from app.integrations.git.worktree import git_worktree_manager
+        await git_worktree_manager.garbage_collect_stale_worktrees(
+            repo_path=default_repo_path if default_repo_path.exists() else None,
+            max_age_hours=24
+        )
+    except Exception as gc_err:
+        logger.debug(f"Startup worktree GC notice: {gc_err}")
 
     yield
     logger.info("Project Ouroboros Backend shutting down...")
@@ -76,12 +86,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Narrow CORS configuration
+# CORS configuration with multi-domain cloud support
+_origins = settings.cors_origins_list
+_has_wildcard = "*" in _origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_origins=["*"] if _has_wildcard else _origins,
+    allow_credentials=False if _has_wildcard else True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

@@ -8,10 +8,15 @@ import {
   FailureTrajectory,
   ModelStatus,
   MetricsOverview,
-  SystemSettings
+  SystemSettings,
+  AstSummary,
+  FileDependencies
 } from '../types';
 
-const BASE_URL = '/api';
+export const BASE_URL = (import.meta as any).env?.VITE_API_URL
+  ? `${(import.meta as any).env.VITE_API_URL.replace(/\/+$/, '')}/api`
+  : '/api';
+
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -74,8 +79,29 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ id, name, path }),
     }),
+  cloneRepository: (id: string, name: string, git_url: string, target_path?: string) =>
+    request<Repository>('/repositories/clone', {
+      method: 'POST',
+      body: JSON.stringify({ id, name, git_url, target_path }),
+    }),
+  updateRepository: (id: string, data: { name?: string; path?: string }) =>
+    request<Repository>(`/repositories/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  reindexRepository: (id: string) =>
+    request<{ status: string; repo_id: string; nodes: number; edges: number; path: string }>(`/repositories/${id}/reindex`, {
+      method: 'POST',
+    }),
+  deleteRepository: (id: string) =>
+    request<{ deleted: boolean; repo_id: string }>(`/repositories/${id}`, {
+      method: 'DELETE',
+    }),
   getGraphStatus: (repoId: string) => request<GraphStatus>(`/repositories/${repoId}/graph-status`),
-  analyzeRepository: (repoId: string) => request<any>(`/repositories/${repoId}/analyze`, { method: 'POST' }),
+  analyzeRepository: (repoId: string) =>
+    request<{ repo_id: string; summary: AstSummary }>(`/repositories/${repoId}/analyze`, { method: 'POST' }),
+  getFileDependencies: (repoId: string, relPath: string) =>
+    request<FileDependencies>(`/repositories/${repoId}/file-dependencies?rel_path=${encodeURIComponent(relPath)}`),
 
   // Tickets
   getTickets: (repoId?: string, status?: string) => {
@@ -121,8 +147,12 @@ export const api = {
     }),
 
   // Failure Flywheel
-  getFailures: (ticketId?: string) => {
-    const url = ticketId ? `/failures?ticket_id=${ticketId}` : '/failures';
+  getFailures: (ticketId?: string, runId?: string) => {
+    const params = new URLSearchParams();
+    if (ticketId) params.append('ticket_id', ticketId);
+    if (runId) params.append('run_id', runId);
+    const qs = params.toString();
+    const url = qs ? `/failures?${qs}` : '/failures';
     return request<FailureTrajectory[]>(url);
   },
   deleteFailure: (id: string) => request<{ message: string }>(`/failures/${id}`, { method: 'DELETE' }),

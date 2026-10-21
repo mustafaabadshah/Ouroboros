@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, Cloud, CheckCircle2, XCircle, Key, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Cpu, Cloud, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 import { ModelStatus } from '../types';
 
@@ -80,9 +80,9 @@ export const ModelsPage: React.FC = () => {
         </div>
         <button
           onClick={loadStatus}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition shadow-sm"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh Status
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Status
         </button>
       </div>
 

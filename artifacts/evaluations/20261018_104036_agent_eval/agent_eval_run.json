@@ -1,0 +1,594 @@
+{
+  "schema_version": "v0.11.0",
+  "evaluation_type": "repeated_agent_evaluation",
+  "benchmark_suite": "ouroboros_benchmark",
+  "benchmark_version": "v1.0.0",
+  "timestamp_utc": "2026-10-18T10:40:36.441837+00:00",
+  "configuration": {
+    "task_id_filter": "BENCH-05,BENCH-13,BENCH-14,BENCH-15",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "seed": null,
+    "max_attempts": 3,
+    "ablation_mode": true,
+    "dry_run": false,
+    "mock_agents": false
+  },
+  "statistical_summary": {
+    "memory_enabled": {
+      "condition": "MEMORY_ENABLED",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        1.0
+      ],
+      "mean_pass_rate": 1.0,
+      "pooled_pass_rate": 1.0,
+      "wilson_ci_95": {
+        "lower": 0.5101,
+        "upper": 1.0
+      },
+      "mean_duration_ms": 458449,
+      "median_latency_p50_ms": 150779,
+      "task_consistency": {
+        "BENCH-05": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        }
+      }
+    },
+    "naive_retry_baseline": {
+      "condition": "NAIVE_RETRY",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.25
+      ],
+      "mean_pass_rate": 0.25,
+      "pooled_pass_rate": 0.25,
+      "wilson_ci_95": {
+        "lower": 0.0456,
+        "upper": 0.6994
+      },
+      "mean_duration_ms": 367794,
+      "median_latency_p50_ms": 92940,
+      "task_consistency": {
+        "BENCH-05": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "paired_comparison": {
+      "eligible_repair_pass_rate_delta": 0.75,
+      "median_latency_delta_ms": 57839,
+      "statistical_interpretation": "Memory Enabled achieved 100.0% vs Naive Retry 25.0% across 1 trials (\u0394 = +75.0 percentage points, 95% Wilson CI: [0.510, 1.000])."
+    }
+  },
+  "raw_trials": {
+    "memory_enabled_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": true,
+        "retry_strategy": "flywheel_escalation",
+        "tasks_selected": 4,
+        "tasks_attempted": 4,
+        "tasks_not_run": 0,
+        "eligible_tasks": 4,
+        "adversarial_tasks": 0,
+        "repairs_passed": 4,
+        "repairs_failed": 0,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 1.0,
+        "eligible_repair_success_rate": 1.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 4,
+          "FAILED_REPAIR": 0,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 4094,
+        "total_tokens_out": 1393,
+        "median_duration_ms": 150779,
+        "total_duration_ms": 458449,
+        "task_results": [
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 943,
+            "tokens_out": 228,
+            "phase_timings": {
+              "planning_ms": 24247,
+              "coding_ms": 5907,
+              "evaluation_ms": 128281,
+              "total_ms": 170538
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": "\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_qr83k1tb\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   AssertionError: Regex pattern did not match.\r\nE     Expected regex: 'page and page_size must be >= 1'\r\nE     Actual message: 'page and page_size must be positive integers'\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Assertion...\r\n============================== 1 failed in 3.18s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 170538,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 1707,
+            "tokens_out": 482,
+            "phase_timings": {
+              "planning_ms": 1875,
+              "coding_ms": 10058,
+              "evaluation_ms": 135272,
+              "total_ms": 150779
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                    "traceback": "tform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-13_a5xhvqe_\\worktrees\\BENCH-13\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_safe_loader.py::test_load_invalid_and_fallback FAILED               [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_load_invalid_and_fallback ________________________\r\ntest_safe_loader.py:13: in test_load_invalid_and_fallback\r\n    assert 'JSONDecodeError' in err\r\nE   AssertionError: assert 'JSONDecodeError' in 'Expecting property name enclosed in double quotes: line 1 column 23 (char 22)'\r\n=========================== short test summary info ===========================\r\nFAILED test_safe_loader.py::test_load_invalid_and_fallback - AssertionError: ...\r\n============================== 1 failed in 1.32s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                    "traceback": "orm win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-13_a5xhvqe_\\worktrees\\BENCH-13\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_safe_loader.py::test_load_invalid_and_fallback FAILED               [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_load_invalid_and_fallback ________________________\r\ntest_safe_loader.py:18: in test_load_invalid_and_fallback\r\n    assert 'Invalid input type' in err2\r\nE   AssertionError: assert 'Invalid input type' in 'TypeError: the JSON object must be str, bytes or bytearray, not NoneType'\r\n=========================== short test summary info ===========================\r\nFAILED test_safe_loader.py::test_load_invalid_and_fallback - AssertionError: ...\r\n============================== 1 failed in 1.42s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 3,
+                "escalated_plan": true,
+                "revised_subtask": "Refactor safe_load_config to explicitly validate input type before attempting JSON parsing. If the input is not a string, bytes, or bytearray, return (fallback, 'Invalid input type') immediately. If the input is valid type but contains invalid JSON, catch json.JSONDecodeError and return (fallback, 'Invalid JSON: <error details>'). Ensure no exceptions propagate out of the function.",
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 150779,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 1,
+            "max_attempts": 3,
+            "tokens_in": 411,
+            "tokens_out": 205,
+            "phase_timings": {
+              "planning_ms": 874,
+              "coding_ms": 2901,
+              "evaluation_ms": 40916,
+              "total_ms": 45856
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 45856,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 1033,
+            "tokens_out": 478,
+            "phase_timings": {
+              "planning_ms": 585,
+              "coding_ms": 6034,
+              "evaluation_ms": 83530,
+              "total_ms": 91276
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_processor.py::test_process_records_collects_errors",
+                    "traceback": "anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_processor.py::test_process_records_collects_errors FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_process_records_collects_errors _____________________\r\ntest_processor.py:25: in test_process_records_collects_errors\r\n    assert res['errors'][0] == {'index': 1, 'item': -2, 'error': 'Negative value: -2'}\r\nE   AssertionError: assert {'index': 1, ...ve value: -2'} == {'index': 1, ...ve value: -2'}\r\nE     \r\nE     Omitting 2 identical items, use -vv to show\r\nE     Right contains 1 more item:\r\nE     {'item': -2}\r\nE     \r\nE     Full diff:\r\nE       {...\r\nE     \r\nE     ...Full output truncated (4 lines hidden), use '-vv' to show\r\n=========================== short test summary info ===========================\r\nFAILED test_processor.py::test_process_records_collects_errors - AssertionErr...\r\n============================== 1 failed in 1.29s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 91276,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-2d4b09"
+      }
+    ],
+    "baseline_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": false,
+        "retry_strategy": "naive_retry",
+        "tasks_selected": 4,
+        "tasks_attempted": 4,
+        "tasks_not_run": 0,
+        "eligible_tasks": 4,
+        "adversarial_tasks": 0,
+        "repairs_passed": 1,
+        "repairs_failed": 3,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.25,
+        "eligible_repair_success_rate": 0.25,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 1,
+          "FAILED_REPAIR": 3,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 3885,
+        "total_tokens_out": 1789,
+        "median_duration_ms": 92940,
+        "total_duration_ms": 367794,
+        "task_results": [
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 1098,
+            "tokens_out": 510,
+            "phase_timings": {
+              "planning_ms": 837,
+              "coding_ms": 9379,
+              "evaluation_ms": 126344,
+              "total_ms": 137862
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": "\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_0gyoy575\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   AssertionError: Regex pattern did not match.\r\nE     Expected regex: 'page and page_size must be >= 1'\r\nE     Actual message: 'page and page_size must be positive integers'\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Assertion...\r\n============================== 1 failed in 1.30s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": "\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_0gyoy575\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   AssertionError: Regex pattern did not match.\r\nE     Expected regex: 'page and page_size must be >= 1'\r\nE     Actual message: 'page and page_size must be positive integers'\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Assertion...\r\n============================== 1 failed in 1.27s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 3,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                    "traceback": ".venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-05_0gyoy575\\worktrees\\BENCH-05\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_paginator.py::test_paginate_boundaries_and_validation FAILED        [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_paginate_boundaries_and_validation ___________________\r\ntest_paginator.py:13: in test_paginate_boundaries_and_validation\r\n    with pytest.raises(ValueError, match='page and page_size must be >= 1'):\r\nE   AssertionError: Regex pattern did not match.\r\nE     Expected regex: 'page and page_size must be >= 1'\r\nE     Actual message: 'page must be a positive integer'\r\n=========================== short test summary info ===========================\r\nFAILED test_paginator.py::test_paginate_boundaries_and_validation - Assertion...\r\n============================== 1 failed in 1.18s =============================="
+                  }
+                ]
+              }
+            ],
+            "duration_ms": 137862,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 1169,
+            "tokens_out": 563,
+            "phase_timings": {
+              "planning_ms": 569,
+              "coding_ms": 9171,
+              "evaluation_ms": 81914,
+              "total_ms": 92940
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                    "traceback": "tform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-13_w80g4vs2\\worktrees\\BENCH-13\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_safe_loader.py::test_load_invalid_and_fallback FAILED               [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_load_invalid_and_fallback ________________________\r\ntest_safe_loader.py:13: in test_load_invalid_and_fallback\r\n    assert 'JSONDecodeError' in err\r\nE   AssertionError: assert 'JSONDecodeError' in 'Expecting property name enclosed in double quotes: line 1 column 23 (char 22)'\r\n=========================== short test summary info ===========================\r\nFAILED test_safe_loader.py::test_load_invalid_and_fallback - AssertionError: ...\r\n============================== 1 failed in 1.19s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_safe_loader.py::test_load_invalid_and_fallback",
+                    "traceback": "tform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Ouroboros\\.venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-13_w80g4vs2\\worktrees\\BENCH-13\r\nplugins: anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_safe_loader.py::test_load_invalid_and_fallback FAILED               [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_load_invalid_and_fallback ________________________\r\ntest_safe_loader.py:13: in test_load_invalid_and_fallback\r\n    assert 'JSONDecodeError' in err\r\nE   AssertionError: assert 'JSONDecodeError' in 'Expecting property name enclosed in double quotes: line 1 column 23 (char 22)'\r\n=========================== short test summary info ===========================\r\nFAILED test_safe_loader.py::test_load_invalid_and_fallback - AssertionError: ...\r\n============================== 1 failed in 1.17s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: json_parser/safe_loader.py:1\nerror: json_parser/safe_loader.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 92940,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 1,
+            "max_attempts": 3,
+            "tokens_in": 409,
+            "tokens_out": 204,
+            "phase_timings": {
+              "planning_ms": 454,
+              "coding_ms": 2935,
+              "evaluation_ms": 40142,
+              "total_ms": 44455
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 44455,
+            "error_detail": null
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "groq",
+            "model_name": "qwen/qwen3.8-27b",
+            "verdict": "BLOCKED",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 1209,
+            "tokens_out": 512,
+            "phase_timings": {
+              "planning_ms": 482,
+              "coding_ms": 8647,
+              "evaluation_ms": 82196,
+              "total_ms": 92537
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_processor.py::test_process_records_collects_errors",
+                    "traceback": "anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_processor.py::test_process_records_collects_errors FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_process_records_collects_errors _____________________\r\ntest_processor.py:25: in test_process_records_collects_errors\r\n    assert res['errors'][0] == {'index': 1, 'item': -2, 'error': 'Negative value: -2'}\r\nE   AssertionError: assert {'index': 1, ...ve value: -2'} == {'index': 1, ...ve value: -2'}\r\nE     \r\nE     Omitting 2 identical items, use -vv to show\r\nE     Right contains 1 more item:\r\nE     {'item': -2}\r\nE     \r\nE     Full diff:\r\nE       {...\r\nE     \r\nE     ...Full output truncated (4 lines hidden), use '-vv' to show\r\n=========================== short test summary info ===========================\r\nFAILED test_processor.py::test_process_records_collects_errors - AssertionErr...\r\n============================== 1 failed in 1.19s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_processor.py::test_process_records_collects_errors",
+                    "traceback": "anyio-4.15.1, arize-phoenix-client-3.5.0, platformdirs-4.13.0, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_processor.py::test_process_records_collects_errors FAILED           [100%]\r\n\r\n================================== FAILURES ===================================\r\n____________________ test_process_records_collects_errors _____________________\r\ntest_processor.py:25: in test_process_records_collects_errors\r\n    assert res['errors'][0] == {'index': 1, 'item': -2, 'error': 'Negative value: -2'}\r\nE   AssertionError: assert {'index': 1, ...ve value: -2'} == {'index': 1, ...ve value: -2'}\r\nE     \r\nE     Omitting 2 identical items, use -vv to show\r\nE     Right contains 1 more item:\r\nE     {'item': -2}\r\nE     \r\nE     Full diff:\r\nE       {...\r\nE     \r\nE     ...Full output truncated (4 lines hidden), use '-vv' to show\r\n=========================== short test summary info ===========================\r\nFAILED test_processor.py::test_process_records_collects_errors - AssertionErr...\r\n============================== 1 failed in 1.58s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 3,
+                "verdict": "BLOCKED",
+                "reason": "Malformed patch: Could not identify valid unified diff headers (--- a/..., +++ b/...) or no modifications found."
+              }
+            ],
+            "duration_ms": 92537,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-2d4b09"
+      }
+    ]
+  }
+}

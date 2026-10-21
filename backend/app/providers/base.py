@@ -8,7 +8,7 @@ class BaseLLMProvider(ABC):
     """
 
     @abstractmethod
-    async def check_health(self) -> Dict[str, Any]:
+    async def check_health(self, force_refresh: bool = False) -> Dict[str, Any]:
         """Checks connection health, availability, and installed models."""
         pass
 

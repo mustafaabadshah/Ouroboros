@@ -6,6 +6,10 @@ import { MetricsOverview } from '../types';
 interface PhoenixSpan {
   id: string;
   trace_id: string;
+  otel_trace_id?: string;
+  otel_span_id?: string;
+  parent_span_id?: string;
+  phoenix_url?: string;
   name: string;
   span_kind: string;
   role: string;
@@ -15,7 +19,12 @@ interface PhoenixSpan {
   tokens_out: number;
   total_tokens: number;
   status: string;
+  error_message?: string;
+  ticket_id?: string;
+  run_id?: string;
   timestamp: string;
+  input?: string;
+  output?: string;
   attributes: Record<string, any>;
 }
 
@@ -34,15 +43,40 @@ export const ObservabilityPage: React.FC = () => {
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
   const [phoenix, setPhoenix] = useState<PhoenixStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedSpan, setSelectedSpan] = useState<PhoenixSpan | null>(null);
+  const [spanFilter, setSpanFilter] = useState<string>('ALL');
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, section: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSection(section);
+    setTimeout(() => setCopiedSection(null), 2000);
+  };
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 4000);
-    return () => clearInterval(interval);
+    loadData(true);
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadData(false);
+      }
+    }, 10000);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(false);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (isInitial = false) => {
     try {
+      if (isInitial) setLoading(true);
       const [metricsData, phoenixData] = await Promise.all([
         api.getMetricsOverview(),
         api.getPhoenixStatus().catch(() => null),
@@ -54,9 +88,17 @@ export const ObservabilityPage: React.FC = () => {
     } catch (e) {
       console.error('Error fetching metrics/phoenix:', e);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
+
+  const filteredSpans = (phoenix?.recent_spans || []).filter((s) => {
+    if (spanFilter === 'ALL') return true;
+    if (spanFilter === 'AGENT') return s.span_kind === 'AGENT';
+    if (spanFilter === 'EVALUATOR') return s.span_kind === 'EVALUATOR';
+    if (spanFilter === 'ERROR') return s.status !== 'OK';
+    return true;
+  });
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto font-sans">
@@ -68,7 +110,7 @@ export const ObservabilityPage: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={loadData}
+          onClick={() => loadData(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh Telemetry
@@ -79,12 +121,15 @@ export const ObservabilityPage: React.FC = () => {
       <div className="border border-zinc-800 rounded bg-zinc-950 p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <div className={`w-2.5 h-2.5 rounded-full ${phoenix?.active ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`}></div>
             <h3 className="text-sm font-bold font-mono text-zinc-100">
               ARIZE PHOENIX AI OBSERVABILITY & TRACING
             </h3>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-400 font-bold">
-              OPENINFERENCE OTEL
+              OTLP HTTP/PROTOBUF
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+              {phoenix?.active ? 'COLLECTOR ACTIVE' : 'COLLECTOR OFFLINE'}
             </span>
           </div>
           {phoenix?.ui_url && (
@@ -107,35 +152,64 @@ export const ObservabilityPage: React.FC = () => {
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">COLLECTOR ENDPOINT</span>
-            <div className="text-emerald-400 font-bold truncate">{phoenix?.collector_endpoint || 'http://localhost:6006'}</div>
-            <div className="text-[10px] text-zinc-500">OTLP HTTP Transport</div>
+            <div className="text-emerald-400 font-bold truncate">{phoenix?.collector_endpoint || 'http://127.0.0.1:6006/v1/traces'}</div>
+            <div className="text-[10px] text-zinc-500">HTTP/protobuf Port 6006</div>
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">RECORDED SPANS</span>
             <div className="text-zinc-100 font-bold text-base">{phoenix?.total_recorded_spans || 0} Spans</div>
-            <div className="text-[10px] text-zinc-500">In-memory ring buffer</div>
+            <div className="text-[10px] text-zinc-500">In-memory ring buffer (50 max)</div>
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">TRACING INSTRUMENTATION</span>
-            <div className="text-zinc-200 font-bold">Agent + Evaluator + LLM</div>
-            <div className="text-[10px] text-zinc-500">Semantic Conventions</div>
+            <div className="text-zinc-200 font-bold">Root Chain + Agent + Evaluator</div>
+            <div className="text-[10px] text-zinc-500">Hierarchical OpenInference</div>
           </div>
         </div>
 
         {/* Recent Spans Stream */}
         <div className="space-y-2 pt-2">
-          <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
-            Live OpenInference Span Stream
-          </h4>
-          <div className="border border-zinc-800/80 rounded bg-zinc-900/30 overflow-x-auto divide-y divide-zinc-800/60 max-h-60 overflow-y-auto font-mono">
-            {!phoenix?.recent_spans || phoenix.recent_spans.length === 0 ? (
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
+              Live OpenInference Span Stream ({filteredSpans.length})
+            </h4>
+            <div className="flex gap-1.5 text-[10px] font-mono">
+              {['ALL', 'AGENT', 'EVALUATOR', 'ERROR'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setSpanFilter(filter)}
+                  className={`px-2 py-0.5 rounded border ${
+                    spanFilter === filter
+                      ? 'bg-zinc-700 text-zinc-100 border-zinc-500'
+                      : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-zinc-800/80 rounded bg-zinc-900/30 overflow-x-auto divide-y divide-zinc-800/60 max-h-72 overflow-y-auto font-mono">
+            {filteredSpans.length === 0 ? (
               <div className="p-4 text-center text-zinc-500 text-[11px]">
-                No spans recorded yet. Trigger a ticket generation or swarm run to stream live spans.
+                No spans recorded matching filter. Trigger a ticket generation or swarm run to stream live spans.
               </div>
             ) : (
-              phoenix.recent_spans.map((span) => (
-                <div key={span.id} className="p-2.5 flex items-center justify-between text-[11px] hover:bg-zinc-900/60 transition">
+              filteredSpans.map((span) => (
+                <div
+                  key={span.id}
+                  onClick={() => setSelectedSpan(span)}
+                  className={`p-2.5 flex items-center justify-between text-[11px] cursor-pointer hover:bg-zinc-900/80 transition ${
+                    selectedSpan?.id === span.id ? 'bg-zinc-900/90 border-l-2 border-emerald-400' : ''
+                  }`}
+                >
                   <div className="flex items-center gap-2">
+                    {span.parent_span_id ? (
+                      <span className="text-zinc-600 font-bold text-xs" title={`Child of ${span.parent_span_id}`}>↳</span>
+                    ) : (
+                      <span className="text-emerald-500 font-bold text-xs" title="Root Span">●</span>
+                    )}
                     <span
                       className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
                         span.span_kind === 'AGENT'
@@ -149,18 +223,172 @@ export const ObservabilityPage: React.FC = () => {
                     </span>
                     <span className="font-semibold text-zinc-200">{span.name}</span>
                     <span className="text-zinc-500 text-[10px]">({span.model_name})</span>
+                    {span.parent_span_id && (
+                      <span className="text-[9px] text-zinc-500 bg-zinc-900 px-1 rounded border border-zinc-800">
+                        child:{span.parent_span_id.slice(0, 6)}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-4 text-zinc-400 text-[10px]">
+                  <div className="flex items-center gap-3 text-zinc-400 text-[10px]">
                     <span>{span.duration_ms} ms</span>
-                    <span>{span.total_tokens} tok</span>
+                    {span.total_tokens > 0 && <span>{span.total_tokens} tok</span>}
                     <span className={span.status === 'OK' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
                       {span.status}
                     </span>
+                    {span.otel_trace_id && phoenix?.ui_url && (
+                      <a
+                        href={`http://127.0.0.1:${phoenix.port}/?project=${phoenix.project_name}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        title="View trace in Arize Phoenix UI"
+                        className="text-emerald-400 hover:text-emerald-300"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))
             )}
           </div>
+
+          {/* Span Detail Inspection Modal/Panel with Full Agent I/O */}
+          {selectedSpan && (
+            <div className="mt-3 p-4 border border-zinc-800 rounded bg-zinc-900/70 space-y-4 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-400 border border-sky-800">
+                    {selectedSpan.role || selectedSpan.span_kind}
+                  </span>
+                  <span className="font-bold text-zinc-200 text-sm">{selectedSpan.name}</span>
+                  <span className="text-[10px] text-zinc-500">Span ID: {selectedSpan.otel_span_id || selectedSpan.id}</span>
+                </div>
+                <button
+                  onClick={() => setSelectedSpan(null)}
+                  className="text-zinc-500 hover:text-zinc-300 text-xs px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 transition"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-[11px] bg-zinc-950/60 p-3 rounded border border-zinc-800">
+                <div>
+                  <span className="text-zinc-500 block">ROLE / AGENT</span>
+                  <span className="text-zinc-200 font-bold font-mono">
+                    {selectedSpan.role || 'System'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">AI MODEL</span>
+                  <span className="text-zinc-300 font-mono">
+                    {selectedSpan.model_name || 'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">RUN / TICKET</span>
+                  <span className="text-zinc-300">
+                    {selectedSpan.ticket_id || selectedSpan.run_id || 'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">TOKENS (IN / OUT)</span>
+                  <span className="text-zinc-300">
+                    {selectedSpan.tokens_in} in / {selectedSpan.tokens_out} out ({selectedSpan.total_tokens} total)
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">EXECUTION STATUS</span>
+                  <span className={selectedSpan.status === 'OK' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                    {selectedSpan.status} ({selectedSpan.duration_ms} ms)
+                  </span>
+                </div>
+              </div>
+
+              {selectedSpan.error_message && (
+                <div className="p-3 rounded bg-rose-950/40 border border-rose-900 text-rose-300 text-[11px]">
+                  <strong>Execution Error:</strong> {selectedSpan.error_message}
+                </div>
+              )}
+
+              {/* Agent Input Prompt Section */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-400"></span> Agent Input / Prompt
+                  </span>
+                  {(selectedSpan.input || selectedSpan.attributes?.['input.value'] || selectedSpan.attributes?.['llm.input_messages.0.message.content']) && (
+                    <button
+                      onClick={() =>
+                        copyToClipboard(
+                          selectedSpan.input ||
+                            selectedSpan.attributes?.['input.value'] ||
+                            selectedSpan.attributes?.['llm.input_messages.0.message.content'] ||
+                            '',
+                          'input'
+                        )
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                    >
+                      {copiedSection === 'input' ? 'Copied!' : 'Copy Prompt'}
+                    </button>
+                  )}
+                </div>
+                <div className="bg-zinc-950 p-3 rounded border border-zinc-800/90 max-h-48 overflow-y-auto">
+                  <pre className="text-zinc-300 text-[11px] whitespace-pre-wrap font-mono leading-relaxed select-text">
+                    {selectedSpan.input ||
+                      selectedSpan.attributes?.['input.value'] ||
+                      selectedSpan.attributes?.['llm.input_messages.0.message.content'] ||
+                      '[No input prompt captured for this span]'}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Agent Output / Response Section */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Agent Output / Result
+                  </span>
+                  {(selectedSpan.output || selectedSpan.attributes?.['output.value'] || selectedSpan.attributes?.['llm.output_messages.0.message.content']) && (
+                    <button
+                      onClick={() =>
+                        copyToClipboard(
+                          selectedSpan.output ||
+                            selectedSpan.attributes?.['output.value'] ||
+                            selectedSpan.attributes?.['llm.output_messages.0.message.content'] ||
+                            '',
+                          'output'
+                        )
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                    >
+                      {copiedSection === 'output' ? 'Copied!' : 'Copy Output'}
+                    </button>
+                  )}
+                </div>
+                <div className="bg-zinc-950 p-3 rounded border border-zinc-800/90 max-h-56 overflow-y-auto">
+                  <pre className="text-emerald-300 text-[11px] whitespace-pre-wrap font-mono leading-relaxed select-text">
+                    {selectedSpan.output ||
+                      selectedSpan.attributes?.['output.value'] ||
+                      selectedSpan.attributes?.['llm.output_messages.0.message.content'] ||
+                      '[No output content captured for this span]'}
+                  </pre>
+                </div>
+              </div>
+
+              {selectedSpan.attributes && Object.keys(selectedSpan.attributes).length > 0 && (
+                <div className="space-y-1 pt-1">
+                  <span className="text-zinc-500 text-[10px] uppercase font-bold">OpenInference & OTel Attributes</span>
+                  <div className="bg-zinc-950 p-2.5 rounded border border-zinc-800 text-[11px] overflow-x-auto max-h-32 overflow-y-auto">
+                    <pre className="text-zinc-400 text-[10px] leading-relaxed">
+                      {JSON.stringify(selectedSpan.attributes, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

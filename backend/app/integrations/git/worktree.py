@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import asyncio
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 from app.core.config import settings
 from app.core.logging import logger
 from app.core.security import run_safe_subprocess, validate_safe_path
@@ -67,6 +67,43 @@ class GitWorktreeManager:
                 pass
 
         return worktree_path, candidate_branch, base_commit
+
+    async def create_parallel_subtask_worktrees(
+        self,
+        repo_path: Path,
+        ticket_id: str,
+        subtask_keys: List[str]
+    ) -> Dict[str, Tuple[Path, str, str]]:
+        """
+        Dynamic Task Parallelization (DAG Execution):
+        Creates independent isolated worktrees for disjoint subtasks in parallel
+        (e.g., candidate/{ticket_id}_{subtask_id}).
+        Allows concurrent code synthesis in isolated cleanroom branches.
+        """
+        results = {}
+        for key in subtask_keys:
+            safe_key = key.replace(":", "-").replace("/", "-").lower()
+            sub_ticket_id = f"{ticket_id}_{safe_key}"
+            wt_path, branch, base = await self.create_worktree(repo_path, sub_ticket_id)
+            results[key] = (wt_path, branch, base)
+            logger.info(f"[DAG Parallel Worktree] Created isolated worktree for subtask '{key}': {wt_path}")
+        return results
+
+    async def cleanup_parallel_subtask_worktrees(
+        self,
+        repo_path: Path,
+        ticket_id: str,
+        subtask_keys: List[str]
+    ) -> None:
+        """Cleans up temporary parallel subtask worktrees after reconciliation."""
+        for key in subtask_keys:
+            safe_key = key.replace(":", "-").replace("/", "-").lower()
+            sub_ticket_id = f"{ticket_id}_{safe_key}"
+            cand_branch = f"candidate/{sub_ticket_id}"
+            try:
+                await self.remove_worktree(repo_path, sub_ticket_id, cand_branch)
+            except Exception as e:
+                logger.debug(f"Cleanup subtask worktree notice: {e}")
 
     @staticmethod
     def _sanitize_patch(patch_text: str) -> str:
@@ -251,10 +288,131 @@ class GitWorktreeManager:
             return False, f"Merge failed: {err}"
         return True, "Candidate merged successfully."
 
+    @staticmethod
+    def is_reparse_point_or_link(path: Path) -> bool:
+        """
+        Exhaustively checks whether path is a symbolic link, NTFS directory junction, or reparse point.
+        Uses:
+        1. os.path.islink & Path.is_symlink
+        2. os.lstat st_reparse_tag check (Python 3.8+ Windows)
+        3. Win32 GetFileAttributesW FILE_ATTRIBUTE_REPARSE_POINT (0x0400) via kernel32
+        """
+        p_str = str(path)
+        if os.path.islink(p_str) or path.is_symlink():
+            return True
+        if os.name == "nt":
+            try:
+                st = os.lstat(p_str)
+                if getattr(st, "st_reparse_tag", 0) != 0:
+                    return True
+            except Exception:
+                pass
+            try:
+                import ctypes
+                attrs = ctypes.windll.kernel32.GetFileAttributesW(p_str)
+                if attrs != 0xFFFFFFFF and (attrs & 0x0400):  # FILE_ATTRIBUTE_REPARSE_POINT
+                    return True
+            except Exception:
+                pass
+        return False
+
+    def validate_candidate_worktree_path(self, worktree_path: Path) -> Path:
+        """
+        Validates that worktree_path:
+        1. Resolves strictly inside self.worktrees_root and is not the root itself.
+        2. Is not a symlink, Windows NTFS directory junction, or reparse point.
+        3. Is an authentic linked Git worktree (.git is a file, NOT a directory).
+           Crucial guard: Protects primary/main repositories from destructive reset or clean.
+        """
+        raw_target = Path(worktree_path)
+        # Check raw target for reparse point before path resolution
+        if self.is_reparse_point_or_link(raw_target):
+            raise ValueError(f"Security Violation: Path '{worktree_path}' is an NTFS junction or reparse point.")
+
+        resolved_path = raw_target.resolve()
+        resolved_root = self.worktrees_root.resolve()
+
+        try:
+            resolved_path.relative_to(resolved_root)
+        except ValueError:
+            raise ValueError(
+                f"Security Violation: Path '{resolved_path}' is outside designated worktrees root '{resolved_root}'."
+            )
+
+        if resolved_path == resolved_root:
+            raise ValueError("Security Violation: Cannot operate on the worktrees root directory itself.")
+
+        if self.is_reparse_point_or_link(resolved_path):
+            raise ValueError(f"Security Violation: Resolved path '{resolved_path}' is a symlink, junction, or reparse point.")
+
+        git_meta = resolved_path / ".git"
+        if git_meta.exists():
+            if git_meta.is_dir():
+                raise ValueError(
+                    f"Security Violation: Target '{resolved_path}' has a .git directory. "
+                    "Refusing destructive operation on a primary Git repository!"
+                )
+            if not git_meta.is_file():
+                raise ValueError(f"Security Violation: Target '{resolved_path}' has an invalid .git metadata object.")
+        else:
+            raise ValueError(f"Security Violation: Target '{resolved_path}' is not a valid Git worktree (missing .git).")
+
+        return resolved_path
+
+    async def reset_worktree_to_base(self, worktree_path: Path, base_commit: str) -> bool:
+        """
+        Resets the candidate worktree cleanly back to the base commit.
+        Used between retry attempts to prevent dirty working trees or conflicts
+        from prior flawed patches.
+        Enforces strict boundary and identity validation before executing git reset/clean.
+        """
+        import re
+        try:
+            # 1. Validate worktree boundary & identity
+            safe_worktree = self.validate_candidate_worktree_path(worktree_path)
+
+            # 2. Validate commit hash format to prevent command injection or branch switching
+            clean_commit = str(base_commit).strip()
+            if not re.match(r"^[0-9a-fA-F]{7,40}$", clean_commit):
+                logger.error(f"Security Violation: Refusing reset to invalid commit hash: '{base_commit}'")
+                return False
+
+            # 3. Execute bounded reset & clean
+            code_reset, _, err_reset = await run_safe_subprocess(
+                ["git", "reset", "--hard", clean_commit],
+                cwd=safe_worktree
+            )
+            if code_reset != 0:
+                logger.error(f"Git reset failed in worktree {safe_worktree}: {err_reset}")
+                return False
+
+            code_clean, _, err_clean = await run_safe_subprocess(
+                ["git", "clean", "-fd"],
+                cwd=safe_worktree
+            )
+            if code_clean != 0:
+                logger.error(f"Git clean failed in worktree {safe_worktree}: {err_clean}")
+                return False
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Security validation blocked worktree reset for '{worktree_path}': {e}")
+            return False
+
     async def remove_worktree(self, repo_path: Path, ticket_id: str, candidate_branch: Optional[str] = None):
         """Safely tears down the worktree and prunes git references."""
         safe_ticket_id = ticket_id.replace(":", "-").replace("/", "-")
-        worktree_path = self.worktrees_root / safe_ticket_id
+        worktree_path = (self.worktrees_root / safe_ticket_id).resolve()
+
+        # Only clean up if strictly inside self.worktrees_root
+        try:
+            worktree_path.relative_to(self.worktrees_root.resolve())
+            if worktree_path == self.worktrees_root.resolve():
+                return
+        except ValueError:
+            logger.error(f"Refusing to remove worktree outside root: {worktree_path}")
+            return
 
         if worktree_path.exists():
             await run_safe_subprocess(
@@ -271,5 +429,38 @@ class GitWorktreeManager:
         await run_safe_subprocess(["git", "worktree", "prune"], cwd=repo_path)
         if candidate_branch:
             await run_safe_subprocess(["git", "branch", "-D", candidate_branch], cwd=repo_path)
+
+    async def garbage_collect_stale_worktrees(self, repo_path: Optional[Path] = None, max_age_hours: int = 24) -> int:
+        """
+        Scans self.worktrees_root for stale or orphaned candidate worktrees older than max_age_hours.
+        Safely removes them and prunes git references to preserve host disk space.
+        """
+        import time
+        pruned_count = 0
+        if not self.worktrees_root.exists():
+            return 0
+
+        now = time.time()
+        max_age_seconds = max_age_hours * 3600
+
+        for child in list(self.worktrees_root.iterdir()):
+            if child.is_dir() and not child.name.startswith("."):
+                try:
+                    mtime = child.stat().st_mtime
+                    if (now - mtime) > max_age_seconds:
+                        logger.info(f"[Worktree GC] Pruning stale worktree: {child.name} (age: {(now - mtime)/3600:.1f}h)")
+                        if repo_path and repo_path.exists():
+                            await run_safe_subprocess(["git", "worktree", "remove", "--force", str(child)], cwd=repo_path)
+                        shutil.rmtree(child, ignore_errors=True)
+                        pruned_count += 1
+                except Exception as e:
+                    logger.debug(f"[Worktree GC] Could not prune {child.name}: {e}")
+
+        if repo_path and repo_path.exists() and pruned_count > 0:
+            await run_safe_subprocess(["git", "worktree", "prune"], cwd=repo_path)
+
+        if pruned_count > 0:
+            logger.info(f"[Worktree GC] Cleaned up {pruned_count} stale candidate worktree(s).")
+        return pruned_count
 
 git_worktree_manager = GitWorktreeManager()

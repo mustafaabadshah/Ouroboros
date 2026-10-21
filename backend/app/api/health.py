@@ -16,11 +16,11 @@ async def health_check():
     }
 
 @router.get("/system/status")
-async def system_status():
+async def system_status(refresh: bool = False):
     metrics = telemetry.get_system_metrics()
-    sandbox = await sandbox_detector.detect_capabilities()
-    ollama = await ollama_provider.check_health()
-    groq = await groq_provider.check_health()
+    sandbox = await sandbox_detector.detect_capabilities(force_refresh=refresh)
+    ollama = await ollama_provider.check_health(force_refresh=refresh)
+    groq = await groq_provider.check_health(force_refresh=refresh)
 
     return {
         "system": metrics,

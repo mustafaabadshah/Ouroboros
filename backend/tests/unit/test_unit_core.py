@@ -165,3 +165,29 @@ async def test_model_router_mock_fallback():
     assert res["is_error"] is False
     assert res["provider"] == "mock"
     assert "title" in res["content"].lower()
+
+@pytest.mark.asyncio
+async def test_event_bus_polymorphic_publish():
+    from app.core.events import EventBus
+    eb = EventBus()
+    q = eb.subscribe("run-test-123")
+
+    # 1. Test standard positional call
+    await eb.publish("run-test-123", "STATE_CHANGED", {"state": "CODING"})
+    msg1 = await q.get()
+    assert "STATE_CHANGED" in msg1
+    assert "CODING" in msg1
+
+    # 2. Test single-dictionary payload call (defensive polymorphism)
+    await eb.publish({
+        "type": "FAIL_FAST_TRIGGERED",
+        "run_id": "run-test-123",
+        "test_file": "test_board.py",
+        "duration_ms": 1200
+    })
+    msg2 = await q.get()
+    assert "FAIL_FAST_TRIGGERED" in msg2
+    assert "test_board.py" in msg2
+
+    eb.unsubscribe("run-test-123", q)
+

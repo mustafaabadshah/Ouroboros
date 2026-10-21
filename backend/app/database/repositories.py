@@ -50,6 +50,37 @@ def list_repositories(db: Session) -> List[RepositoryModel]:
 def get_repository(db: Session, repo_id: str) -> Optional[RepositoryModel]:
     return db.query(RepositoryModel).filter(RepositoryModel.id == repo_id).first()
 
+def update_repository(
+    db: Session,
+    repo_id: str,
+    name: Optional[str] = None,
+    path: Optional[str] = None,
+    commit_hash: Optional[str] = None,
+    file_count: Optional[int] = None
+) -> Optional[RepositoryModel]:
+    repo = get_repository(db, repo_id)
+    if not repo:
+        return None
+    if name is not None:
+        repo.name = name
+    if path is not None:
+        repo.path = path
+    if commit_hash is not None:
+        repo.commit_hash = commit_hash
+    if file_count is not None:
+        repo.file_count = file_count
+    db.commit()
+    db.refresh(repo)
+    return repo
+
+def delete_repository(db: Session, repo_id: str) -> bool:
+    repo = get_repository(db, repo_id)
+    if not repo:
+        return False
+    db.delete(repo)
+    db.commit()
+    return True
+
 # Tickets
 def create_ticket(db: Session, ticket_data: Dict[str, Any]) -> TicketModel:
     ticket = TicketModel(**ticket_data)
@@ -156,11 +187,14 @@ def create_failure_trajectory(db: Session, traj_data: Dict[str, Any]) -> Failure
 def list_failure_trajectories(
     db: Session,
     repo_id: Optional[str] = None,
-    ticket_id: Optional[str] = None
+    ticket_id: Optional[str] = None,
+    run_id: Optional[str] = None
 ) -> List[FailureTrajectoryModel]:
     query = db.query(FailureTrajectoryModel)
     if ticket_id:
         query = query.filter(FailureTrajectoryModel.ticket_id == ticket_id)
+    if run_id:
+        query = query.filter(FailureTrajectoryModel.run_id == run_id)
     return query.order_by(desc(FailureTrajectoryModel.created_at)).all()
 
 # Audit Events

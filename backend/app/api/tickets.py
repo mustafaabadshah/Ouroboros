@@ -73,26 +73,29 @@ async def generate_ticket(
         force_mock=use_mock
     )
 
-    ticket_record = create_ticket(db, {
-        "repo_id": req.repo_id,
-        "title": generated.title,
-        "problem_statement": generated.problem_statement,
-        "motivation": generated.motivation,
-        "current_behavior": generated.current_behavior,
-        "desired_behavior": generated.desired_behavior,
-        "acceptance_criteria_json": generated.acceptance_criteria,
-        "proposed_tests_json": generated.proposed_tests,
-        "relevant_graph_entities_json": generated.relevant_graph_entities,
-        "candidate_files_json": generated.candidate_files,
-        "risk_level": generated.risk_level,
-        "expected_complexity": generated.expected_complexity,
-        "estimated_resources": generated.estimated_resources,
-        "evidence_json": generated.evidence,
-        "out_of_scope": generated.out_of_scope,
-        "status": "PROPOSED"
-    })
+    from app.observability.phoenix_service import phoenix_service
+    with phoenix_service.trace_step("ticket.validate", repo_id=req.repo_id, title=generated.title):
+        ticket_record = create_ticket(db, {
+            "repo_id": req.repo_id,
+            "title": generated.title,
+            "problem_statement": generated.problem_statement,
+            "motivation": generated.motivation,
+            "current_behavior": generated.current_behavior,
+            "desired_behavior": generated.desired_behavior,
+            "acceptance_criteria_json": generated.acceptance_criteria,
+            "proposed_tests_json": generated.proposed_tests,
+            "relevant_graph_entities_json": generated.relevant_graph_entities,
+            "candidate_files_json": generated.candidate_files,
+            "risk_level": generated.risk_level,
+            "expected_complexity": generated.expected_complexity,
+            "estimated_resources": generated.estimated_resources,
+            "evidence_json": generated.evidence,
+            "out_of_scope": generated.out_of_scope,
+            "acceptance_test_template": generated.acceptance_test_template,
+            "status": "PROPOSED"
+        })
 
-    record_audit_event(db, "TICKET_GENERATED", details={"ticket_id": ticket_record.id, "title": ticket_record.title})
+        record_audit_event(db, "TICKET_GENERATED", details={"ticket_id": ticket_record.id, "title": ticket_record.title})
 
     return TicketResponse(
         id=ticket_record.id,
@@ -111,6 +114,7 @@ async def generate_ticket(
         estimated_resources=ticket_record.estimated_resources,
         evidence=ticket_record.evidence_json or [],
         out_of_scope=ticket_record.out_of_scope,
+        acceptance_test_template=ticket_record.acceptance_test_template,
         status=ticket_record.status,
         created_at=ticket_record.created_at,
         updated_at=ticket_record.updated_at

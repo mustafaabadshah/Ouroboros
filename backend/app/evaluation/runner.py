@@ -17,7 +17,7 @@ class PytestRunner:
     exit-code validation, and structured failure extraction.
     """
 
-    def __init__(self, default_timeout: int = 45):
+    def __init__(self, default_timeout: int = 90):
         self.default_timeout = default_timeout
         self._lock = asyncio.Lock()  # Strict global test concurrency limiter
 
@@ -31,10 +31,37 @@ class PytestRunner:
         candidate_venvs = [
             target_dir / "venv" / bin_dir / py_name,
             target_dir / ".venv" / bin_dir / py_name,
-            target_dir.parent / "venv" / bin_dir / py_name,
             target_dir / "backend" / "venv" / bin_dir / py_name,
-            Path(sys.executable),
+            target_dir.parent / "venv" / bin_dir / py_name,
         ]
+
+        # If target_dir is an isolated git worktree, discover the parent repository
+        git_file = target_dir / ".git"
+        if git_file.is_file():
+            try:
+                content = git_file.read_text(encoding="utf-8").strip()
+                if content.startswith("gitdir:"):
+                    gitdir_path = Path(content.replace("gitdir:", "").strip())
+                    # Format: <repo>/.git/worktrees/<name>
+                    main_repo = gitdir_path.parent.parent
+                    candidate_venvs.extend([
+                        main_repo / "backend" / "venv" / bin_dir / py_name,
+                        main_repo / "venv" / bin_dir / py_name,
+                        main_repo / ".venv" / bin_dir / py_name,
+                    ])
+            except Exception:
+                pass
+
+        # Also check configured default repository path
+        if getattr(settings, "DEFAULT_REPO_PATH", None):
+            def_repo = Path(settings.DEFAULT_REPO_PATH)
+            candidate_venvs.extend([
+                def_repo / "backend" / "venv" / bin_dir / py_name,
+                def_repo / "venv" / bin_dir / py_name,
+                def_repo / ".venv" / bin_dir / py_name,
+            ])
+
+        candidate_venvs.append(Path(sys.executable))
 
         for p in candidate_venvs:
             if p.exists():

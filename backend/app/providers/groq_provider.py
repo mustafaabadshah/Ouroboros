@@ -19,6 +19,14 @@ class GroqProvider(BaseLLMProvider):
         self.api_key = api_key or settings.GROQ_API_KEY
         self.default_model = default_model or settings.GROQ_REASONING_MODEL
         self._client: Optional[AsyncGroq] = None
+        self._health_cache: Optional[Dict[str, Any]] = None
+        self._health_cache_time: float = 0.0
+        self._health_cache_ttl: float = 60.0  # 60s cache avoids transatlantic round-trips on status polls
+
+    def reset_health_cache(self) -> None:
+        """Invalidates the cached health response."""
+        self._health_cache = None
+        self._health_cache_time = 0.0
 
     def _get_client(self) -> AsyncGroq:
         if self._client is None:
@@ -28,16 +36,23 @@ class GroqProvider(BaseLLMProvider):
             self._client = AsyncGroq(api_key=key)
         return self._client
 
-    async def check_health(self) -> Dict[str, Any]:
-        """Tests connectivity without returning or logging the raw key."""
+    async def check_health(self, force_refresh: bool = False) -> Dict[str, Any]:
+        """Tests connectivity without returning or logging the raw key. Caches for 60s."""
+        now = time.monotonic()
+        if not force_refresh and self._health_cache is not None and (now - self._health_cache_time) < self._health_cache_ttl:
+            return dict(self._health_cache)
+
         key = self.api_key or settings.GROQ_API_KEY
         if not key:
-            return {
+            res = {
                 "available": False,
                 "configured": False,
                 "masked_key": "NOT_CONFIGURED",
                 "message": "Groq API key not set in environment."
             }
+            self._health_cache = res
+            self._health_cache_time = now
+            return dict(res)
 
         start_time = time.perf_counter()
         try:
@@ -45,7 +60,7 @@ class GroqProvider(BaseLLMProvider):
             models_res = await client.models.list()
             latency = int((time.perf_counter() - start_time) * 1000)
             model_ids = [m.id for m in models_res.data]
-            return {
+            res = {
                 "available": True,
                 "configured": True,
                 "latency_ms": latency,
@@ -56,13 +71,17 @@ class GroqProvider(BaseLLMProvider):
         except Exception as e:
             latency = int((time.perf_counter() - start_time) * 1000)
             logger.warning(f"Groq API connection test failed: {e}")
-            return {
+            res = {
                 "available": False,
                 "configured": True,
                 "latency_ms": latency,
                 "masked_key": mask_secret(key),
                 "message": f"Groq connection error: {str(e)}"
             }
+
+        self._health_cache = res
+        self._health_cache_time = now
+        return dict(res)
 
     async def generate(
         self,

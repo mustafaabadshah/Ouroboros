@@ -42,6 +42,7 @@ class TicketModel(Base):
     estimated_resources = Column(String(100), default="1 LLM call, 1 pytest run")
     evidence_json = Column(JSON, default=list)
     out_of_scope = Column(Text, nullable=True)
+    acceptance_test_template = Column(Text, nullable=True)
     status = Column(String(30), default="PROPOSED")  # PROPOSED, REVIEWED, APPROVED, IMPLEMENTING, EVALUATING, ACCEPTED, REJECTED
     created_at = Column(DateTime(timezone=True), default=get_utc_now)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)

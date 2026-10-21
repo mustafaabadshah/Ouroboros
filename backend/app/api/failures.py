@@ -14,9 +14,10 @@ router = APIRouter(prefix="/failures", tags=["Failure Flywheel"])
 async def get_all_failures(
     ticket_id: Optional[str] = Query(None),
     repo_id: Optional[str] = Query(None),
+    run_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
-    records = list_failure_trajectories(db, repo_id=repo_id, ticket_id=ticket_id)
+    records = list_failure_trajectories(db, repo_id=repo_id, ticket_id=ticket_id, run_id=run_id)
     return [
         FailureTrajectoryResponse(
             id=r.id,

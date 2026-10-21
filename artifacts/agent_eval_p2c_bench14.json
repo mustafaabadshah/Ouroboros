@@ -1,0 +1,100 @@
+{
+  "evaluation_type": "real_agent_evaluation",
+  "benchmark_version": "v1.0.0",
+  "expansion_milestone": "v0.10",
+  "timestamp": "2026-10-16T06:42:53Z",
+  "configuration": {
+    "task_id_filter": "BENCH-14",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "ablation_mode": false,
+    "dry_run": false,
+    "mock_agents": false
+  },
+  "memory_enabled_run": {
+    "evaluation_engine": "OuroborosAgentRepairEvaluator",
+    "benchmark_version": "v1.0.0",
+    "memory_enabled": true,
+    "tasks_selected": 1,
+    "tasks_attempted": 1,
+    "tasks_not_run": 0,
+    "eligible_tasks": 1,
+    "adversarial_tasks": 0,
+    "repairs_passed": 1,
+    "repairs_failed": 0,
+    "policy_blocked": 0,
+    "timed_out": 0,
+    "infrastructure_failures": 0,
+    "provider_unavailable": 0,
+    "attempted_repair_success_rate": 1.0,
+    "eligible_repair_success_rate": 1.0,
+    "adversarial_block_rate": null,
+    "outcome_distribution": {
+      "PASSED_REPAIR": 1,
+      "FAILED_REPAIR": 0,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0,
+      "PROVIDER_UNAVAILABLE": 0,
+      "NOT_RUN": 0
+    },
+    "total_tokens_in": 1098,
+    "total_tokens_out": 417,
+    "median_duration_ms": 33169,
+    "total_duration_ms": 33169,
+    "task_results": [
+      {
+        "task_id": "BENCH-14",
+        "name": "SemVer Tag Regex Extractor",
+        "category": "serialization_and_parsing",
+        "difficulty": "medium",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 2,
+        "max_attempts": 3,
+        "tokens_in": 1098,
+        "tokens_out": 417,
+        "phase_timings": {
+          "planning_ms": 18192,
+          "coding_ms": 6005,
+          "evaluation_ms": 7308,
+          "total_ms": 33169
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": false,
+            "regression_passed": false,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "test_semver.py::test_parse_complex_semver_tags",
+                "traceback": "ython 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Agent Chess\\backend\\venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-14_gsf_e9r5\\worktrees\\BENCH-14\r\nplugins: anyio-4.15.1, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_semver.py::test_parse_complex_semver_tags FAILED                    [100%]\r\n\r\n================================== FAILURES ===================================\r\n_______________________ test_parse_complex_semver_tags ________________________\r\ntest_semver.py:9: in test_parse_complex_semver_tags\r\n    res_v = parse_semver('v2.4.1')\r\n            ^^^^^^^^^^^^^^^^^^^^^^\r\nsemver\\parser.py:9: in parse_semver\r\n    major, minor, patch = m.groups()\r\n    ^^^^^^^^^^^^^^^^^^^\r\nE   ValueError: too many values to unpack (expected 3)\r\n=========================== short test summary info ===========================\r\nFAILED test_semver.py::test_parse_complex_semver_tags - ValueError: too many ...\r\n============================== 1 failed in 0.15s =============================="
+              },
+              {
+                "test_name": "test_semver.py::test_parse_basic_semver",
+                "traceback": "rm win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- E:\\MM Office\\Agent Chess\\backend\\venv\\Scripts\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-14_gsf_e9r5\\worktrees\\BENCH-14\r\nplugins: anyio-4.15.1, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_semver.py::test_parse_basic_semver FAILED                           [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________________ test_parse_basic_semver ___________________________\r\ntest_semver.py:5: in test_parse_basic_semver\r\n    res = parse_semver('1.2.3')\r\n          ^^^^^^^^^^^^^^^^^^^^^\r\nsemver\\parser.py:9: in parse_semver\r\n    major, minor, patch = m.groups()\r\n    ^^^^^^^^^^^^^^^^^^^\r\nE   ValueError: too many values to unpack (expected 3)\r\n=========================== short test summary info ===========================\r\nFAILED test_semver.py::test_parse_basic_semver - ValueError: too many values ...\r\n============================== 1 failed in 0.11s =============================="
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 33169,
+        "error_detail": null
+      }
+    ]
+  }
+}

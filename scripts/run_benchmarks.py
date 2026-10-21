@@ -200,20 +200,19 @@ async def main():
             print(f"  - {err}")
         sys.exit(1)
 
+    # Task filtering setup
+    task_ids = [tid.strip() for tid in args.task_id.split(",") if tid.strip()] if args.task_id else None
+    run_ablation = args.ablation or (not args.memory_enabled and not args.memory_disabled)
+
     # 1. Fixture validation mode
     if args.validate_fixtures:
-        task_filter = [args.task_id] if args.task_id else None
-        reports, all_ok = await run_fixture_validation(task_ids=task_filter)
+        reports, all_ok = await run_fixture_validation(task_ids=task_ids)
         if args.output:
             out_p = Path(args.output)
             out_p.parent.mkdir(parents=True, exist_ok=True)
             out_p.write_text(json.dumps(reports, indent=2), encoding="utf-8")
             print(f"Saved fixture validation report to {out_p}")
         sys.exit(0 if all_ok else 1)
-
-    # Task filtering setup
-    task_ids = [args.task_id] if args.task_id else None
-    run_ablation = args.ablation or (not args.memory_enabled and not args.memory_disabled)
 
     artifacts_dir = Path(__file__).resolve().parent.parent / "artifacts"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -322,8 +321,33 @@ async def main():
             "median_latency_delta_ms": results_mem_on["median_duration_ms"] - results_mem_off["median_duration_ms"]
         }
 
+    # Add environment and git provenance
+    import subprocess
+    git_commit = "unknown"
+    try:
+        git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        pass
+
+    report_data["provenance"] = {
+        "git_commit": git_commit,
+        "python_version": sys.version,
+        "platform": sys.platform
+    }
+
     out_file.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
     print(f"\nSaved machine-readable report to: {out_file}")
+
+    # Archive immutable timestamped record to prevent data loss across test runs
+    timestamp_slug = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    mode_slug = "agent_eval" if args.agent_eval else "ref_benchmark"
+    cond_slug = "memory_enabled" if args.memory_enabled else ("memory_disabled" if args.memory_disabled else "ablation")
+    task_slug = f"_{args.task_id}" if args.task_id else ""
+    eval_dir = artifacts_dir / "evaluations" / f"{timestamp_slug}_{mode_slug}_{cond_slug}{task_slug}"
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    immutable_file = eval_dir / "benchmark_run.json"
+    immutable_file.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    print(f"Archived immutable evaluation record to: {immutable_file}")
     print("=" * 80)
 
 

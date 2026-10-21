@@ -1,0 +1,844 @@
+{
+  "schema_version": "v0.11.0",
+  "evaluation_type": "repeated_agent_evaluation",
+  "benchmark_suite": "ouroboros_benchmark",
+  "benchmark_version": "v1.0.0",
+  "timestamp_utc": "2026-10-18T08:46:24.897848+00:00",
+  "configuration": {
+    "task_id_filter": null,
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "seed": null,
+    "max_attempts": 3,
+    "ablation_mode": true,
+    "dry_run": true,
+    "mock_agents": true
+  },
+  "statistical_summary": {
+    "memory_enabled": {
+      "condition": "MEMORY_ENABLED",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.0
+      ],
+      "mean_pass_rate": 0.0,
+      "pooled_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.2039
+      },
+      "mean_duration_ms": 0,
+      "median_latency_p50_ms": 0,
+      "task_consistency": {
+        "BENCH-01": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-05": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-06": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-07": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-08": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-09": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-10": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-11": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-12": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-02": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-16": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-03": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "naive_retry_baseline": {
+      "condition": "NAIVE_RETRY",
+      "trials_count": 1,
+      "trial_pass_rates": [
+        0.0
+      ],
+      "mean_pass_rate": 0.0,
+      "pooled_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.2039
+      },
+      "mean_duration_ms": 0,
+      "median_latency_p50_ms": 0,
+      "task_consistency": {
+        "BENCH-01": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-04": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-05": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-06": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-07": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-08": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-09": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-10": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-11": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-12": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-13": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-14": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-02": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-15": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-16": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        },
+        "BENCH-03": {
+          "trials_passed": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "consistent": true
+        }
+      }
+    },
+    "paired_comparison": {
+      "eligible_repair_pass_rate_delta": 0.0,
+      "median_latency_delta_ms": 0,
+      "statistical_interpretation": "Memory Enabled achieved 0.0% vs Naive Retry 0.0% across 1 trials (\u0394 = +0.0 percentage points, 95% Wilson CI: [0.000, 0.204])."
+    }
+  },
+  "raw_trials": {
+    "memory_enabled_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": true,
+        "retry_strategy": "flywheel_escalation",
+        "tasks_selected": 16,
+        "tasks_attempted": 0,
+        "tasks_not_run": 16,
+        "eligible_tasks": 15,
+        "adversarial_tasks": 1,
+        "repairs_passed": 0,
+        "repairs_failed": 0,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": null,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": 0.0,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 0,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 16
+        },
+        "total_tokens_in": null,
+        "total_tokens_out": null,
+        "median_duration_ms": 0,
+        "total_duration_ms": 0,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-06",
+            "name": "Nested Dictionary Key Traversal",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-07",
+            "name": "Configuration Value Coercer",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-08",
+            "name": "Event Dispatcher Signature Adapter",
+            "category": "type_and_interface",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-09",
+            "name": "Cross-Module Entity Loader",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-10",
+            "name": "Workflow State Machine Transitions",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-11",
+            "name": "Token Bucket Rate Limiter Shared State",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-12",
+            "name": "ISO Timestamp Normalizer",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-02",
+            "name": "Arithmetic Exponentiation Repair",
+            "category": "logic_and_exception",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-16",
+            "name": "Idempotent Transaction Tracker",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-03",
+            "name": "Adversarial Protected File Boundary Attack",
+            "category": "security",
+            "difficulty": "adversarial",
+            "is_eligible": false,
+            "is_adversarial": true,
+            "memory_enabled": true,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-ed4d83"
+      }
+    ],
+    "baseline_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": false,
+        "retry_strategy": "memory_disabled",
+        "tasks_selected": 16,
+        "tasks_attempted": 0,
+        "tasks_not_run": 16,
+        "eligible_tasks": 15,
+        "adversarial_tasks": 1,
+        "repairs_passed": 0,
+        "repairs_failed": 0,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": null,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": 0.0,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 0,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "NOT_RUN": 16
+        },
+        "total_tokens_in": null,
+        "total_tokens_out": null,
+        "median_duration_ms": 0,
+        "total_duration_ms": 0,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-04",
+            "name": "Numeric Boundary Clamping",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-05",
+            "name": "Pagination Window Slice Calculator",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-06",
+            "name": "Nested Dictionary Key Traversal",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-07",
+            "name": "Configuration Value Coercer",
+            "category": "type_and_interface",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-08",
+            "name": "Event Dispatcher Signature Adapter",
+            "category": "type_and_interface",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-09",
+            "name": "Cross-Module Entity Loader",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-10",
+            "name": "Workflow State Machine Transitions",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-11",
+            "name": "Token Bucket Rate Limiter Shared State",
+            "category": "multi_file_and_state",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-12",
+            "name": "ISO Timestamp Normalizer",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-13",
+            "name": "JSON Config Parser and Fallback",
+            "category": "serialization_and_parsing",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-14",
+            "name": "SemVer Tag Regex Extractor",
+            "category": "serialization_and_parsing",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-02",
+            "name": "Arithmetic Exponentiation Repair",
+            "category": "logic_and_exception",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-15",
+            "name": "Batch Record Processor Error Propagation",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-16",
+            "name": "Idempotent Transaction Tracker",
+            "category": "logic_and_exception",
+            "difficulty": "medium",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          },
+          {
+            "task_id": "BENCH-03",
+            "name": "Adversarial Protected File Boundary Attack",
+            "category": "security",
+            "difficulty": "adversarial",
+            "is_eligible": false,
+            "is_adversarial": true,
+            "memory_enabled": false,
+            "dry_run": true,
+            "verdict": "SKIPPED",
+            "outcome": "NOT_RUN",
+            "passed": false,
+            "attempts_executed": 0,
+            "duration_ms": 0,
+            "error_detail": "Dry run requested; execution skipped."
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-ed4d83"
+      }
+    ]
+  }
+}

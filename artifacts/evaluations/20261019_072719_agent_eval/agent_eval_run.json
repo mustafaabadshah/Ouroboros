@@ -1,0 +1,279 @@
+{
+  "schema_version": "v0.11.0",
+  "evaluation_type": "repeated_agent_evaluation",
+  "benchmark_suite": "ouroboros_benchmark",
+  "benchmark_version": "v1.0.0",
+  "timestamp_utc": "2026-10-19T07:27:19.107494+00:00",
+  "configuration": {
+    "task_id_filter": "BENCH-01",
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": null,
+    "repeat_trials": 1,
+    "seed": null,
+    "max_attempts": 3,
+    "ablation_mode": true,
+    "dry_run": false,
+    "live_mode": false,
+    "mock_agents": true,
+    "budget_enforced": {
+      "max_requests": 120,
+      "token_ceiling": 60000,
+      "cost_ceiling_usd": 0.1,
+      "pacing_delay_seconds": 3.0
+    }
+  },
+  "budget_accounting": {
+    "total_requests": 0,
+    "max_requests": 120,
+    "total_tokens_in": 0,
+    "total_tokens_out": 0,
+    "total_tokens": 0,
+    "max_tokens": 60000,
+    "total_cost_usd": 0.0,
+    "max_cost_usd": 0.1,
+    "is_exhausted": false,
+    "exhaustion_reason": null,
+    "pricing_known": true,
+    "pacing_delay_seconds": 0.0
+  },
+  "statistical_summary": {
+    "memory_enabled": {
+      "condition": "MEMORY_ENABLED",
+      "trial_count": 1,
+      "pooled_pass_rate": 1.0,
+      "mean_pass_rate": 1.0,
+      "wilson_ci_95": {
+        "lower": 0.2065,
+        "upper": 1.0
+      },
+      "mean_duration_ms": 39237,
+      "median_latency_p50_ms": 39237,
+      "task_consistency": {
+        "BENCH-01": {
+          "passed_trials": 1,
+          "total_trials": 1,
+          "pass_ratio": 1.0,
+          "is_deterministic": true
+        }
+      }
+    },
+    "naive_retry_baseline": {
+      "condition": "NAIVE_RETRY",
+      "trial_count": 1,
+      "pooled_pass_rate": 0.0,
+      "mean_pass_rate": 0.0,
+      "wilson_ci_95": {
+        "lower": 0.0,
+        "upper": 0.7935
+      },
+      "mean_duration_ms": 12466,
+      "median_latency_p50_ms": 12466,
+      "task_consistency": {
+        "BENCH-01": {
+          "passed_trials": 0,
+          "total_trials": 1,
+          "pass_ratio": 0.0,
+          "is_deterministic": true
+        }
+      }
+    },
+    "paired_comparison": {
+      "eligible_repair_pass_rate_delta": 1.0,
+      "median_latency_delta_ms": 26771,
+      "paired_analysis": {
+        "total_paired_tasks_started": 1,
+        "complete_pairs_count": 1,
+        "incomplete_pairs_count": 0,
+        "incomplete_pairs_detail": [],
+        "concordance_matrix": {
+          "mutual_pass_a": 0,
+          "flywheel_only_win_b": 1,
+          "naive_only_win_c": 0,
+          "mutual_fail_d": 0
+        }
+      },
+      "statistical_interpretation": "Memory Enabled achieved 100.0% vs Naive Retry 0.0% across 1 trials (\u0394 = +100.0 percentage points, 95% Wilson CI: [0.206, 1.000]). Complete pairs evaluated: 1/1."
+    }
+  },
+  "raw_trials": {
+    "memory_enabled_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": true,
+        "retry_strategy": "flywheel_escalation",
+        "tasks_selected": 1,
+        "tasks_attempted": 1,
+        "tasks_not_run": 0,
+        "eligible_tasks": 1,
+        "adversarial_tasks": 0,
+        "repairs_passed": 1,
+        "repairs_failed": 0,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 1.0,
+        "eligible_repair_success_rate": 1.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 1,
+          "FAILED_REPAIR": 0,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "BUDGET_EXHAUSTED": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 240,
+        "total_tokens_out": 480,
+        "median_duration_ms": 39237,
+        "total_duration_ms": 39237,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": true,
+            "retry_strategy": "flywheel_escalation",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "PASS",
+            "outcome": "PASSED_REPAIR",
+            "passed": true,
+            "attempts_executed": 2,
+            "max_attempts": 3,
+            "tokens_in": 240,
+            "tokens_out": 480,
+            "phase_timings": {
+              "planning_ms": 32,
+              "coding_ms": 12,
+              "evaluation_ms": 32116,
+              "total_ms": 39237
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_input_parser.py::test_parse_negative_raises_value_error",
+                    "traceback": "============================= test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- C:\\Users\\Mustafa Badshah\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-01_lkt46vq9\\worktrees\\BENCH-01\r\nplugins: anyio-4.15.1, langsmith-0.4.4, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_input_parser.py::test_parse_negative_raises_value_error FAILED      [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_parse_negative_raises_value_error ____________________\r\ntest_input_parser.py:8: in test_parse_negative_raises_value_error\r\n    with pytest.raises(ValueError):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_input_parser.py::test_parse_negative_raises_value_error - Failed:...\r\n============================== 1 failed in 0.58s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "acceptance_passed": true,
+                "regression_passed": true,
+                "verdict": "PASS"
+              }
+            ],
+            "duration_ms": 39237,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-7530ca"
+      }
+    ],
+    "baseline_trials": [
+      {
+        "evaluation_engine": "OuroborosAgentRepairEvaluator",
+        "benchmark_version": "v1.0.0",
+        "memory_enabled": false,
+        "retry_strategy": "naive_retry",
+        "tasks_selected": 1,
+        "tasks_attempted": 1,
+        "tasks_not_run": 0,
+        "eligible_tasks": 1,
+        "adversarial_tasks": 0,
+        "repairs_passed": 0,
+        "repairs_failed": 1,
+        "policy_blocked": 0,
+        "timed_out": 0,
+        "infrastructure_failures": 0,
+        "provider_unavailable": 0,
+        "attempted_repair_success_rate": 0.0,
+        "eligible_repair_success_rate": 0.0,
+        "adversarial_block_rate": null,
+        "outcome_distribution": {
+          "PASSED_REPAIR": 0,
+          "FAILED_REPAIR": 1,
+          "BLOCKED_BY_POLICY": 0,
+          "TIMED_OUT": 0,
+          "INFRASTRUCTURE_ERROR": 0,
+          "PROVIDER_UNAVAILABLE": 0,
+          "BUDGET_EXHAUSTED": 0,
+          "NOT_RUN": 0
+        },
+        "total_tokens_in": 360,
+        "total_tokens_out": 720,
+        "median_duration_ms": 12466,
+        "total_duration_ms": 12466,
+        "task_results": [
+          {
+            "task_id": "BENCH-01",
+            "name": "Input Validation Boundary Guard",
+            "category": "boundary_and_edge_case",
+            "difficulty": "small",
+            "is_eligible": true,
+            "is_adversarial": false,
+            "memory_enabled": false,
+            "retry_strategy": "naive_retry",
+            "model_provider": "mock",
+            "model_name": "mock-deterministic-v1",
+            "verdict": "FAIL",
+            "outcome": "FAILED_REPAIR",
+            "passed": false,
+            "attempts_executed": 3,
+            "max_attempts": 3,
+            "tokens_in": 360,
+            "tokens_out": 720,
+            "phase_timings": {
+              "planning_ms": 3,
+              "coding_ms": 9,
+              "evaluation_ms": 10285,
+              "total_ms": 12466
+            },
+            "history": [
+              {
+                "attempt": 1,
+                "acceptance_passed": false,
+                "regression_passed": true,
+                "verdict": "FAIL",
+                "failures": [
+                  {
+                    "test_name": "test_input_parser.py::test_parse_negative_raises_value_error",
+                    "traceback": "============================= test session starts =============================\r\nplatform win32 -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- C:\\Users\\Mustafa Badshah\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\r\ncachedir: .pytest_cache\r\nrootdir: C:\\Users\\Mustafa Badshah\\AppData\\Local\\Temp\\ouro_agenteval_BENCH-01_ba_c7l5k\\worktrees\\BENCH-01\r\nplugins: anyio-4.15.1, langsmith-0.4.4, asyncio-1.4.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollecting ... collected 1 item\r\n\r\ntest_input_parser.py::test_parse_negative_raises_value_error FAILED      [100%]\r\n\r\n================================== FAILURES ===================================\r\n___________________ test_parse_negative_raises_value_error ____________________\r\ntest_input_parser.py:8: in test_parse_negative_raises_value_error\r\n    with pytest.raises(ValueError):\r\nE   Failed: DID NOT RAISE ValueError\r\n=========================== short test summary info ===========================\r\nFAILED test_input_parser.py::test_parse_negative_raises_value_error - Failed:...\r\n============================== 1 failed in 0.41s =============================="
+                  }
+                ]
+              },
+              {
+                "attempt": 2,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/input_parser.py:1\nerror: utils/input_parser.py: patch does not apply\n"
+              },
+              {
+                "attempt": 3,
+                "verdict": "FAIL",
+                "reason": "Git apply failed: Patch failed dry-run check: error: patch failed: utils/input_parser.py:1\nerror: utils/input_parser.py: patch does not apply\n"
+              }
+            ],
+            "duration_ms": 12466,
+            "error_detail": null
+          }
+        ],
+        "trial_index": 1,
+        "trial_id": "trial-1-7530ca"
+      }
+    ]
+  }
+}

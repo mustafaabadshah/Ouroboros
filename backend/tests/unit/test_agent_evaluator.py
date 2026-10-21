@@ -43,7 +43,7 @@ def adversarial_task():
 VALID_BENCH04_FIX = (
     "--- a/math_utils/bounds.py\n"
     "+++ b/math_utils/bounds.py\n"
-    "@@ -1,6 +1,6 @@\n"
+    "@@ -1,7 +1,7 @@\n"
     " def clamp(val, low, high):\n"
     "     if low > high:\n"
     "-        pass\n"
@@ -52,6 +52,8 @@ VALID_BENCH04_FIX = (
     "-        return high  # Bug: returns high instead of low\n"
     "+        return low\n"
     "     if val > high:\n"
+    "         return high\n"
+    "     return val\n"
 )
 
 
@@ -111,7 +113,7 @@ async def test_successful_candidate_patch_mock(sample_task):
         m_plan.return_value = mock_plan
         m_coder.return_value = mock_patch
 
-        res = await AgentRepairEvaluator.evaluate_task(sample_task, memory_enabled=True)
+        res = await AgentRepairEvaluator.evaluate_task(sample_task, memory_enabled=True, force_mock=True)
 
         assert res["task_id"] == "BENCH-04"
         assert res["verdict"] == "PASS"

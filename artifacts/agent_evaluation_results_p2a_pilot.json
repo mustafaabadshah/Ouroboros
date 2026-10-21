@@ -1,0 +1,194 @@
+{
+  "evaluation_type": "real_agent_evaluation",
+  "benchmark_version": "v1.0.0",
+  "expansion_milestone": "v0.10",
+  "timestamp": "2026-10-15T19:13:32Z",
+  "configuration": {
+    "task_id_filter": null,
+    "eligible_only": false,
+    "security_only": false,
+    "category_filter": "boundary_and_edge_case",
+    "repeat_trials": 1,
+    "ablation_mode": false,
+    "dry_run": false,
+    "mock_agents": false
+  },
+  "memory_enabled_run": {
+    "evaluation_engine": "OuroborosAgentRepairEvaluator",
+    "benchmark_version": "v1.0.0",
+    "memory_enabled": true,
+    "tasks_selected": 3,
+    "tasks_attempted": 3,
+    "tasks_not_run": 0,
+    "eligible_tasks": 3,
+    "adversarial_tasks": 0,
+    "repairs_passed": 2,
+    "repairs_failed": 1,
+    "policy_blocked": 0,
+    "timed_out": 0,
+    "infrastructure_failures": 0,
+    "provider_unavailable": 0,
+    "attempted_repair_success_rate": 0.6667,
+    "eligible_repair_success_rate": 0.6667,
+    "adversarial_block_rate": null,
+    "outcome_distribution": {
+      "PASSED_REPAIR": 2,
+      "FAILED_REPAIR": 1,
+      "BLOCKED_BY_POLICY": 0,
+      "TIMED_OUT": 0,
+      "INFRASTRUCTURE_ERROR": 0,
+      "PROVIDER_UNAVAILABLE": 0,
+      "NOT_RUN": 0
+    },
+    "total_tokens_in": 1784,
+    "total_tokens_out": 1830,
+    "median_duration_ms": 22935,
+    "total_duration_ms": 76429,
+    "task_results": [
+      {
+        "task_id": "BENCH-01",
+        "name": "Input Validation Boundary Guard",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 303,
+        "tokens_out": 79,
+        "phase_timings": {
+          "planning_ms": 16193,
+          "coding_ms": 2763,
+          "evaluation_ms": 2614,
+          "total_ms": 22935
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 22935,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-04",
+        "name": "Numeric Boundary Clamping",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "PASS",
+        "outcome": "PASSED_REPAIR",
+        "passed": true,
+        "attempts_executed": 1,
+        "max_attempts": 3,
+        "tokens_in": 365,
+        "tokens_out": 105,
+        "phase_timings": {
+          "planning_ms": 814,
+          "coding_ms": 2843,
+          "evaluation_ms": 2563,
+          "total_ms": 7581
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": true,
+            "regression_passed": true,
+            "verdict": "PASS"
+          }
+        ],
+        "duration_ms": 7581,
+        "error_detail": null
+      },
+      {
+        "task_id": "BENCH-05",
+        "name": "Pagination Window Slice Calculator",
+        "category": "boundary_and_edge_case",
+        "difficulty": "small",
+        "is_eligible": true,
+        "is_adversarial": false,
+        "memory_enabled": true,
+        "model_provider": "groq",
+        "model_name": "qwen/qwen3.8-27b",
+        "verdict": "FAIL",
+        "outcome": "FAILED_REPAIR",
+        "passed": false,
+        "attempts_executed": 3,
+        "max_attempts": 3,
+        "tokens_in": 1116,
+        "tokens_out": 1646,
+        "phase_timings": {
+          "planning_ms": 614,
+          "coding_ms": 35222,
+          "evaluation_ms": 8613,
+          "total_ms": 45913
+        },
+        "history": [
+          {
+            "attempt": 1,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          },
+          {
+            "attempt": 2,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          },
+          {
+            "attempt": 3,
+            "acceptance_passed": false,
+            "regression_passed": true,
+            "verdict": "FAIL",
+            "failures": [
+              {
+                "test_name": "[100%]",
+                "traceback": ""
+              },
+              {
+                "test_name": "test_paginator.py::test_paginate_boundaries_and_validation",
+                "traceback": "- Assertion..."
+              }
+            ]
+          }
+        ],
+        "duration_ms": 45913,
+        "error_detail": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "timestamp_utc": "2026-10-16T09:04:28.516959+00:00",
+  "repo_git": {
+    "branch": "feature/v0.10-benchmark-expansion",
+    "head": "549608c2a212c35e3d98e79656056a40ddef0fd5",
+    "status": [
+      " M artifacts/benchmark_results.json",
+      " M artifacts/post_rc1_release_report.json",
+      " M backend/app/agents/local_coder.py",
+      " M backend/app/agents/planner.py",
+      " M backend/app/agents/repair_agent.py",
+      " M backend/app/evaluation/benchmark.py",
+      " M backend/app/evaluation/judge.py",
+      " M backend/app/evaluation/runner.py",
+      " M backend/app/memory/flywheel.py",
+      " M backend/app/sandbox/security.py",
+      " M backend/tests/unit/test_security_sandbox.py",
+      " M scripts/run_benchmarks.py",
+      " M scripts/verify_release.py",
+      "?? artifacts/agent_eval_ablation_consolidated.json",
+      "?? artifacts/agent_eval_adversarial_bench03.json",
+      "?? artifacts/agent_eval_memory_disabled_sweep.json",
+      "?? artifacts/agent_eval_memory_enabled_sweep.json",
+      "?? artifacts/agent_eval_p2c_bench05.json",
+      "?? artifacts/agent_eval_p2c_bench13.json",
+      "?? artifacts/agent_eval_p2c_bench14.json",
+      "?? artifacts/agent_eval_p2c_bench15.json",
+      "?? artifacts/agent_eval_p2c_sweep.json",
+      "?? artifacts/agent_evaluation_results.json",
+      "?? artifacts/agent_evaluation_results_p2a_pilot.json",
+      "?? artifacts/smoke_test_bench04.json",
+      "?? artifacts/v0_11/",
+      "?? backend/app/evaluation/agent_evaluator.py",
+      "?? backend/app/evaluation/failure_context.py",
+      "?? backend/tests/unit/test_agent_evaluator.py",
+      "?? backend/tests/unit/test_benchmark_expansion.py",
+      "?? backend/tests/unit/test_failure_context.py",
+      "?? backend/tests/unit/test_phase2c_pipeline.py",
+      "?? docs/V0_10_BENCHMARKS.md",
+      "?? docs/V0_10_PRIORITY_2B_REPORT.md",
+      "?? docs/V0_10_PRIORITY_2C_REPORT.md",
+      "?? scripts/run_agent_eval.py"
+    ],
+    "diff_stat": [
+      " artifacts/benchmark_results.json            | 1032 +++++++++++++++++--",
+      " artifacts/post_rc1_release_report.json      |   53 +-",
+      " backend/app/agents/local_coder.py           |    4 +",
+      " backend/app/agents/planner.py               |   62 ++",
+      " backend/app/agents/repair_agent.py          |   47 +-",
+      " backend/app/evaluation/benchmark.py         | 1467 +++++++++++++++++++++++++--",
+      " backend/app/evaluation/judge.py             |   76 +-",
+      " backend/app/evaluation/runner.py            |   36 +-",
+      " backend/app/memory/flywheel.py              |  100 +-",
+      " backend/app/sandbox/security.py             |   25 +-",
+      " backend/tests/unit/test_security_sandbox.py |   33 +",
+      " scripts/run_benchmarks.py                   |  337 +++++-",
+      " scripts/verify_release.py                   |    4 +-",
+      " 13 files changed, 3015 insertions(+), 261 deletions(-)"
+    ]
+  },
+  "ref_repos_git": {
+    "Agent Chess": {
+      "branch": "main",
+      "head": "c7dedd8902e5c845c0fe8a6767f58312add1db3d",
+      "status": [],
+      "diff_stat": []
+    },
+    "Meta-Graph-Codebase-Navigator": {
+      "branch": "main",
+      "head": "86d9597f98ec37e09a1b3c00d389acce8980aa24",
+      "status": [],
+      "diff_stat": []
+    }
+  },
+  "file_hashes": {
+    "artifacts/agent_eval_p2c_sweep.json": {
+      "exists": true,
+      "sha256": "4ecea9844bc145f581022366c24804975a96698d66881ae88f2d57527117509f",
+      "size_bytes": 23935
+    },
+    "artifacts/post_rc1_release_report.json": {
+      "exists": true,
+      "sha256": "8c17040712db72aa7ac11b1cb7d15f045bb6b8d836185b64c5b4048a1ad848bd",
+      "size_bytes": 3891
+    },
+    "artifacts/benchmark_results.json": {
+      "exists": true,
+      "sha256": "ed568f208b924ec3b12565e5340f83d2f95de5ba85ae61e32e79607fd9f84baa",
+      "size_bytes": 39151
+    },
+    "artifacts/agent_eval_ablation_consolidated.json": {
+      "exists": true,
+      "sha256": "0ad1efc0bb9febc4849d4207d760ad49ccc2080abf715def4783f85c43160558",
+      "size_bytes": 16632
+    },
+    "artifacts/agent_eval_memory_disabled_sweep.json": {
+      "exists": true,
+      "sha256": "18226de3c3d2b5a300f2a699a732f8b282036356d1b7b97ecc9e8fed3906510a",
+      "size_bytes": 22413
+    },
+    "artifacts/agent_eval_memory_enabled_sweep.json": {
+      "exists": true,
+      "sha256": "5e76743ccf59f78cd582d3a8cfeb1bf343473d9d0402fa697b1a5fa069bd3aab",
+      "size_bytes": 20660
+    },
+    "backend/app/agents/repair_agent.py": {
+      "exists": true,
+      "sha256": "ad59733d51753e207bbe6c15317b59ea56bb8669f6081c3c4f9243ee6d82157b",
+      "size_bytes": 3912
+    },
+    "backend/app/agents/planner.py": {
+      "exists": true,
+      "sha256": "44ccf0a3b2b68540242114766694f0a7051766bd50e5171c35a3f07b588ef3b4",
+      "size_bytes": 6107
+    },
+    "backend/app/agents/local_coder.py": {
+      "exists": true,
+      "sha256": "e85eff07e954d2e52fbc7ab4536d9979e28b0e3bfa23e5ce114d771c9f33baf9",
+      "size_bytes": 2224
+    },
+    "backend/app/evaluation/agent_evaluator.py": {
+      "exists": true,
+      "sha256": "01a65d4647db14c86d84d92498ba5acea689f26ff26c1cba3fdb43b397a16356",
+      "size_bytes": 30387
+    },
+    "backend/app/evaluation/failure_context.py": {
+      "exists": true,
+      "sha256": "11e3ac236e94a493f0011019c6da9800f9a1eef71cd769437d46f2c40a7b8961",
+      "size_bytes": 13841
+    },
+    "backend/app/evaluation/benchmark.py": {
+      "exists": true,
+      "sha256": "7342a346935950debcefe4c979756236e107209274371961460bcb617f71007f",
+      "size_bytes": 74496
+    },
+    "backend/app/evaluation/judge.py": {
+      "exists": true,
+      "sha256": "ae32ebf251c6b575dab27f65ab1da97cac0d890e4ac41c1a361bb252dacac816",
+      "size_bytes": 11296
+    },
+    "backend/app/evaluation/runner.py": {
+      "exists": true,
+      "sha256": "051b7512472c9ae8df4328585aa25803db77bf93c49d37b035dcfae753f30cc7",
+      "size_bytes": 8126
+    },
+    "backend/app/memory/flywheel.py": {
+      "exists": true,
+      "sha256": "c07d3c5b96a565654958b68de5dfba966bc8147cfcd0953246bed2f8c60a17f7",
+      "size_bytes": 8146
+    },
+    "backend/app/sandbox/security.py": {
+      "exists": true,
+      "sha256": "1ca6b8c05ee5c8ff91c12c66adc7de95cedc762ae72f4c67f23035183213d591",
+      "size_bytes": 6102
+    },
+    "scripts/run_benchmarks.py": {
+      "exists": true,
+      "sha256": "17ecf7e9b3f389294dae5046befbd6e6d625cdd27ab0e4d43b4327a1c38d56c0",
+      "size_bytes": 15271
+    },
+    "scripts/run_agent_eval.py": {
+      "exists": true,
+      "sha256": "9333d21c44c780ab0976ccea9f8871309d8f44c82df4ddd6136c45265ead1bc9",
+      "size_bytes": 6196
+    },
+    "scripts/verify_release.py": {
+      "exists": true,
+      "sha256": "9bc1a164a45a789213ffc532249b8c63b2e54299c3cf6965be9635d60d77c0cc",
+      "size_bytes": 17820
+    }
+  },
+  "recomputed_metrics": {
+    "total_task_records": 16,
+    "eligible_tasks_count": 15,
+    "eligible_passed_count": 15,
+    "eligible_repair_rate": 1.0,
+    "adversarial_count": 1,
+    "adversarial_blocked_count": 1,
+    "adversarial_block_rate": 1.0,
+    "total_duration_ms": 447697,
+    "eligible_duration_ms": 446216,
+    "recomputed_tokens_in": 7899,
+    "recomputed_tokens_out": 2788,
+    "total_tokens_sum": 10687,
+    "max_attempts": 1,
+    "mean_attempts": 1.0
+  },
+  "comparison": {
+    "reported_eligible_pass_rate": 1.0,
+    "recomputed_eligible_pass_rate": 1.0,
+    "reported_total_tokens_in": 7899,
+    "recomputed_tokens_in": 7899,
+    "reported_total_tokens_out": 2788,
+    "recomputed_tokens_out": 2788,
+    "reported_total_duration_ms": 447697,
+    "recomputed_duration_ms": 447697,
+    "gate_4_eligible_tasks": 15,
+    "gate_4_passed_tasks": 15,
+    "gate_4_blocked_tasks": 1
+  },
+  "findings": {
+    "git_branch_and_head": {
+      "status": "VERIFIED",
+      "details": "Branch: feature/v0.10-benchmark-expansion, Head: 549608c2a212c35e3d98e79656056a40ddef0fd5"
+    },
+    "working_tree_state": {
+      "status": "VERIFIED",
+      "details": "36 modified/untracked files preserved intact."
+    },
+    "release_commit_presence": {
+      "status": "VERIFIED",
+      "details": "HEAD matches release commit: 549608c2a212c35e3d98e79656056a40ddef0fd5"
+    },
+    "evaluation_source_uncommitted_state": {
+      "status": "VERIFIED",
+      "details": "Evaluation & agent core files contain uncommitted changes from v0.10 Priority 2C, fully indexed and tracked in SHA-256 baseline."
+    },
+    "all_16_tasks_accounted": {
+      "status": "VERIFIED",
+      "details": "All 16 tasks accounted for in agent_eval_p2c_sweep.json (BENCH-01 through BENCH-16)."
+    },
+    "separate_denominators": {
+      "status": "VERIFIED",
+      "details": "Eligible repairs denominator = 15, Adversarial denominator = 1. Policy blocks strictly excluded from repair success."
+    },
+    "attempt_counts_bounded": {
+      "status": "VERIFIED",
+      "details": "Max attempts observed is 1 (budget <= 3 strictly maintained, mean 1.00)."
+    },
+    "recomputed_aggregates": {
+      "status": "VERIFIED",
+      "details": "Tokens recompute exactly: In=7899, Out=2788, Total=10687. Total duration sum = 447697 ms."
+    },
+    "cross_artifact_reconciliation": {
+      "status": "VERIFIED",
+      "details": "post_rc1_release_report.json Gate 4 matches agent_eval_p2c_sweep.json on eligible (15), passed (15), and blocked (1)."
+    },
+    "reference_repos_safety": {
+      "status": "VERIFIED",
+      "details": "Reference repositories (Agent Chess, Meta-Graph-Codebase-Navigator) are 100% clean and unmodified."
+    }
+  }
+}

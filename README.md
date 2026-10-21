@@ -18,9 +18,11 @@ The Ouroboros architecture strictly isolates the autonomous agent swarm, model r
 1. **Grounded AST Ingestion:** Queries the existing Meta-Graph Codebase Navigator index (750 nodes, 2,105 edges) without requiring a running Neo4j/Redis instance.
 2. **Jira-Style Ticket Synthesis:** Architect Agent synthesizes bounded, testable tickets with explicit acceptance criteria.
 3. **Isolated Git Worktrees:** Candidate patches are applied and evaluated exclusively in disposable Git worktrees—the user's repository branch is **never** overwritten.
-4. **Deterministic Evaluation Harness:** Pytest-based regression gates enforce a strict 0-regression policy. Patches are accepted only when empirical tests pass.
-5. **Persistent Failure Flywheel:** Captures failed assertions, tracebacks, and AST diffs in SQLite to guide subsequent repair attempts.
-6. **Explicit Human Approval Gate:** Merges into the production repository require deliberate confirmation from the operator via the React dashboard.
+4. **AST Fail-Fast Test Impact Ordering:** Runs targeted tests calling modified AST symbols first, failing bad runs in <3 seconds before invoking the full test suite.
+5. **Deterministic Evaluation Harness:** Pytest-based regression gates enforce a strict 0-regression policy. Patches are accepted only when empirical tests pass.
+6. **Persistent Failure Flywheel:** Captures failed assertions, tracebacks, and AST diffs in SQLite to guide subsequent repair attempts across 3 bounded cycles.
+7. **Explicit Human Approval Gate:** Merges into the production repository require deliberate confirmation from the operator via the React dashboard.
+8. **Arize Phoenix AI Observability:** Captures OpenTelemetry traces for every LLM interaction, token cost, prompt input/output, and lifecycle transition.
 
 ---
 
@@ -28,7 +30,7 @@ The Ouroboros architecture strictly isolates the autonomous agent swarm, model r
 
 Designed and verified on Windows 10/11 x64 under an **8 GB physical RAM constraint**:
 - **Processor:** Intel Core with integrated Intel HD Graphics 620 (**No CUDA / GPU requirements**).
-- **Python Version:** 3.12.3 64-bit.
+- **Python Version:** 3.12+ 64-bit.
 - **Default Local Model:** `qwen2.5-coder:1.5b` (986 MB download size, 2048 token context window).
 - **Remote Provider:** Groq API (`llama-3.3-70b-versatile` and `llama-3.1-8b-instant`).
 - **Global Concurrency Limits:** Strict `asyncio.Lock()` enforces a maximum of **1 active pytest runner** and **1 active inference request** across the system.
@@ -58,30 +60,34 @@ Zero merges into production without explicit human operator confirmation. Approv
 
 ---
 
-## 5. Quick Start (Windows Developer Experience)
+## 5. Quick Start (Local Development)
 
-Project Ouroboros provides five automated PowerShell scripts in `scripts/`:
+### Prerequisites
+- Python 3.12+
+- Node.js 20+
+- Git
 
-### Step 1: Check Environment
-Verify Python 3.12+, Node.js, Git, and available system RAM:
+### Step 1: Clone & Check Environment
 ```powershell
+git clone https://github.com/mustafaabadshah/Ouroboros.git
+cd Ouroboros
 powershell -ExecutionPolicy Bypass scripts/check-environment.ps1
 ```
 
 ### Step 2: Automated Setup
-Initializes the Python virtual environment (`.venv`), installs pinned backend packages, and installs frontend npm dependencies:
+Initializes the Python virtual environment (`.venv`), installs backend dependencies, and installs frontend npm packages:
 ```powershell
 powershell -ExecutionPolicy Bypass scripts/setup.ps1
 ```
 
 ### Step 3: Run Automated Test Suite
-Runs all 31 backend unit, integration, adversarial security, and evaluation tests completely offline:
+Runs the comprehensive backend unit, integration, adversarial security, and evaluation tests:
 ```powershell
 powershell -ExecutionPolicy Bypass scripts/test.ps1
 ```
 
 ### Step 4: Start Services
-Launches the FastAPI backend on port 8000 and the React dashboard on port 5173:
+Launches the FastAPI backend on port 8000, Arize Phoenix on port 6006, and the React dashboard on port 5173:
 ```powershell
 powershell -ExecutionPolicy Bypass scripts/start.ps1
 ```
@@ -98,17 +104,100 @@ powershell -ExecutionPolicy Bypass scripts/stop.ps1
 
 ---
 
-## 6. Repository Layout
+## 6. Containerized Deployment (Docker Compose)
+
+Project Ouroboros includes production Dockerfiles for one-click containerization:
+
+```bash
+# Set your Groq API key (optional if using mock mode)
+echo "GROQ_API_KEY=your_key_here" > .env
+
+# Launch entire 3-service stack in the background
+docker compose up -d
+```
+
+This spins up:
+1. **Frontend Service** (`ouroboros-frontend` on port `5173`): Production multi-stage Nginx container serving compiled React SPA and proxying `/api/` with SSE support.
+2. **Backend Service** (`ouroboros-backend` on port `8000`): FastAPI application with Git installed for isolated candidate worktrees and deterministic harnesses.
+3. **Phoenix Telemetry** (`ouroboros-phoenix` on port `6006`): OpenTelemetry collector and real-time LLM tracing dashboard.
+
+---
+
+## 7. Deploying Online for Free (100% Zero-Cost Hosting)
+
+You can host Project Ouroboros publicly on free-tier cloud platforms without requiring credit cards or paid compute:
+
+### Architecture for Free Cloud Deployment
+- **Frontend SPA**: Hosted on **Vercel** or **Cloudflare Pages** (Free Tier).
+- **Backend API & Worktrees**: Hosted on **Render.com** (Free Web Service) or **Hugging Face Spaces** (Free Docker Container).
+
+---
+
+### Method A: Render (Backend) + Vercel (Frontend) [Recommended]
+
+#### 1. Deploy Backend to Render (Free)
+1. Sign up for a free account at [Render.com](https://render.com).
+2. Click **New +** ➔ **Web Service** ➔ Connect your GitHub repository `mustafaabadshah/Ouroboros`.
+3. Choose:
+   - **Environment:** `Docker`
+   - **Dockerfile Path:** `backend/Dockerfile`
+   - **Docker Context:** `.` (root of repo)
+   - **Instance Type:** `Free`
+4. In **Environment Variables**, add:
+   - `APP_ENV` = `production`
+   - `CORS_ORIGINS` = `*`
+   - `GROQ_API_KEY` = `your_free_groq_api_key` (get one free at [console.groq.com](https://console.groq.com))
+   - `PHOENIX_ENABLED` = `false` *(recommended for Render free tier to conserve 512MB RAM)*
+5. Click **Deploy Web Service**.
+6. Copy your public backend URL: `https://ouroboros-backend-xxxx.onrender.com`.
+
+#### 2. Deploy Frontend to Vercel (Free)
+1. Sign up for free at [Vercel.com](https://vercel.com).
+2. Click **Add New...** ➔ **Project** ➔ Import your repository `mustafaabadshah/Ouroboros`.
+3. Set:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** `Vite`
+4. In **Environment Variables**, add:
+   - `VITE_API_URL` = `https://ouroboros-backend-xxxx.onrender.com` *(your Render URL from Step 1)*
+5. Click **Deploy**.
+6. Your live dashboard is now accessible globally at `https://your-project.vercel.app`!
+
+---
+
+### Method B: Hugging Face Spaces (All-in-One Docker Container - Free)
+Hugging Face offers free 16GB RAM CPU Docker containers:
+1. Create a free account at [Hugging Face](https://huggingface.co).
+2. Create a new **Space** ➔ Select **Docker (Blank)** ➔ Space Hardware: **CPU Basic (Free)**.
+3. Push your repository to the Space remote.
+4. Set Secret `GROQ_API_KEY` in Space Settings.
+5. The entire multi-agent swarm, UI, and backend run in a single self-contained environment with persistent storage.
+
+---
+
+## 8. Continuous Integration & Security (GitHub Actions)
+
+The repository includes a hardened, offline CI pipeline in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+
+- **Zero Secret Leaks Gate**: Verifies no raw API keys (`gsk_...`, `ghp_...`) are committed.
+- **Python Syntax & Bytecode Compilation**: Ensures zero import or bytecode syntax errors via `compileall`.
+- **Hermetic Backend Test Suite**: Executes 167+ unit and integration tests with `OUROBOROS_MOCK_ONLY=1` and `PHOENIX_ENABLED=false`.
+- **Frontend Quality Gate**: Validates TypeScript types and builds the production bundle with `oxlint` and `vite build`.
+
+---
+
+## 9. Repository Layout
 
 ```
 Ouroboros/
 ├── .env.example                     # Environment template with secret placeholders
+├── .github/workflows/ci.yml         # Hardened offline GitHub Actions CI pipeline
+├── docker-compose.yml               # Unified multi-container deployment stack
 ├── pyproject.toml                   # Pinned Python dependencies (Python 3.12)
-├── README.md                        # Primary developer documentation & UI showcase
-├── CHANGELOG.md                     # Semantic versioning changelog
+├── README.md                        # Primary documentation, quickstart & deployment guide
 ├── backend/
+│   ├── Dockerfile                   # Production container for backend & Git worktrees
 │   ├── app/
-│   │   ├── main.py                  # FastAPI application entry point with lifespan reconciliation
+│   │   ├── main.py                  # FastAPI application entry point with multi-domain CORS
 │   │   ├── api/                     # REST routers (health, repositories, tickets, runs, evaluation, models, settings)
 │   │   ├── core/                    # Security, path validation, config, logging, event bus
 │   │   ├── database/                # SQLite session, models, repositories
@@ -116,68 +205,48 @@ Ouroboros/
 │   │   ├── agents/                  # AutoGen runtime, Architect, Planner, Coder, Critic, Judge, Repair agents
 │   │   ├── providers/               # Ollama, Groq, Mock providers & ModelRouter
 │   │   ├── integrations/
-│   │   │   ├── graph/               # MetaGraphAdapter (API -> JSON -> AST scanner)
+│   │   │   ├── graph/               # MetaGraphAdapter (AST call graph scanner)
 │   │   │   └── git/                 # GitWorktreeManager & UnifiedDiffParser
 │   │   ├── evaluation/              # MetricsCalculator, BenchmarkHarness, PytestRunner, DeterministicJudge
 │   │   ├── sandbox/                 # SandboxDetector, fail-closed container boundary
-│   │   └── memory/                  # FailureFlywheel persistent memory
+│   │   ├── memory/                  # FailureFlywheel persistent memory
+│   │   └── observability/           # Arize Phoenix OpenTelemetry tracing service
 │   └── tests/                       # Unit, integration, adversarial, and E2E fixture test suite
 ├── frontend/
+│   ├── Dockerfile                   # Multi-stage production Nginx container
+│   ├── nginx.conf                   # Nginx reverse proxy configuration with SSE support
 │   ├── src/
 │   │   ├── components/              # Navbar, Sidebar, StatusBadge, DiffViewer
-│   │   ├── pages/                   # All 10 dashboard views including EvaluationLabPage
-│   │   ├── services/api.ts          # Centralized typed REST & SSE client
+│   │   ├── pages/                   # All 10 dashboard views including AgentRunsPage & EvaluationLab
+│   │   ├── services/api.ts          # Centralized typed REST & SSE client with VITE_API_URL support
 │   │   └── types/index.ts           # TypeScript interfaces matching backend schemas
 │   ├── vite.config.ts               # Vite configuration with Tailwind CSS v4 & proxy
 │   └── package.json
 ├── artifacts/
 │   ├── baseline/                    # Initial verification baseline reports
-│   ├── benchmark_results.json       # Versioned benchmark and ablation execution results
-│   └── release_gate_report.json     # Comprehensive G1-G14 release gate audit report
+│   └── release_gate_report.json     # Comprehensive release gate audit report
 ├── docs/
-│   ├── images/                      # High-res architecture diagrams and UI screenshots
+│   ├── images/                      # Architecture diagrams and dashboard screenshots
 │   ├── ARCHITECTURE.md              # Deep-dive system architecture specification
-│   ├── CODEBASE_AUDIT.md            # Ground-truth codebase and layer audit report
-│   ├── IMPLEMENTATION_BACKLOG.md    # Prioritized engineering tasks backlog
-│   ├── MASTER_ROADMAP.md            # Comprehensive project roadmap & release gates G1-G14
+│   ├── MASTER_ROADMAP.md            # Comprehensive project roadmap & release gates
 │   ├── RELEASE_RUNBOOK.md           # Operational setup, verification & troubleshooting guide
-│   ├── KNOWN_LIMITATIONS.md         # Documented limitations & security threat boundaries
-│   ├── METRICS_REFERENCE.md         # Mathematical definitions of honest evaluation metrics
-│   ├── FAILURE_MEMORY_DESIGN.md     # FailureFlywheel schema & retrieval architecture
-│   ├── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
-│   ├── CONTAINER_RUNTIME_VERIFICATION.md # Docker Desktop / WSL2 capability verification
-│   ├── EXECUTION_BOUNDARY_AUDIT.md  # Comprehensive execution entry-point security audit
-│   ├── MODEL_ROUTING_AND_PRIVACY.md # Agent schemas, routing rules & privacy standards
-│   ├── CODE_GRAPH_INTEGRATION.md    # MetaGraph 3-tier architecture & data contracts
-│   ├── EVALUATION_METHODOLOGY.md    # Standardized evaluation metrics & task taxonomy
-│   ├── FAILURE_MEMORY_EVALUATION.md # Empirical ablation study on FailureFlywheel
-│   ├── WINDOWS_OPERATIONS.md        # Windows host operations, port bindings & SRE guide
-│   ├── POST_RC1_RELEASE_CHECKLIST.md# Post-RC1 release qualification gates & checklist
-│   ├── POST_RC1_KNOWN_LIMITATIONS.md# Risk register, hardware constraints & limitations
-│   └── POST_RC1_FINAL_REPORT.md     # Comprehensive post-RC1 engineering & verification report
+│   └── PHOENIX_OBSERVABILITY.md     # Arize Phoenix telemetry & tracing protocol
 └── scripts/
     ├── check-environment.ps1        # Verifies host prerequisites
     ├── setup.ps1                    # Installs backend virtualenv and npm dependencies
     ├── start.ps1                    # Launches backend, frontend & Phoenix with process tracking
-    ├── stop.ps1                     # Terminates background processes safely (Windows tree kill)
+    ├── stop.ps1                     # Terminates background processes safely
     ├── test.ps1                     # Executes full pytest suite
-    ├── run_benchmarks.py            # Executes versioned benchmark suite with memory ablation
-    ├── verify_release.py            # Automated machine-readable release qualification harness
-    └── demonstrate_complete_workflow.py # 13-step software repair demonstrator
+    └── run_phoenix.py               # Phoenix telemetry daemon launcher
 ```
 
 ---
 
-## 7. Verification & Empirical Test Evidence (`v0.9.1-pre`)
+## 10. Verification & Empirical Evidence
 
-- **Full Backend Pytest Suite:** **35 / 35 passed** (Unit, Integration, 18 Adversarial Security Tests, and Evaluation API).
-- **Independent Acceptance Suite:** **20 / 20 passed** in `backend/tests/verify_acceptance.py`.
-- **Frontend Production Build:** **1,935 modules compiled in 2.03s with 0 errors** (`npm run build`).
-- **Complete Workflow Demonstrator:** **12/12 logic steps passed**, Step 8 container execution reported **`BLOCKED`** when daemon is offline, and executes cleanly in container isolation when Docker is active.
-- **Evaluation Benchmark Suite:** Versioned benchmark `BENCHMARK_TASKS_V1` executed with FailureFlywheel memory enabled vs disabled (ablation); results persisted in `artifacts/benchmark_results.json`.
-- **Adversarial Security Suite:** Verified protection against path traversal (`SEC-01`), symlink escapes (`SEC-02`), test file tampering (`SEC-03`), protected file edits (`SEC-04`), merge authorization bypasses (`WRK-01`), stale replay attacks (`WRK-02`), target-branch drift, and Docker socket access attempts.
-- **Container Isolation:** Docker Desktop with WSL2 engine integration (`docker 25.0.3`) supported; fail-closed execution policy strictly enforces container isolation without unsafe host fallback.
-- **Machine-Readable Release Report:** Automated qualification harness `scripts/verify_release.py` evaluates all release gates and exports `artifacts/post_rc1_release_report.json`.
-- **Reference Repositories Untouched:** Verified zero modifications to `Agent Chess` and `Meta-Graph-Codebase-Navigator`.
-
-
+- **Full Backend Pytest Suite:** **167 passed, 2 skipped, 0 failed in 177s**.
+- **Frontend Production Bundle:** **1,935 modules compiled in 2.71s with 0 errors** (`npm run build`).
+- **End-to-End Autonomous Run:** Run `run-cac6c10c` on ticket `ouro-6140cc` completed full baseline, DAG planning, AST validation, impact ordering, and full regression in 86s with **VERDICT: PASS**.
+- **Adversarial Security Hardening:** Verified protection against path traversal, symlink escapes, unauthorized file access, forbidden subprocess calls (`ASTSecurityVisitor`), and command injection.
+- **Fail-Fast Test Impact Ordering:** Automatically derives call-graph dependencies from AST nodes to run impacted test suites before full regression.
+- **Persistent Failure Memory Flywheel:** Automatically logs failed attempts and feeds structured failure context into repair prompts to resolve bugs within 3 bounded retries.

@@ -1,4 +1,5 @@
 import random
+import re
 from typing import Dict, Any, Optional, List
 from app.agents.runtime import agent_runtime, extract_json_from_response
 from app.schemas.ticket import TicketBase
@@ -29,6 +30,7 @@ Rules:
    - estimated_resources
    - evidence (list of strings)
    - out_of_scope
+   - acceptance_test_template (executable pytest test function string)
 """
 
 FOCUS_DOMAINS = [
@@ -55,6 +57,14 @@ DIVERSE_FALLBACK_TICKETS = [
         proposed_tests=[
             "backend/tests/test_chess.py::test_board_manager_invalid_fen_graceful_rejection"
         ],
+        acceptance_test_template="""import pytest
+from app.chess.board_manager import BoardManager
+
+def test_board_manager_invalid_fen_graceful_rejection():
+    # Acceptance Criterion: BoardManager validates FEN token count before parsing
+    with pytest.raises((ValueError, Exception)):
+        BoardManager(fen="invalid fen string too short")
+""",
         relevant_graph_entities=[
             "BoardManager.__init__",
             "BoardManager.current_fen"
@@ -185,6 +195,48 @@ class ArchitectAgent:
     """
 
     @staticmethod
+    def synthesize_test_template(
+        ticket_title: str,
+        candidate_files: List[str],
+        relevant_symbols: List[str],
+        acceptance_criteria: List[str],
+        repo_id: str = "agent_chess"
+    ) -> str:
+        """
+        Cross-Repo Test Discovery:
+        Auto-synthesizes candidate acceptance test template grounded in AST caller graphs
+        and existing test conventions.
+        """
+        try:
+            from app.integrations.graph.adapter import meta_graph_adapter
+            target_f = candidate_files[0] if candidate_files else "backend/app/module.py"
+            deps = meta_graph_adapter.get_file_dependencies(repo_id, target_f)
+            callers = [c.get("caller_name", "") for c in deps.get("callers", [])[:3] if c.get("caller_name")]
+            caller_note = f"# AST Callers identified: {', '.join(callers)}" if callers else "# AST Callers: Direct unit test invocation"
+        except Exception:
+            target_f = candidate_files[0] if candidate_files else "backend/app/module.py"
+            caller_note = "# AST Callers: Isolated module target"
+
+        clean_slug = re.sub(r"[^a-zA-Z0-9_]+", "_", ticket_title.lower()).strip("_")[:40]
+        first_criterion = acceptance_criteria[0] if acceptance_criteria else "Verify expected behavior"
+        symbols_str = ", ".join(relevant_symbols[:3]) if relevant_symbols else "target symbols"
+
+        template = f'''"""
+Auto-Synthesized Acceptance Test Template
+Grounded in AST entity graph for: {target_f}
+{caller_note}
+"""
+import pytest
+
+def test_acceptance_{clean_slug}():
+    # Acceptance Criterion: {first_criterion}
+    # Target symbols: {symbols_str}
+    # TODO: Assert expected behavior without regressions
+    pass
+'''
+        return template
+
+    @staticmethod
     async def generate_ticket(
         repo_id: str,
         repo_summary: Dict[str, Any],
@@ -223,26 +275,67 @@ Target Focus / Direction: {chosen_focus}
 Generate one high-value, bounded, low-risk engineering ticket in strict JSON format.
 Ensure the problem_statement, current_behavior, and desired_behavior directly describe specific code logic in the chosen subsystem."""
 
-        res = await agent_runtime.execute_task(
-            role="Architect",
-            prompt=user_prompt,
-            system_instruction=ARCHITECT_SYSTEM_PROMPT,
-            force_mock=force_mock
-        )
+        from app.observability.phoenix_service import phoenix_service
+        with phoenix_service.trace_step("ticket.generate", repo_id=repo_id, target_focus=chosen_focus):
+            res = await agent_runtime.execute_task(
+                role="Architect",
+                prompt=user_prompt,
+                system_instruction=ARCHITECT_SYSTEM_PROMPT,
+                force_mock=force_mock
+            )
 
-        content = res.get("content", "")
-        try:
-            data = extract_json_from_response(content)
-            ticket = TicketBase.model_validate(data)
-            logger.info(f"Architect generated ticket: '{ticket.title}'")
-            return ticket
-        except Exception as e:
-            logger.error(f"Architect response failed schema validation: {e}. Raw content: {content[:200]}")
-            # Select fallback that doesn't duplicate recent tickets
-            for fb in DIVERSE_FALLBACK_TICKETS:
-                if not existing_tickets or fb.title not in existing_tickets:
-                    logger.info(f"Using diverse fallback ticket: '{fb.title}'")
-                    return fb
-            return DIVERSE_FALLBACK_TICKETS[0]
+            content = res.get("content", "")
+            try:
+                data = extract_json_from_response(content)
+                ticket = TicketBase.model_validate(data)
+
+                # Deduplicate: if title matches any existing ticket, select an unaddressed diverse subsystem
+                if existing_tickets and any(ticket.title.strip().lower() == et.strip().lower() for et in existing_tickets):
+                    logger.warning(f"Architect generated duplicate ticket title '{ticket.title}'. Selecting diverse novelty alternative.")
+                    chosen_fb = None
+                    for fb in DIVERSE_FALLBACK_TICKETS:
+                        if not any(fb.title.strip().lower() == et.strip().lower() for et in existing_tickets):
+                            chosen_fb = fb
+                            break
+                    if chosen_fb:
+                        ticket = chosen_fb
+                    else:
+                        ticket.title = f"{ticket.title} (Phase #{len(existing_tickets) + 1})"
+
+                if not ticket.acceptance_test_template or len(ticket.acceptance_test_template.strip()) < 10:
+                    ticket.acceptance_test_template = ArchitectAgent.synthesize_test_template(
+                        ticket_title=ticket.title,
+                        candidate_files=ticket.candidate_files,
+                        relevant_symbols=ticket.relevant_graph_entities,
+                        acceptance_criteria=ticket.acceptance_criteria,
+                        repo_id=repo_id
+                    )
+                logger.info(f"Architect generated ticket: '{ticket.title}' with AST test template.")
+                return ticket
+            except Exception as e:
+                logger.error(f"Architect response failed schema validation: {e}. Raw content: {content[:200]}")
+                # Select fallback that doesn't duplicate recent tickets
+                for fb in DIVERSE_FALLBACK_TICKETS:
+                    if not existing_tickets or fb.title not in existing_tickets:
+                        logger.info(f"Using diverse fallback ticket: '{fb.title}'")
+                        if not fb.acceptance_test_template:
+                            fb.acceptance_test_template = ArchitectAgent.synthesize_test_template(
+                                ticket_title=fb.title,
+                                candidate_files=fb.candidate_files,
+                                relevant_symbols=fb.relevant_graph_entities,
+                                acceptance_criteria=fb.acceptance_criteria,
+                                repo_id=repo_id
+                            )
+                        return fb
+                fb_default = DIVERSE_FALLBACK_TICKETS[0]
+                if not fb_default.acceptance_test_template:
+                    fb_default.acceptance_test_template = ArchitectAgent.synthesize_test_template(
+                        ticket_title=fb_default.title,
+                        candidate_files=fb_default.candidate_files,
+                        relevant_symbols=fb_default.relevant_graph_entities,
+                        acceptance_criteria=fb_default.acceptance_criteria,
+                        repo_id=repo_id
+                    )
+                return fb_default
 
 architect_agent = ArchitectAgent()

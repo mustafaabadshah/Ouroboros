@@ -1,6 +1,13 @@
 version: '3.8'
 
 services:
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: ouroboros-phoenix
+    ports:
+      - "6006:6006"
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -14,8 +21,11 @@ services:
       - PORT=8000
       - DATABASE_URL=sqlite:////app/data/ouroboros.db
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006/v1/traces
     volumes:
       - ouroboros_data:/app/data
+    depends_on:
+      - phoenix
     restart: unless-stopped
 
   frontend:

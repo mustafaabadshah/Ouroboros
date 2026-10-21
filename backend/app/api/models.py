@@ -61,7 +61,7 @@ async def update_models_config(req: ModelConfigUpdate, db: Session = Depends(get
 @router.post("/test-connection", response_model=ConnectionTestResponse)
 async def test_provider_connection(req: ConnectionTestRequest):
     if req.provider.lower() == "ollama":
-        res = await ollama_provider.check_health()
+        res = await ollama_provider.check_health(force_refresh=True)
         return ConnectionTestResponse(
             provider="ollama",
             success=res.get("available", False),
@@ -69,7 +69,7 @@ async def test_provider_connection(req: ConnectionTestRequest):
             message="Ollama connected." if res.get("available") else res.get("message", "Offline")
         )
     elif req.provider.lower() == "groq":
-        res = await groq_provider.check_health()
+        res = await groq_provider.check_health(force_refresh=True)
         return ConnectionTestResponse(
             provider="groq",
             success=res.get("available", False),
