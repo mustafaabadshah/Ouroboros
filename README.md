@@ -2,6 +2,14 @@
 ### Hierarchical Software Evolution and Deterministic Repair Engine
 *A CPU-first, API-assisted, multi-agent software engineering swarm with deterministic regression gates and persistent failure memory.*
 
+[![CI](https://github.com/mustafaabadshah/Ouroboros/actions/workflows/ci.yml/badge.svg)](https://github.com/mustafaabadshah/Ouroboros/actions/workflows/ci.yml)
+[![Render Service](https://img.shields.io/badge/Render-Live%20Service-success?logo=render&logoColor=white)](https://ouroboros-backend-i9x2.onrender.com/api/health)
+[![API Docs](https://img.shields.io/badge/Swagger%20UI-OpenAPI-blue?logo=fastapi)](https://ouroboros-backend-i9x2.onrender.com/docs)
+
+- **Live Production URL**: [https://ouroboros-backend-i9x2.onrender.com](https://ouroboros-backend-i9x2.onrender.com)
+- **Interactive Swagger Docs**: [https://ouroboros-backend-i9x2.onrender.com/docs](https://ouroboros-backend-i9x2.onrender.com/docs)
+- **Health Check Endpoint**: [https://ouroboros-backend-i9x2.onrender.com/api/health](https://ouroboros-backend-i9x2.onrender.com/api/health)
+
 ---
 
 ## 1. System Architecture Diagram
