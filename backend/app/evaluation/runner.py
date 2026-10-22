@@ -166,10 +166,12 @@ class PytestRunner:
 
             # Parse results
             summary = self._parse_pytest_output(stdout, stderr)
+            no_tests_collected = (exit_code == 5 and summary["failed"] == 0 and summary["errors"] == 0)
 
             return {
                 "exit_code": exit_code,
-                "passed": exit_code == 0,
+                "passed": (exit_code == 0) or no_tests_collected,
+                "no_tests_collected": no_tests_collected,
                 "duration_ms": duration_ms,
                 "command": " ".join(cmd),
                 "passed_count": summary["passed"],

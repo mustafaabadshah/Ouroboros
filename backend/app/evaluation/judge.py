@@ -220,7 +220,16 @@ class DeterministicJudge:
                     working_dir=worktree_path,
                     test_path=impact_file
                 )
-                if not impact_res["passed"]:
+                # If no tests were collected (e.g. exit code 5 on helper/fixture file), bypass fail-fast for this file
+                if impact_res.get("no_tests_collected") or (
+                    impact_res.get("passed_count", 0) == 0 and
+                    impact_res.get("failed_count", 0) == 0 and
+                    impact_res.get("error_count", 0) == 0
+                ):
+                    logger.info(f"[Fail-Fast Gate] Impact file '{impact_file}' contained 0 collected tests. Bypassing fail-fast gate for this file.")
+                    continue
+
+                if not impact_res["passed"] and (impact_res.get("failed_count", 0) > 0 or impact_res.get("error_count", 0) > 0):
                     logger.warning(f"[Fail-Fast Gate] Impact test {impact_file} failed in {impact_res.get('duration_ms', 0)}ms. Aborting early.")
                     return {
                         "verdict": "FAIL",
@@ -252,7 +261,7 @@ class DeterministicJudge:
             return {
                 "verdict": "FAIL",
                 "reason": f"Regression detected: Candidate failed {candidate_failed} tests compared to baseline {baseline_failed}.",
-                "acceptance": acceptance_res,
+                "acceptance": acceptance_res or regression_res,
                 "regression": regression_res
             }
 

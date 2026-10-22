@@ -305,19 +305,28 @@ class WorkflowController:
 
                     if static_check["verdict"] != "PASS":
                         logger.warning(f"Static validation failed: {static_check['reason']}")
+                        rule_id = static_check.get("policy_rule_id", "StaticASTValidation")
+                        req_hint = static_check.get("policy_requirement")
+                        reason = static_check.get("reason", "Static syntax or policy violation.")
+                        if req_hint:
+                            repair_hint = f"POLICY VIOLATION [{rule_id}]: {reason}. Requirement: {req_hint}. Do NOT use dynamic __import__, eval, exec, or prohibited modules. Use standard top-level imports."
+                        else:
+                            repair_hint = f"STATIC VALIDATION FAILED: {reason}. Correct Python syntax, remove invalid hunks, and ensure valid unified diff headers."
+
                         failure_flywheel.record_failure(
                             db=db,
                             run_id=run_id,
                             ticket_id=ticket.id,
                             attempt=attempt,
-                            failed_tests=["StaticASTValidation"],
-                            traceback_excerpt=static_check["reason"],
+                            failed_tests=["StaticASTValidation", rule_id] if rule_id != "StaticASTValidation" else ["StaticASTValidation"],
+                            traceback_excerpt=reason,
                             ast_diff=static_check.get("ast_analysis", {}),
                             patch_hash=diff_hash,
-                            root_cause_hypothesis="Patch violates static constraints or contains syntax errors.",
-                            repair_hint="Correct syntax and verify diff headers.",
+                            root_cause_hypothesis=f"Patch violates static constraints: {reason}",
+                            repair_hint=repair_hint,
                             provider=coder_res.get("provider"),
-                            model=coder_res.get("model")
+                            model=coder_res.get("model"),
+                            failure_context=static_check.get("failure_context")
                         )
                         attempt += 1
                         run.retry_count = attempt - 1
@@ -420,6 +429,7 @@ class WorkflowController:
                             failed_test_names = ["TestTimeoutOrFailure"]
 
                         # Record failure trajectory
+                        failure_context = reg_res.get("failure_context") if reg_res else None
                         failure_flywheel.record_failure(
                             db=db,
                             run_id=run_id,
@@ -432,7 +442,8 @@ class WorkflowController:
                             root_cause_hypothesis=judge_eval.get("reason", "Candidate failed acceptance or regression testing."),
                             repair_hint="Fix assertions, avoid regressions in existing tests, and adhere to strict Python syntax.",
                             provider=coder_res.get("provider"),
-                            model=coder_res.get("model")
+                            model=coder_res.get("model"),
+                            failure_context=failure_context
                         )
                         attempt += 1
                         run.retry_count = attempt - 1

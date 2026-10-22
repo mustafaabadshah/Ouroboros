@@ -11,6 +11,7 @@ Rules:
 3. Respond with a valid Unified Diff inside ```diff ... ``` code blocks.
 4. CRITICAL PYTHON SYNTAX: Every compound statement ('with', 'try', 'except', 'def', 'class', 'if', 'for', 'while') MUST contain valid indented body statements. Never leave an empty or unindented block.
 5. UNIFIED DIFF INTEGRITY: Context lines (starting with a single space ' ') must exactly match the existing file content. Ensure all modifications apply cleanly without syntax or indentation errors.
+6. SECURITY & CLEAN IMPORTS: NEVER use dynamic execution or dangerous primitives: '__import__', 'eval', 'exec', 'compile', 'os.system', or 'subprocess'. Always use standard static top-level Python imports. If resolving circular imports or missing types, refactor cleanly using standard imports or TYPE_CHECKING guards.
 """
 
 class RepairAgent:

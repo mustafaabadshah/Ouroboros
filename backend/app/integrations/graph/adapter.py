@@ -440,6 +440,26 @@ class MetaGraphAdapter:
             "callers": callers[:20]  # bounded context
         }
 
+    @staticmethod
+    def _is_runnable_test_file(path_str: Optional[str]) -> bool:
+        """Determines if a path represents an executable test file (e.g. test_*.py or *_test.py), ignoring fixtures/conftest."""
+        if not path_str:
+            return False
+        clean = str(path_str).replace("\\", "/").lower()
+        if not clean.endswith(".py"):
+            return False
+        filename = Path(clean).name
+        # Disallow non-test files: conftest, __init__, fixtures, setup
+        if (
+            filename.startswith("conftest") or
+            filename.startswith("__") or
+            "fixture" in filename or
+            filename == "setup.py"
+        ):
+            return False
+        # Require standard pytest naming conventions
+        return filename.startswith("test_") or filename.endswith("_test.py")
+
     def get_associated_tests(self, repo_id: str, candidate_files: List[str]) -> List[str]:
         """Identifies test files and test functions related to the candidate files."""
         graph = self._load_local_graph(repo_id)
@@ -454,17 +474,19 @@ class MetaGraphAdapter:
                 if data.get("type") == "TESTS":
                     u_data = graph.nodes.get(u, {})
                     v_data = graph.nodes.get(v, {})
-                    if clean in str(v_data.get("rel_path", "")).lower():
-                        matched_tests.add(u_data.get("rel_path", u))
+                    target_rel = str(v_data.get("rel_path", "")).lower()
+                    test_candidate = u_data.get("rel_path", u)
+                    if clean in target_rel and self._is_runnable_test_file(test_candidate):
+                        matched_tests.add(test_candidate)
 
             # 2. Heuristic convention matching (e.g. backend/tests/test_agents.py for backend/app/agents/...)
             for node, d in graph.nodes(data=True):
                 rel = str(d.get("rel_path", "")).replace("\\", "/").lower()
-                if "test_" in rel:
+                if self._is_runnable_test_file(rel):
                     if base in rel or any(part in rel for part in Path(clean).parts if len(part) > 3):
                         matched_tests.add(d.get("rel_path"))
 
-        return sorted(list(matched_tests))
+        return sorted([t for t in matched_tests if self._is_runnable_test_file(t)])
 
     def get_impacted_tests_from_callgraph(
         self,
@@ -478,10 +500,11 @@ class MetaGraphAdapter:
         import the modified module or directly call the target symbols.
         Orders them by impact depth (direct symbol callers first, direct module importers second)
         so the Judge can execute targeted fail-fast tests within 2-3s before running the full suite.
+        Excludes fixtures, conftest.py, and non-test modules.
         """
         graph = self._load_local_graph(repo_id)
         if graph.number_of_nodes() == 0:
-            return self.get_associated_tests(repo_id, candidate_files)
+            return [t for t in self.get_associated_tests(repo_id, candidate_files) if self._is_runnable_test_file(t)]
 
         direct_symbol_test_files = set()
         direct_import_test_files = set()
@@ -509,8 +532,11 @@ class MetaGraphAdapter:
 
         for node, data in graph.nodes(data=True):
             rel = str(data.get("rel_path", "")).replace("\\", "/").lower()
-            if not ("test_" in rel or "/tests/" in rel):
+            # Only consider runnable test files (excludes conftest.py, fixtures, etc.)
+            if not self._is_runnable_test_file(rel):
                 continue
+
+            test_path_val = data.get("rel_path")
 
             # Check if this test node calls target symbols
             if norm_symbols:
@@ -518,40 +544,42 @@ class MetaGraphAdapter:
                     if edge_data.get("type") == "CALLS":
                         target_name = str(target).lower()
                         if target_name in norm_symbols or any(sym in target_name for sym in norm_symbols):
-                            direct_symbol_test_files.add(data.get("rel_path"))
+                            direct_symbol_test_files.add(test_path_val)
 
             # Check outbound IMPORTS edges from test file
             for _, target_mod, edge_data in graph.out_edges(node, data=True):
                 if edge_data.get("type") == "IMPORTS":
                     target_mod_str = str(target_mod).lower()
                     if any(c_mod in target_mod_str for c_mod in candidate_modules):
-                        direct_import_test_files.add(data.get("rel_path"))
+                        direct_import_test_files.add(test_path_val)
 
             # Check explicit TESTS edges
             for _, target_file, edge_data in graph.out_edges(node, data=True):
                 if edge_data.get("type") == "TESTS":
                     tf_str = str(target_file).lower()
                     if any(c_rel in tf_str for c_rel in candidate_rel_paths):
-                        direct_symbol_test_files.add(data.get("rel_path"))
+                        direct_symbol_test_files.add(test_path_val)
 
             # Heuristic naming fallback
             for c_f in candidate_files:
                 base = Path(c_f).stem.lower()
                 if base in rel:
-                    heuristic_test_files.add(data.get("rel_path"))
+                    heuristic_test_files.add(test_path_val)
 
         ordered_tests = []
         for t in list(direct_symbol_test_files):
-            if t and t not in ordered_tests:
+            if t and self._is_runnable_test_file(t) and t not in ordered_tests:
                 ordered_tests.append(t)
         for t in list(direct_import_test_files):
-            if t and t not in ordered_tests:
+            if t and self._is_runnable_test_file(t) and t not in ordered_tests:
                 ordered_tests.append(t)
         for t in list(heuristic_test_files):
-            if t and t not in ordered_tests:
+            if t and self._is_runnable_test_file(t) and t not in ordered_tests:
                 ordered_tests.append(t)
 
-        return ordered_tests if ordered_tests else self.get_associated_tests(repo_id, candidate_files)
+        if ordered_tests:
+            return ordered_tests
+        return [t for t in self.get_associated_tests(repo_id, candidate_files) if self._is_runnable_test_file(t)]
 
     def get_architectural_summary(self, repo_id: str, max_files: int = 100) -> Dict[str, Any]:
         """Provides comprehensive architectural overview across all subsystems and key symbols for the Architect Agent."""

@@ -12,6 +12,7 @@ Rules:
    @@ ... @@
 2. Keep edits focused and minimal. Do not touch unrelated code.
 3. Wrap your diff inside ```diff ... ``` code blocks.
+4. SECURITY & CLEAN IMPORTS: NEVER use dynamic execution or dangerous primitives: '__import__', 'eval', 'exec', 'compile', 'os.system', or 'subprocess'. Always use standard static top-level Python imports (e.g. 'import foo', 'from app.models import Bar').
 """
 
 class LocalCoderAgent:
