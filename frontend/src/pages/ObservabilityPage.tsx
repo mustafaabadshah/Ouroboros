@@ -139,7 +139,7 @@ export const ObservabilityPage: React.FC = () => {
               rel="noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition"
             >
-              <ExternalLink className="w-3.5 h-3.5" /> Open Phoenix UI (Port {phoenix.port})
+              <ExternalLink className="w-3.5 h-3.5" /> {phoenix.ui_url.startsWith('http://localhost') ? `Open Phoenix UI (Port ${phoenix.port})` : 'Live Telemetry Stream'}
             </a>
           )}
         </div>

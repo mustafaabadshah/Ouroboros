@@ -14,6 +14,7 @@ from app.database.repositories import (
     get_ticket,
     update_ticket_status,
     get_repository,
+    get_verified_repo_path,
     update_run_state,
     create_candidate,
     record_test_result,
@@ -89,7 +90,7 @@ class WorkflowController:
                 frozen_criteria_hash = hashlib.sha256(criteria_payload.encode("utf-8")).hexdigest()
                 logger.info(f"Frozen acceptance criteria hash for run {run_id}: {frozen_criteria_hash[:12]}")
 
-                repo_path = Path(repo.path)
+                repo_path = get_verified_repo_path(repo)
 
                 # -------------------------------------------------------------
                 # Stage 1: BASELINE_VALIDATION

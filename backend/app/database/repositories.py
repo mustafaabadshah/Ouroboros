@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict, Any
+from pathlib import Path
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from datetime import datetime, timezone
@@ -36,6 +37,10 @@ def get_or_create_repository(
         db.commit()
         db.refresh(repo)
     else:
+        # If current repo.path does not exist on disk, update to valid provided path
+        from pathlib import Path
+        if path and (not repo.path or not Path(repo.path).exists()):
+            repo.path = path
         if commit_hash:
             repo.commit_hash = commit_hash
         if file_count:
@@ -43,6 +48,29 @@ def get_or_create_repository(
         db.commit()
         db.refresh(repo)
     return repo
+
+def get_verified_repo_path(repo: Optional[RepositoryModel]) -> Path:
+    from pathlib import Path
+    from app.core.config import settings
+    if repo and repo.path:
+        p = Path(repo.path)
+        if p.exists() and p.is_dir():
+            return p
+    # Look for candidate paths on disk across Linux/Windows/Docker environments
+    candidates = [
+        Path("/opt/render/project/multi_agent_ai_chess_arena"),
+        Path("/opt/render/project/agent_chess"),
+        Path(settings.DEFAULT_REPO_PATH),
+        Path.cwd().parent / "multi_agent_ai_chess_arena",
+        Path.cwd() / "repos" / "multi_agent_ai_chess_arena",
+        Path.cwd() / "repos" / "agent_chess",
+        Path("repos") / "multi_agent_ai_chess_arena",
+        Path.cwd()
+    ]
+    for c in candidates:
+        if c.exists() and c.is_dir():
+            return c
+    return Path(repo.path) if repo and repo.path else Path(settings.DEFAULT_REPO_PATH)
 
 def list_repositories(db: Session) -> List[RepositoryModel]:
     return db.query(RepositoryModel).order_by(RepositoryModel.name).all()

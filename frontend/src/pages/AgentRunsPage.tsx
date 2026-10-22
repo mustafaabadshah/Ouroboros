@@ -248,16 +248,15 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href="http://127.0.0.1:6006"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setCurrentTab('observability')}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 transition"
+            title="Open Phoenix OpenInference traces, agent execution spans, and telemetry"
           >
             <Radio className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
-            <span>Open Phoenix :6006</span>
+            <span>Phoenix Telemetry</span>
             <ExternalLink className="w-3 h-3 text-purple-400" />
-          </a>
+          </button>
           <button
             onClick={loadRuns}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition shadow-sm"

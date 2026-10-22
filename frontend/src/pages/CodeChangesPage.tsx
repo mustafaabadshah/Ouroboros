@@ -14,7 +14,7 @@ import {
   Layers,
   ArrowRight
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, fallbackData } from '../services/api';
 import { DiffInspection, Run } from '../types';
 import { DiffViewer } from '../components/DiffViewer';
 import { StatusBadge } from '../components/StatusBadge';
@@ -24,8 +24,27 @@ interface CodeChangesPageProps {
 }
 
 export const CodeChangesPage: React.FC<CodeChangesPageProps> = ({ selectedRunId }) => {
-  const [runs, setRuns] = useState<Run[]>([]);
-  const [activeRunId, setActiveRunId] = useState<string | null>(selectedRunId);
+  const [runs, setRuns] = useState<Run[]>(() => {
+    try {
+      const cached = localStorage.getItem('ouroboros_cached_runs');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return (fallbackData.runs as Run[]) || [];
+  });
+  const [activeRunId, setActiveRunId] = useState<string | null>(() => {
+    if (selectedRunId) return selectedRunId;
+    try {
+      const cached = localStorage.getItem('ouroboros_cached_runs');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0].id;
+      }
+    } catch {}
+    return ((fallbackData.runs as Run[])[0]?.id) || null;
+  });
   const [diffData, setDiffData] = useState<DiffInspection | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
@@ -44,9 +63,12 @@ export const CodeChangesPage: React.FC<CodeChangesPageProps> = ({ selectedRunId 
   const loadRuns = async () => {
     try {
       const data = await api.getRuns();
-      setRuns(data);
-      if (data.length > 0 && !activeRunId) {
-        setActiveRunId(data[0].id);
+      if (Array.isArray(data) && data.length > 0) {
+        setRuns(data);
+        localStorage.setItem('ouroboros_cached_runs', JSON.stringify(data));
+        if (!activeRunId) {
+          setActiveRunId(data[0].id);
+        }
       }
     } catch (e) {
       console.error('Error loading runs:', e);
