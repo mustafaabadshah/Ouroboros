@@ -22,7 +22,8 @@ import {
   XCircle,
   Bug,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  RotateCcw
 } from 'lucide-react';
 import { api, BASE_URL, fallbackData } from '../services/api';
 import { Run, FailureTrajectory, TestResult } from '../types';
@@ -99,7 +100,7 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
       const r = runs.find((run) => run.id === selectedRunId);
       loadRunDiagnostics(selectedRunId, r?.ticket_id);
     }
-  }, [selectedRunId, runs]);
+  }, [selectedRunId]);
 
   useEffect(() => {
     if (terminalBottomRef.current) {
@@ -173,7 +174,9 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
         } else {
           setLogs((prev) => [...prev, `[${timestamp}] [${payload.event_type}] ${JSON.stringify(payload.data)}`]);
         }
-        loadRuns();
+        if (payload.event_type === 'STATE_CHANGED' || payload.event_type === 'RUN_TERMINATED') {
+          loadRuns();
+        }
       } catch {
         // keepalive or raw message
       }
@@ -182,6 +185,19 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
     es.onerror = () => {
       es.close();
     };
+  };
+
+  const handleRelaunch = async (ticketId: string) => {
+    try {
+      setLoading(true);
+      const newRun = await api.startRun(ticketId, 'SUPERVISED', false);
+      await loadRuns();
+      onSelectRun(newRun.id);
+    } catch (e) {
+      alert(`Failed to launch run: ${e}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = async (runId: string) => {
@@ -213,16 +229,35 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
     return true;
   });
 
-  const getStepStatus = (stepKey: string, currentStatus: string) => {
+  const getStepStatus = (stepKey: string, run: Run | null) => {
+    if (!run) return 'pending';
+    const currentStatus = run.state;
     const stepKeys = LIFECYCLE_STEPS.map((s) => s.key);
-    const currentIndex = stepKeys.indexOf(currentStatus);
     const stepIndex = stepKeys.indexOf(stepKey);
 
     if (currentStatus === 'COMPLETED') return 'completed';
-    if (currentStatus === 'FAILED') {
-      if (stepIndex === currentIndex) return 'failed';
-      return stepIndex < currentIndex ? 'completed' : 'pending';
+
+    if (currentStatus === 'FAILED' || currentStatus === 'CANCELLED') {
+      let failedStepKey = 'ACCEPTANCE_TESTS';
+      const errMsg = (run.error_message || '').toLowerCase();
+      if (run.active_agent === 'Planner') {
+        failedStepKey = 'PLANNING';
+      } else if (run.active_agent === 'LocalCoder' || run.active_agent === 'RepairAgent') {
+        failedStepKey = 'CODING';
+      } else if (errMsg.includes('syntax') || errMsg.includes('patch') || errMsg.includes('ast')) {
+        failedStepKey = 'PATCH_VALIDATION';
+      } else if (errMsg.includes('regression')) {
+        failedStepKey = 'REGRESSION_TESTS';
+      } else if (errMsg.includes('baseline') || errMsg.includes('worktree')) {
+        failedStepKey = 'BASELINE_VALIDATION';
+      }
+      const failedIndex = stepKeys.indexOf(failedStepKey);
+      if (stepIndex === failedIndex) return 'failed';
+      return stepIndex < failedIndex ? 'completed' : 'pending';
     }
+
+    const currentIndex = stepKeys.indexOf(currentStatus);
+    if (currentIndex === -1) return 'pending';
     if (stepIndex === currentIndex) return 'active';
     if (stepIndex < currentIndex) return 'completed';
     return 'pending';
@@ -361,6 +396,43 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
                       <span>Review Patch Diff</span>
                     </button>
                   )}
+                  {selectedRun.state === 'COMPLETED' && (
+                    <button
+                      onClick={() => setCurrentTab('changes')}
+                      className="px-3 py-1.5 text-xs font-mono rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>View Patch Diff</span>
+                    </button>
+                  )}
+                  {selectedRun.state === 'FAILED' && (
+                    <>
+                      <button
+                        onClick={() => handleRelaunch(selectedRun.ticket_id)}
+                        className="px-3 py-1.5 text-xs font-mono rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
+                        title="Relaunch this run with a clean sandbox worktree"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Relaunch Run</span>
+                      </button>
+                      <button
+                        onClick={() => setCurrentTab('tickets')}
+                        className="px-2.5 py-1.5 text-xs font-mono rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition flex items-center gap-1"
+                        title="Inspect ticket criteria"
+                      >
+                        <FileCode className="w-3.5 h-3.5" />
+                        <span>Ticket</span>
+                      </button>
+                      <button
+                        onClick={() => setCurrentTab('failures')}
+                        className="px-2.5 py-1.5 text-xs font-mono rounded-lg border border-rose-900/60 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 transition flex items-center gap-1"
+                        title="View failure trajectory in memory flywheel"
+                      >
+                        <Bug className="w-3.5 h-3.5" />
+                        <span>Flywheel</span>
+                      </button>
+                    </>
+                  )}
                   {['CODING', 'PLANNING', 'BASELINE_VALIDATION', 'ACCEPTANCE_TESTS', 'REGRESSION_TESTS'].includes(
                     selectedRun.state
                   ) && (
@@ -386,7 +458,7 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-9 gap-1.5 pt-1">
                   {LIFECYCLE_STEPS.map((st) => {
-                    const status = getStepStatus(st.key, selectedRun.state);
+                    const status = getStepStatus(st.key, selectedRun);
                     const Icon = st.icon;
 
                     let bgClass = 'bg-zinc-900/60 border-zinc-800/80 text-zinc-500';
@@ -501,16 +573,16 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
                         <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
                         <span>Termination Reason: {selectedRun.error_message || 'Repair attempts exhausted.'}</span>
                       </div>
-                      {testResults.length > 0 && (
+                      {Array.isArray(testResults) && testResults.length > 0 && (
                         <div className="mt-2 space-y-2">
                           <div className="text-zinc-300 text-[11px] font-bold">Execution & Test Results:</div>
                           {testResults.map((tr) => (
                             <div key={tr.id} className="p-3 rounded-lg bg-black/60 border border-zinc-800 text-[11px] space-y-1">
                               <div className="flex items-center justify-between text-zinc-400">
                                 <span className="font-bold text-zinc-200">
-                                  [{tr.test_type.toUpperCase()}] Exit Code: {tr.exit_code}
+                                  [{String(tr.test_type || 'TEST').toUpperCase()}] Exit Code: {tr.exit_code ?? 0}
                                 </span>
-                                <span>Duration: {tr.duration_ms}ms</span>
+                                <span>Duration: {tr.duration_ms || 0}ms</span>
                               </div>
                               <div className="text-zinc-400 text-[10px] truncate">Command: {tr.test_command}</div>
                               {tr.stderr_excerpt && (
@@ -527,6 +599,11 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
                     <div className="space-y-2.5">
                       {failureTrajectories.map((ft) => {
                         const isExpanded = expandedAttempt === ft.attempt;
+                        const testList = Array.isArray(ft.failed_tests)
+                          ? ft.failed_tests
+                          : typeof ft.failed_tests === 'string'
+                          ? [ft.failed_tests]
+                          : [];
                         return (
                           <div
                             key={ft.id || ft.attempt}
@@ -545,7 +622,7 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
                                 </span>
                                 <span className="text-zinc-600">•</span>
                                 <span className="px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-900/80 text-rose-300 text-[10px]">
-                                  {ft.failed_tests.join(', ') || 'Validation Failure'}
+                                  {testList.join(', ') || 'Validation Failure'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-zinc-400 shrink-0">
