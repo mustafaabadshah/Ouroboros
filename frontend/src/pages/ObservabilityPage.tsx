@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Cpu, ShieldAlert, DollarSign, Clock, RefreshCw, ExternalLink, Radio, Layers } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Activity, Cpu, ShieldAlert, DollarSign, Clock, RefreshCw, ExternalLink, Radio, Layers, Terminal, Search } from 'lucide-react';
 import { api } from '../services/api';
 import { MetricsOverview } from '../types';
 
@@ -32,11 +32,21 @@ interface PhoenixStatus {
   enabled: boolean;
   active: boolean;
   ui_url: string;
+  dashboard_url?: string;
+  is_cloud?: boolean;
   port: number;
   project_name: string;
   collector_endpoint: string;
   total_recorded_spans: number;
   recent_spans: PhoenixSpan[];
+}
+
+interface SystemLog {
+  timestamp: string;
+  level: string;
+  logger: string;
+  message: string;
+  formatted: string;
 }
 
 export const ObservabilityPage: React.FC = () => {
@@ -46,6 +56,12 @@ export const ObservabilityPage: React.FC = () => {
   const [selectedSpan, setSelectedSpan] = useState<PhoenixSpan | null>(null);
   const [spanFilter, setSpanFilter] = useState<string>('ALL');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'spans' | 'logs'>('spans');
+  const [systemLogs, setSystemLogs] = useState<SystemLog[]>([]);
+  const [logSearch, setLogSearch] = useState<string>('');
+  const [logFilterLevel, setLogFilterLevel] = useState<string>('ALL');
+  const [autoScrollLogs, setAutoScrollLogs] = useState<boolean>(true);
+  const logsEndRef = useRef<HTMLDivElement>(null);
 
   const copyToClipboard = (text: string, section: string) => {
     navigator.clipboard.writeText(text);
@@ -59,7 +75,7 @@ export const ObservabilityPage: React.FC = () => {
       if (document.visibilityState === 'visible') {
         loadData(false);
       }
-    }, 10000);
+    }, 6000);
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -74,19 +90,29 @@ export const ObservabilityPage: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (autoScrollLogs && logsEndRef.current && activeTab === 'logs') {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [systemLogs, activeTab, autoScrollLogs]);
+
   const loadData = async (isInitial = false) => {
     try {
       if (isInitial) setLoading(true);
-      const [metricsData, phoenixData] = await Promise.all([
+      const [metricsData, phoenixData, logsData] = await Promise.all([
         api.getMetricsOverview(),
         api.getPhoenixStatus().catch(() => null),
+        api.getSystemLogs(150).catch(() => ({ logs: [] })),
       ]);
       setMetrics(metricsData);
       if (phoenixData) {
         setPhoenix(phoenixData);
       }
+      if (logsData?.logs) {
+        setSystemLogs(logsData.logs);
+      }
     } catch (e) {
-      console.error('Error fetching metrics/phoenix:', e);
+      console.error('Error fetching metrics/phoenix/logs:', e);
     } finally {
       if (isInitial) setLoading(false);
     }
@@ -97,6 +123,18 @@ export const ObservabilityPage: React.FC = () => {
     if (spanFilter === 'AGENT') return s.span_kind === 'AGENT';
     if (spanFilter === 'EVALUATOR') return s.span_kind === 'EVALUATOR';
     if (spanFilter === 'ERROR') return s.status !== 'OK';
+    return true;
+  });
+
+  const filteredLogs = systemLogs.filter((log) => {
+    if (logFilterLevel !== 'ALL' && log.level !== logFilterLevel) return false;
+    if (logSearch.trim()) {
+      const q = logSearch.toLowerCase();
+      const matchMsg = (log.message || log.formatted || '').toLowerCase().includes(q);
+      const matchLvl = (log.level || '').toLowerCase().includes(q);
+      const matchLogger = (log.logger || '').toLowerCase().includes(q);
+      return matchMsg || matchLvl || matchLogger;
+    }
     return true;
   });
 
@@ -132,16 +170,21 @@ export const ObservabilityPage: React.FC = () => {
               {phoenix?.active ? 'COLLECTOR ACTIVE' : 'COLLECTOR OFFLINE'}
             </span>
           </div>
-          {phoenix?.ui_url && (
-            <a
-              href={phoenix.ui_url}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition"
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> {phoenix.ui_url.startsWith('http://localhost') ? `Open Phoenix UI (Port ${phoenix.port})` : 'Live Telemetry Stream'}
-            </a>
-          )}
+          {(() => {
+            const dashUrl = phoenix?.dashboard_url || phoenix?.ui_url || 'https://ouroboros-backend-i9x2.onrender.com/phoenix';
+            return (
+              <a
+                href={dashUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition shadow-sm"
+                title="Open Arize Phoenix AI Observability & Live Logs Web Dashboard"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open Phoenix Web Dashboard</span>
+              </a>
+            );
+          })()}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
@@ -152,13 +195,13 @@ export const ObservabilityPage: React.FC = () => {
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">COLLECTOR ENDPOINT</span>
-            <div className="text-emerald-400 font-bold truncate">{phoenix?.collector_endpoint || 'http://127.0.0.1:6006/v1/traces'}</div>
-            <div className="text-[10px] text-zinc-500">HTTP/protobuf Port 6006</div>
+            <div className="text-emerald-400 font-bold truncate">{phoenix?.collector_endpoint || 'https://ouroboros-backend-i9x2.onrender.com/api/observability/phoenix/status'}</div>
+            <div className="text-[10px] text-zinc-500">HTTP/protobuf Cloud Ingest</div>
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">RECORDED SPANS</span>
             <div className="text-zinc-100 font-bold text-base">{phoenix?.total_recorded_spans || 0} Spans</div>
-            <div className="text-[10px] text-zinc-500">In-memory ring buffer (50 max)</div>
+            <div className="text-[10px] text-zinc-500">OpenInference Spans in Buffer</div>
           </div>
           <div className="p-3 rounded bg-zinc-900/50 border border-zinc-800 space-y-1">
             <span className="text-zinc-500">TRACING INSTRUMENTATION</span>
@@ -167,27 +210,156 @@ export const ObservabilityPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Spans Stream */}
-        <div className="space-y-2 pt-2">
+        {/* Tab Switcher: Spans Stream vs Live Server & Swarm Logs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800 pb-2 pt-2 gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('spans')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded transition ${
+                activeTab === 'spans'
+                  ? 'bg-zinc-800 text-zinc-100 border border-zinc-600'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent'
+              }`}
+            >
+              <Radio className="w-3.5 h-3.5 text-purple-400" />
+              <span>OpenInference Spans ({filteredSpans.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded transition ${
+                activeTab === 'logs'
+                  ? 'bg-zinc-800 text-zinc-100 border border-zinc-600'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent'
+              }`}
+            >
+              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Live Server & Swarm Logs ({systemLogs.length})</span>
+            </button>
+          </div>
+
+          {activeTab === 'spans' ? (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">Filter:</span>
+              <div className="flex gap-1.5 text-[10px] font-mono">
+                {['ALL', 'AGENT', 'EVALUATOR', 'ERROR'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setSpanFilter(filter)}
+                    className={`px-2 py-0.5 rounded border ${
+                      spanFilter === filter
+                        ? 'bg-zinc-700 text-zinc-100 border-zinc-500'
+                        : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 text-xs font-mono">
+              <div className="flex items-center gap-1 text-[10px]">
+                {['ALL', 'INFO', 'WARNING', 'ERROR'].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setLogFilterLevel(level)}
+                    className={`px-2 py-0.5 rounded border ${
+                      logFilterLevel === level
+                        ? 'bg-zinc-700 text-zinc-100 border-zinc-500'
+                        : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800'
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+              <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={autoScrollLogs}
+                  onChange={(e) => setAutoScrollLogs(e.target.checked)}
+                  className="rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-0"
+                />
+                Auto-scroll
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Live Logs Terminal View */}
+        {activeTab === 'logs' && (
+          <div className="space-y-3 font-mono">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="Filter logs by keyword, module, or error message..."
+                  value={logSearch}
+                  onChange={(e) => setLogSearch(e.target.value)}
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded px-8 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-700"
+                />
+              </div>
+              <button
+                onClick={() => loadData(false)}
+                className="px-2.5 py-1.5 text-xs rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 flex items-center gap-1 transition"
+                title="Fetch latest log entries"
+              >
+                <RefreshCw className="w-3 h-3" /> Refresh Logs
+              </button>
+            </div>
+
+            <div className="border border-zinc-800 rounded-lg bg-zinc-950 p-3 h-96 overflow-y-auto text-[11px] leading-relaxed divide-y divide-zinc-900/60 shadow-inner">
+              {filteredLogs.length === 0 ? (
+                <div className="p-8 text-center text-zinc-500">
+                  No log entries matching filter. Trigger autonomous swarm runs or navigate to stream live logs.
+                </div>
+              ) : (
+                filteredLogs.map((log, i) => (
+                  <div key={i} className="py-1 flex items-start gap-2 text-zinc-300 hover:bg-zinc-900/40 px-1 rounded transition">
+                    <span className="text-zinc-600 text-[10px] select-none flex-shrink-0 pt-0.5">{log.timestamp || '00:00:00'}</span>
+                    <span
+                      className={`text-[9px] px-1.5 py-0.2 rounded font-bold flex-shrink-0 ${
+                        log.level === 'ERROR'
+                          ? 'bg-rose-950 text-rose-400 border border-rose-800'
+                          : log.level === 'WARNING'
+                          ? 'bg-amber-950 text-amber-400 border border-amber-800'
+                          : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                      }`}
+                    >
+                      {log.level}
+                    </span>
+                    {log.logger && (
+                      <span className="text-zinc-500 text-[10px] flex-shrink-0 font-semibold">[{log.logger}]</span>
+                    )}
+                    <span className="break-all whitespace-pre-wrap flex-1">{log.message || log.formatted}</span>
+                  </div>
+                ))
+              )}
+              <div ref={logsEndRef} />
+            </div>
+
+            <div className="flex justify-between items-center text-[10px] text-zinc-500 pt-1">
+              <span>Displaying {filteredLogs.length} of {systemLogs.length} buffered log lines</span>
+              <a
+                href={phoenix?.dashboard_url || phoenix?.ui_url || 'https://ouroboros-backend-i9x2.onrender.com/phoenix'}
+                target="_blank"
+                rel="noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition"
+              >
+                Open Fullscreen Phoenix & Logs Web Dashboard <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Spans Stream View */}
+        {activeTab === 'spans' && (
+        <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
               Live OpenInference Span Stream ({filteredSpans.length})
             </h4>
-            <div className="flex gap-1.5 text-[10px] font-mono">
-              {['ALL', 'AGENT', 'EVALUATOR', 'ERROR'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setSpanFilter(filter)}
-                  className={`px-2 py-0.5 rounded border ${
-                    spanFilter === filter
-                      ? 'bg-zinc-700 text-zinc-100 border-zinc-500'
-                      : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="border border-zinc-800/80 rounded bg-zinc-900/30 overflow-x-auto divide-y divide-zinc-800/60 max-h-72 overflow-y-auto font-mono">
@@ -390,6 +562,7 @@ export const ObservabilityPage: React.FC = () => {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {metrics && (

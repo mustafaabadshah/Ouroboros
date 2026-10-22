@@ -265,7 +265,12 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ setCurrentTab, onSel
               <span className="text-zinc-500 hidden sm:inline">(14 Spans Ingested in Arize Phoenix)</span>
             </div>
             <a
-              href="http://127.0.0.1:6006/projects/ouroboros-swarm/traces/24d6d767c93a54a83754e8f722e82233"
+              href={
+                typeof window !== 'undefined' &&
+                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                  ? 'http://127.0.0.1:6006/projects/ouroboros-swarm/traces/24d6d767c93a54a83754e8f722e82233'
+                  : 'https://ouroboros-backend-i9x2.onrender.com/phoenix'
+              }
               target="_blank"
               rel="noreferrer"
               className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-bold transition"

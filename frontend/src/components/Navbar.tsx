@@ -64,14 +64,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Arize Phoenix Quick-Pill */}
         <a
-          href="http://127.0.0.1:6006"
+          href={
+            typeof window !== 'undefined' &&
+            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+              ? 'http://127.0.0.1:6006'
+              : 'https://ouroboros-backend-i9x2.onrender.com/phoenix'
+          }
           target="_blank"
           rel="noreferrer"
           className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-800/60 bg-purple-950/40 hover:bg-purple-900/50 text-purple-300 text-xs font-mono transition"
-          title="Arize Phoenix AI Observability UI on Port 6006"
+          title="Arize Phoenix AI Observability & Live Telemetry Dashboard"
         >
           <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-          <span>Phoenix :6006</span>
+          <span>Phoenix Dashboard</span>
           <ExternalLink className="w-3 h-3 text-purple-400" />
         </a>
 

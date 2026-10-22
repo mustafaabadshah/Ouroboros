@@ -95,8 +95,26 @@ async def get_audit_log(db: Session = Depends(get_db)):
     ]
 
 from app.observability.phoenix_service import phoenix_service
+from app.core.logging import log_ring_buffer
+from fastapi.responses import HTMLResponse
+from app.observability.dashboard_html import get_phoenix_dashboard_html
 
 @router.get("/observability/phoenix/status")
 async def get_phoenix_status():
     """Returns real-time Arize Phoenix AI Observability and OpenInference tracing state."""
     return phoenix_service.get_status()
+
+@router.get("/observability/phoenix/dashboard", response_class=HTMLResponse)
+async def get_phoenix_dashboard_api():
+    """Renders the standalone Arize Phoenix AI Observability & Log Dashboard."""
+    return HTMLResponse(content=get_phoenix_dashboard_html(), status_code=200)
+
+@router.get("/system/logs")
+async def get_system_logs(limit: int = 150):
+    """Returns recent server and swarm execution log entries from memory ring buffer."""
+    logs = list(log_ring_buffer)
+    return {
+        "total": len(logs),
+        "limit": limit,
+        "logs": logs[-limit:] if limit > 0 else logs
+    }

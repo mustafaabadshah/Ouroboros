@@ -41,18 +41,46 @@ const PRESET_CHIPS = [
 
 const CACHE_KEY_TICKETS = 'ouroboros_cached_tickets';
 
+function normalizeTicket(t: any): Ticket {
+  if (!t) return t;
+  const parseArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return val.trim() ? [val] : [];
+      }
+    }
+    return [];
+  };
+
+  return {
+    ...t,
+    acceptance_criteria: parseArray(t.acceptance_criteria ?? t.acceptance_criteria_json),
+    proposed_tests: parseArray(t.proposed_tests ?? t.proposed_tests_json),
+    candidate_files: parseArray(t.candidate_files ?? t.candidate_files_json),
+    relevant_graph_entities: parseArray(t.relevant_graph_entities ?? t.relevant_graph_entities_json),
+    evidence: parseArray(t.evidence ?? t.evidence_json),
+    risk_level: t.risk_level || 'low',
+    expected_complexity: t.expected_complexity || 'small',
+    status: t.status || 'PROPOSED',
+  };
+}
+
 export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurrentTab, initialPrompt, onClearInitialPrompt }) => {
   const [tickets, setTickets] = useState<Ticket[]>(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY_TICKETS);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(normalizeTicket);
       }
     } catch {
       // ignore
     }
-    return (fallbackData.tickets as Ticket[]) || [];
+    return ((fallbackData.tickets as Ticket[]) || []).map(normalizeTicket);
   });
   const [repositories, setRepositories] = useState<Repository[]>(() => (fallbackData.repositories as Repository[]) || []);
   const [selectedRepoId, setSelectedRepoId] = useState<string>('');
@@ -61,12 +89,13 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
       const cached = localStorage.getItem(CACHE_KEY_TICKETS);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+        if (Array.isArray(parsed) && parsed.length > 0) return normalizeTicket(parsed[0]);
       }
     } catch {
       // ignore
     }
-    return ((fallbackData.tickets as Ticket[])[0]) || null;
+    const firstFallback = (fallbackData.tickets as Ticket[])[0];
+    return firstFallback ? normalizeTicket(firstFallback) : null;
   });
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -116,11 +145,14 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
       if (tickets.length === 0) setLoading(true);
       const data = await api.getTickets();
       if (Array.isArray(data) && data.length > 0) {
-        setTickets(data);
-        localStorage.setItem(CACHE_KEY_TICKETS, JSON.stringify(data));
-        if (!selectedTicket) {
-          setSelectedTicket(data[0]);
-        }
+        const normalized = data.map(normalizeTicket);
+        setTickets(normalized);
+        localStorage.setItem(CACHE_KEY_TICKETS, JSON.stringify(normalized));
+        setSelectedTicket((prev) => {
+          if (!prev) return normalized[0];
+          const matched = normalized.find((t) => t.id === prev.id);
+          return matched || normalized[0];
+        });
       }
     } catch (e) {
       console.error('Error loading tickets:', e);
@@ -133,7 +165,8 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
     try {
       setGenerating(true);
       const targetRepo = selectedRepoId || (repositories.length > 0 ? repositories[0].id : 'agent_chess');
-      const newTicket = await api.generateTicket(targetRepo, customPrompt);
+      const newTicketRaw = await api.generateTicket(targetRepo, customPrompt);
+      const newTicket = normalizeTicket(newTicketRaw);
       setShowGenModal(false);
       setCustomPrompt('');
       await loadTickets();
@@ -169,7 +202,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   const handleResetStatus = async (ticketId: string, newStatus: string = 'PROPOSED') => {
     try {
       const updated = await api.updateTicket(ticketId, { status: newStatus });
-      setSelectedTicket(updated);
+      setSelectedTicket(normalizeTicket(updated));
       await loadTickets();
     } catch (e) {
       alert(`Status update failed: ${e}`);
@@ -181,7 +214,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
     setEditProblem(t.problem_statement);
     setEditCurrent(t.current_behavior);
     setEditDesired(t.desired_behavior);
-    setEditCriteria(t.acceptance_criteria.join('\n'));
+    setEditCriteria((t.acceptance_criteria || []).join('\n'));
     setIsEditing(true);
   };
 
@@ -196,8 +229,9 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
         desired_behavior: editDesired,
         acceptance_criteria: editCriteria.split('\n').map((s) => s.trim()).filter(Boolean),
       });
-      setSelectedTicket(updated);
-      setTickets(tickets.map((t) => (t.id === updated.id ? updated : t)));
+      const norm = normalizeTicket(updated);
+      setSelectedTicket(norm);
+      setTickets(tickets.map((t) => (t.id === norm.id ? norm : t)));
       setIsEditing(false);
     } catch (e) {
       alert(`Failed to save ticket edits: ${e}`);
@@ -207,7 +241,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   };
 
   const selectTicketItem = (t: Ticket) => {
-    setSelectedTicket(t);
+    setSelectedTicket(normalizeTicket(t));
     setIsEditing(false);
   };
 
@@ -543,7 +577,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
                   />
                 ) : (
                   <ul className="space-y-1.5 font-mono text-[11px]">
-                    {selectedTicket.acceptance_criteria.map((ac, idx) => (
+                    {(selectedTicket.acceptance_criteria || []).map((ac, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-zinc-300 bg-zinc-900/50 p-2.5 rounded-lg border border-zinc-800/60">
                         <span className="text-emerald-400 font-bold">[{idx + 1}]</span>
                         <span className="leading-relaxed">{ac}</span>
@@ -560,7 +594,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
                   Allowed Target Files
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {selectedTicket.candidate_files.map((f, i) => (
+                  {(selectedTicket.candidate_files || []).map((f, i) => (
                     <span key={i} className="font-mono text-xs px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-cyan-300 flex items-center gap-1">
                       <Tag className="w-3 h-3 opacity-60" />
                       {f}
@@ -570,13 +604,13 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
               </div>
 
               {/* Proposed Test Plan */}
-              {selectedTicket.proposed_tests.length > 0 && (
+              {(selectedTicket.proposed_tests || []).length > 0 && (
                 <div>
                   <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1.5">
                     Proposed Pytest Assertions
                   </h4>
                   <div className="space-y-1 font-mono text-[11px]">
-                    {selectedTicket.proposed_tests.map((t, i) => (
+                    {(selectedTicket.proposed_tests || []).map((t, i) => (
                       <div key={i} className="text-zinc-400 bg-zinc-900/30 p-2.5 rounded-lg border border-zinc-800/50">
                         {t}
                       </div>

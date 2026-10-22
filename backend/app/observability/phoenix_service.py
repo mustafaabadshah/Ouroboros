@@ -484,11 +484,13 @@ class PhoenixTracingService:
 
         import os
         is_cloud = bool(os.environ.get("RENDER") or os.environ.get("RENDER_SERVICE_ID"))
+        cloud_dashboard = "https://ouroboros-backend-i9x2.onrender.com/phoenix"
         return {
             "enabled": self.enabled,
             "active": self._active or self.enabled or len(self._recent_spans) > 0,
             "is_cloud": is_cloud,
-            "ui_url": "https://ouroboros-backend-i9x2.onrender.com/api/observability/phoenix/status" if is_cloud else f"http://localhost:{self.port}",
+            "ui_url": cloud_dashboard if is_cloud else f"http://localhost:{self.port}",
+            "dashboard_url": cloud_dashboard if is_cloud else f"http://localhost:{self.port}",
             "port": self.port,
             "project_name": self.project_name,
             "collector_endpoint": "https://ouroboros-backend-i9x2.onrender.com/api/observability/phoenix/status" if is_cloud else (self.collector_endpoint or f"http://localhost:{self.port}/v1/traces"),

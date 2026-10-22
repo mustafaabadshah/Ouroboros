@@ -11,6 +11,7 @@ import { FailureTrajectoriesPage } from './pages/FailureTrajectoriesPage';
 import { ModelsPage } from './pages/ModelsPage';
 import { ObservabilityPage } from './pages/ObservabilityPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { api } from './services/api';
 
 export const App: React.FC = () => {
@@ -92,47 +93,49 @@ export const App: React.FC = () => {
 
         {/* Tab Body */}
         <main className="flex-1 overflow-auto bg-zinc-900/20">
-          {currentTab === 'overview' && (
-            <OverviewPage
-              setCurrentTab={setCurrentTab}
-              onSelectRun={(id) => {
-                setSelectedRunId(id);
-                setCurrentTab('runs');
-              }}
-            />
-          )}
-          {currentTab === 'repositories' && (
-            <RepositoriesPage
-              onNavigateToTickets={(prompt) => {
-                setTicketPromptPrefill(prompt);
-                setCurrentTab('tickets');
-              }}
-            />
-          )}
-          {currentTab === 'runs' && (
-            <AgentRunsPage
-              selectedRunId={selectedRunId}
-              onSelectRun={setSelectedRunId}
-              setCurrentTab={setCurrentTab}
-            />
-          )}
-          {currentTab === 'tickets' && (
-            <TicketsPage
-              onSelectRun={(id) => {
-                setSelectedRunId(id);
-                setCurrentTab('runs');
-              }}
-              setCurrentTab={setCurrentTab}
-              initialPrompt={ticketPromptPrefill}
-              onClearInitialPrompt={() => setTicketPromptPrefill('')}
-            />
-          )}
-          {currentTab === 'changes' && <CodeChangesPage selectedRunId={selectedRunId} />}
-          {currentTab === 'evaluation' && <EvaluationLabPage selectedRunId={selectedRunId} />}
-          {currentTab === 'failures' && <FailureTrajectoriesPage />}
-          {currentTab === 'models' && <ModelsPage />}
-          {currentTab === 'observability' && <ObservabilityPage />}
-          {currentTab === 'settings' && <SettingsPage />}
+          <ErrorBoundary key={currentTab} fallbackTitle={`Error in ${currentTab.toUpperCase()} view`}>
+            {currentTab === 'overview' && (
+              <OverviewPage
+                setCurrentTab={setCurrentTab}
+                onSelectRun={(id) => {
+                  setSelectedRunId(id);
+                  setCurrentTab('runs');
+                }}
+              />
+            )}
+            {currentTab === 'repositories' && (
+              <RepositoriesPage
+                onNavigateToTickets={(prompt) => {
+                  setTicketPromptPrefill(prompt);
+                  setCurrentTab('tickets');
+                }}
+              />
+            )}
+            {currentTab === 'runs' && (
+              <AgentRunsPage
+                selectedRunId={selectedRunId}
+                onSelectRun={setSelectedRunId}
+                setCurrentTab={setCurrentTab}
+              />
+            )}
+            {currentTab === 'tickets' && (
+              <TicketsPage
+                onSelectRun={(id) => {
+                  setSelectedRunId(id);
+                  setCurrentTab('runs');
+                }}
+                setCurrentTab={setCurrentTab}
+                initialPrompt={ticketPromptPrefill}
+                onClearInitialPrompt={() => setTicketPromptPrefill('')}
+              />
+            )}
+            {currentTab === 'changes' && <CodeChangesPage selectedRunId={selectedRunId} />}
+            {currentTab === 'evaluation' && <EvaluationLabPage selectedRunId={selectedRunId} />}
+            {currentTab === 'failures' && <FailureTrajectoriesPage />}
+            {currentTab === 'models' && <ModelsPage />}
+            {currentTab === 'observability' && <ObservabilityPage />}
+            {currentTab === 'settings' && <SettingsPage />}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

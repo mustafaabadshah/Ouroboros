@@ -115,6 +115,8 @@ export const api = {
     enabled: boolean;
     active: boolean;
     ui_url: string;
+    dashboard_url?: string;
+    is_cloud?: boolean;
     port: number;
     project_name: string;
     collector_endpoint: string;
@@ -135,6 +137,18 @@ export const api = {
       attributes: Record<string, any>;
     }>;
   }>('/observability/phoenix/status'),
+  getSystemLogs: (limit = 150) =>
+    request<{
+      total: number;
+      limit: number;
+      logs: Array<{
+        timestamp: string;
+        level: string;
+        logger: string;
+        message: string;
+        formatted: string;
+      }>;
+    }>(`/system/logs?limit=${limit}`),
 
   // Repositories
   getRepositories: () => request<Repository[]>('/repositories'),

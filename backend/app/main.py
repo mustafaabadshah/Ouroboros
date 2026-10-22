@@ -170,6 +170,15 @@ async def root_index():
 async def root_health():
     return {"status": "ok", "app": settings.APP_NAME, "version": "0.1.0"}
 
+from fastapi.responses import HTMLResponse
+from app.observability.dashboard_html import get_phoenix_dashboard_html
+
+@app.get("/phoenix", response_class=HTMLResponse)
+@app.get("/observability", response_class=HTMLResponse)
+async def phoenix_dashboard_view():
+    """Renders the standalone Arize Phoenix AI Observability & Log Dashboard."""
+    return HTMLResponse(content=get_phoenix_dashboard_html(), status_code=200)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host=settings.HOST, port=settings.PORT, reload=True)

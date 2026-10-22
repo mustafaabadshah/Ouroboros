@@ -27,6 +27,22 @@ from app.integrations.graph.adapter import meta_graph_adapter
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
+import json
+
+def _ensure_list(val) -> list:
+    if val is None:
+        return []
+    if isinstance(val, list):
+        return val
+    if isinstance(val, str):
+        try:
+            parsed = json.loads(val)
+            if isinstance(parsed, list):
+                return parsed
+        except Exception:
+            return [val] if val.strip() else []
+    return []
+
 @router.get("", response_model=List[TicketResponse])
 async def get_all_tickets(
     repo_id: Optional[str] = Query(None),
@@ -43,15 +59,16 @@ async def get_all_tickets(
             motivation=t.motivation,
             current_behavior=t.current_behavior,
             desired_behavior=t.desired_behavior,
-            acceptance_criteria=t.acceptance_criteria_json or [],
-            proposed_tests=t.proposed_tests_json or [],
-            relevant_graph_entities=t.relevant_graph_entities_json or [],
-            candidate_files=t.candidate_files_json or [],
-            risk_level=t.risk_level,
-            expected_complexity=t.expected_complexity,
-            estimated_resources=t.estimated_resources,
-            evidence=t.evidence_json or [],
+            acceptance_criteria=_ensure_list(t.acceptance_criteria_json),
+            proposed_tests=_ensure_list(t.proposed_tests_json),
+            relevant_graph_entities=_ensure_list(t.relevant_graph_entities_json),
+            candidate_files=_ensure_list(t.candidate_files_json),
+            risk_level=t.risk_level or "low",
+            expected_complexity=t.expected_complexity or "small",
+            estimated_resources=t.estimated_resources or "1 LLM call, 1 pytest run",
+            evidence=_ensure_list(t.evidence_json),
             out_of_scope=t.out_of_scope,
+            acceptance_test_template=getattr(t, "acceptance_test_template", None),
             status=t.status,
             created_at=t.created_at,
             updated_at=t.updated_at
@@ -136,14 +153,14 @@ async def generate_ticket(
             motivation=ticket_record.motivation,
             current_behavior=ticket_record.current_behavior,
             desired_behavior=ticket_record.desired_behavior,
-            acceptance_criteria=ticket_record.acceptance_criteria_json or [],
-            proposed_tests=ticket_record.proposed_tests_json or [],
-            relevant_graph_entities=ticket_record.relevant_graph_entities_json or [],
-            candidate_files=ticket_record.candidate_files_json or [],
-            risk_level=ticket_record.risk_level,
-            expected_complexity=ticket_record.expected_complexity,
-            estimated_resources=ticket_record.estimated_resources,
-            evidence=ticket_record.evidence_json or [],
+            acceptance_criteria=_ensure_list(ticket_record.acceptance_criteria_json),
+            proposed_tests=_ensure_list(ticket_record.proposed_tests_json),
+            relevant_graph_entities=_ensure_list(ticket_record.relevant_graph_entities_json),
+            candidate_files=_ensure_list(ticket_record.candidate_files_json),
+            risk_level=ticket_record.risk_level or "low",
+            expected_complexity=ticket_record.expected_complexity or "small",
+            estimated_resources=ticket_record.estimated_resources or "1 LLM call, 1 pytest run",
+            evidence=_ensure_list(ticket_record.evidence_json),
             out_of_scope=ticket_record.out_of_scope,
             acceptance_test_template=ticket_record.acceptance_test_template,
             status=ticket_record.status,
@@ -171,15 +188,16 @@ async def get_ticket_by_id(ticket_id: str, db: Session = Depends(get_db)):
         motivation=t.motivation,
         current_behavior=t.current_behavior,
         desired_behavior=t.desired_behavior,
-        acceptance_criteria=t.acceptance_criteria_json or [],
-        proposed_tests=t.proposed_tests_json or [],
-        relevant_graph_entities=t.relevant_graph_entities_json or [],
-        candidate_files=t.candidate_files_json or [],
-        risk_level=t.risk_level,
-        expected_complexity=t.expected_complexity,
-        estimated_resources=t.estimated_resources,
-        evidence=t.evidence_json or [],
+        acceptance_criteria=_ensure_list(t.acceptance_criteria_json),
+        proposed_tests=_ensure_list(t.proposed_tests_json),
+        relevant_graph_entities=_ensure_list(t.relevant_graph_entities_json),
+        candidate_files=_ensure_list(t.candidate_files_json),
+        risk_level=t.risk_level or "low",
+        expected_complexity=t.expected_complexity or "small",
+        estimated_resources=t.estimated_resources or "1 LLM call, 1 pytest run",
+        evidence=_ensure_list(t.evidence_json),
         out_of_scope=t.out_of_scope,
+        acceptance_test_template=getattr(t, "acceptance_test_template", None),
         status=t.status,
         created_at=t.created_at,
         updated_at=t.updated_at
