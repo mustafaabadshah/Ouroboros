@@ -18,7 +18,7 @@ import {
   Radio,
   Sparkles
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, fallbackData } from '../services/api';
 import { MetricsOverview, Run, Ticket } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { TabType } from '../components/Sidebar';
@@ -30,11 +30,13 @@ interface OverviewPageProps {
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({ setCurrentTab, onSelectRun }) => {
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
-  const [recentRuns, setRecentRuns] = useState<Run[]>([]);
-  const [pendingTickets, setPendingTickets] = useState<Ticket[]>([]);
-  const [auditEvents, setAuditEvents] = useState<any[]>([]);
+  const [recentRuns, setRecentRuns] = useState<Run[]>(() => ((fallbackData.runs as Run[]) || []).slice(0, 5));
+  const [pendingTickets, setPendingTickets] = useState<Ticket[]>(() =>
+    ((fallbackData.tickets as Ticket[]) || []).filter((t) => t.status === 'PROPOSED').slice(0, 4)
+  );
+  const [auditEvents, setAuditEvents] = useState<any[]>(() => (fallbackData.auditEvents || []).slice(0, 6));
   const [phoenixStatus, setPhoenixStatus] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadData(true);

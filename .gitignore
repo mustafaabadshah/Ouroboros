@@ -39,6 +39,8 @@ docs/chat_history/
 *.sqlite
 *.sqlite3
 *.db-journal
+!backend/app/database/seeds/*.db
+!backend/app/database/seeds/*.json
 
 # Project Ouroboros Runtime Sandboxes & Candidates
 worktrees/

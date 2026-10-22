@@ -27,7 +27,7 @@ import {
   Hash,
   ArrowUpRight
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, fallbackData } from '../services/api';
 import { Repository, GraphStatus, AstSummary, FileDependencies } from '../types';
 
 interface RepositoriesPageProps {
@@ -35,9 +35,9 @@ interface RepositoriesPageProps {
 }
 
 export const RepositoriesPage: React.FC<RepositoriesPageProps> = ({ onNavigateToTickets }) => {
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repositories, setRepositories] = useState<Repository[]>(() => (fallbackData.repositories as Repository[]) || []);
   const [graphStatuses, setGraphStatuses] = useState<Record<string, GraphStatus>>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedRepoId, setSelectedRepoId] = useState<string>('agent_chess');
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [astSummary, setAstSummary] = useState<AstSummary | null>(null);

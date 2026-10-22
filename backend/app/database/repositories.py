@@ -102,6 +102,11 @@ def create_ticket(db: Session, ticket_data: Dict[str, Any]) -> TicketModel:
     db.add(ticket)
     db.commit()
     db.refresh(ticket)
+    try:
+        from app.database.session import backup_live_to_seed
+        backup_live_to_seed()
+    except Exception:
+        pass
     return ticket
 
 def get_ticket(db: Session, ticket_id: str) -> Optional[TicketModel]:
@@ -121,6 +126,11 @@ def update_ticket_status(db: Session, ticket_id: str, status: str) -> Optional[T
         ticket.status = status
         db.commit()
         db.refresh(ticket)
+        try:
+            from app.database.session import backup_live_to_seed
+            backup_live_to_seed()
+        except Exception:
+            pass
     return ticket
 
 # Runs
@@ -129,6 +139,11 @@ def create_run(db: Session, run_data: Dict[str, Any]) -> RunModel:
     db.add(run)
     db.commit()
     db.refresh(run)
+    try:
+        from app.database.session import backup_live_to_seed
+        backup_live_to_seed()
+    except Exception:
+        pass
     return run
 
 def get_run(db: Session, run_id: str) -> Optional[RunModel]:
@@ -167,6 +182,11 @@ def update_run_state(
             run.completed_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(run)
+        try:
+            from app.database.session import backup_live_to_seed
+            backup_live_to_seed()
+        except Exception:
+            pass
     return run
 
 # Candidates

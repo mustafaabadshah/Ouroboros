@@ -19,7 +19,7 @@ import {
   AlertTriangle,
   Play
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, fallbackData } from '../services/api';
 import { Ticket, Repository } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { TabType } from '../components/Sidebar';
@@ -39,12 +39,36 @@ const PRESET_CHIPS = [
   { label: '📊 Agent Telemetry Counters', prompt: 'Groq agent fallback move counters and structured error logging in groq_agent.py' },
 ];
 
+const CACHE_KEY_TICKETS = 'ouroboros_cached_tickets';
+
 export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurrentTab, initialPrompt, onClearInitialPrompt }) => {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_TICKETS);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return (fallbackData.tickets as Ticket[]) || [];
+  });
+  const [repositories, setRepositories] = useState<Repository[]>(() => (fallbackData.repositories as Repository[]) || []);
   const [selectedRepoId, setSelectedRepoId] = useState<string>('');
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_TICKETS);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+      }
+    } catch {
+      // ignore
+    }
+    return ((fallbackData.tickets as Ticket[])[0]) || null;
+  });
+  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showGenModal, setShowGenModal] = useState(false);
@@ -76,9 +100,11 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   const loadRepositories = async () => {
     try {
       const repos = await api.getRepositories();
-      setRepositories(repos);
-      if (repos.length > 0 && !selectedRepoId) {
-        setSelectedRepoId(repos[0].id);
+      if (Array.isArray(repos) && repos.length > 0) {
+        setRepositories(repos);
+        if (!selectedRepoId) {
+          setSelectedRepoId(repos[0].id);
+        }
       }
     } catch (e) {
       console.error('Error loading repositories:', e);
@@ -87,11 +113,14 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
 
   const loadTickets = async () => {
     try {
-      setLoading(true);
+      if (tickets.length === 0) setLoading(true);
       const data = await api.getTickets();
-      setTickets(data);
-      if (data.length > 0 && !selectedTicket) {
-        setSelectedTicket(data[0]);
+      if (Array.isArray(data) && data.length > 0) {
+        setTickets(data);
+        localStorage.setItem(CACHE_KEY_TICKETS, JSON.stringify(data));
+        if (!selectedTicket) {
+          setSelectedTicket(data[0]);
+        }
       }
     } catch (e) {
       console.error('Error loading tickets:', e);

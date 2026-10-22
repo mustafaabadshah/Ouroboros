@@ -24,7 +24,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
-import { api, BASE_URL } from '../services/api';
+import { api, BASE_URL, fallbackData } from '../services/api';
 import { Run, FailureTrajectory, TestResult } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { TabType } from '../components/Sidebar';
@@ -54,13 +54,26 @@ const LIFECYCLE_STEPS: StepInfo[] = [
   { key: 'COMPLETED', label: 'Completed', icon: Sparkles, description: 'Verified release candidate' },
 ];
 
+const CACHE_KEY_RUNS = 'ouroboros_cached_runs';
+
 export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
   selectedRunId,
   onSelectRun,
   setCurrentTab,
 }) => {
-  const [runs, setRuns] = useState<Run[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [runs, setRuns] = useState<Run[]>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_RUNS);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return (fallbackData.runs as Run[]) || [];
+  });
+  const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [logFilter, setLogFilter] = useState<'ALL' | 'EVENTS' | 'ERRORS'>('ALL');
   const [copiedLogs, setCopiedLogs] = useState(false);
@@ -101,8 +114,15 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
         api.getRunResults(runId).catch(() => []),
         api.getFailures(ticketId, runId).catch(() => []),
       ]);
-      setTestResults(resData);
-      const matchingFailures = (failData as FailureTrajectory[]).filter((f) => f.run_id === runId);
+      const results = (Array.isArray(resData) && resData.length > 0)
+        ? resData
+        : (fallbackData.testResults as TestResult[]).filter((r) => r.run_id === runId);
+      setTestResults(results);
+
+      const failures = (Array.isArray(failData) && failData.length > 0)
+        ? failData
+        : (fallbackData.failureTrajectories as FailureTrajectory[]).filter((f) => f.run_id === runId);
+      const matchingFailures = failures.filter((f) => f.run_id === runId);
       setFailureTrajectories(matchingFailures);
       if (matchingFailures.length > 0) {
         setExpandedAttempt(matchingFailures[matchingFailures.length - 1].attempt);
@@ -116,11 +136,14 @@ export const AgentRunsPage: React.FC<AgentRunsPageProps> = ({
 
   const loadRuns = async () => {
     try {
-      setLoading(true);
+      if (runs.length === 0) setLoading(true);
       const data = await api.getRuns();
-      setRuns(data);
-      if (data.length > 0 && !selectedRunId) {
-        onSelectRun(data[0].id);
+      if (Array.isArray(data) && data.length > 0) {
+        setRuns(data);
+        localStorage.setItem(CACHE_KEY_RUNS, JSON.stringify(data));
+        if (!selectedRunId) {
+          onSelectRun(data[0].id);
+        }
       }
     } catch (e) {
       console.error('Error loading runs:', e);

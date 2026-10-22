@@ -13,27 +13,91 @@ import {
   FileDependencies
 } from '../types';
 
+import seedData from '../data/seedData.json';
+
+const PROD_API_URL = 'https://ouroboros-backend-i9x2.onrender.com/api';
+
+const isBrowser = typeof window !== 'undefined';
+const isLocalhost = isBrowser && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '0.0.0.0'
+);
+
 export const BASE_URL = (import.meta as any).env?.VITE_API_URL
   ? `${(import.meta as any).env.VITE_API_URL.replace(/\/+$/, '')}/api`
-  : '/api';
+  : (isBrowser && !isLocalhost)
+    ? PROD_API_URL
+    : '/api';
 
+export const fallbackData = {
+  repositories: (seedData as any).repositories || [],
+  tickets: (seedData as any).tickets || [],
+  runs: (seedData as any).runs || [],
+  auditEvents: (seedData as any).audit_events || [],
+  testResults: (seedData as any).test_results || [],
+  failureTrajectories: (seedData as any).failure_trajectories || [],
+};
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    ...options,
-  });
+  const url = `${BASE_URL}${endpoint}`;
+  let res: Response;
+
+  try {
+    res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...options?.headers,
+      },
+      ...options,
+    });
+  } catch (netErr) {
+    if (url.startsWith('/api') && PROD_API_URL) {
+      const fallbackUrl = `${PROD_API_URL}${endpoint}`;
+      res = await fetch(fallbackUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+    } else {
+      throw netErr;
+    }
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+
+  // Guard against HTML responses (e.g. Vercel SPA 200 rewrite fallback)
+  if (res.ok && !contentType.includes('application/json')) {
+    if (!url.startsWith('https://ouroboros-backend-i9x2.onrender.com')) {
+      const fallbackUrl = `${PROD_API_URL}${endpoint}`;
+      const fallbackRes = await fetch(fallbackUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+      if (fallbackRes.ok && (fallbackRes.headers.get('content-type') || '').includes('application/json')) {
+        return fallbackRes.json();
+      }
+    }
+    throw new Error(`Expected JSON but received ${contentType} from ${endpoint}`);
+  }
 
   if (!res.ok) {
     let errorDetail = res.statusText;
-    try {
-      const data = await res.json();
-      errorDetail = data.detail || errorDetail;
-    } catch {
-      // ignore
+    if (contentType.includes('application/json')) {
+      try {
+        const data = await res.json();
+        errorDetail = data.detail || errorDetail;
+      } catch {
+        // ignore
+      }
     }
     throw new Error(errorDetail);
   }
