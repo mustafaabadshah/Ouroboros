@@ -42,13 +42,34 @@ const PRESET_CHIPS = [
 const CACHE_KEY_TICKETS = 'ouroboros_cached_tickets';
 
 function normalizeTicket(t: any): Ticket {
-  if (!t) return t;
+  if (!t || typeof t !== 'object') {
+    return {
+      id: `ouro-${Math.random().toString(36).slice(2, 8)}`,
+      repo_id: 'agent_chess',
+      title: 'Untitled Ticket',
+      problem_statement: '',
+      motivation: '',
+      current_behavior: '',
+      desired_behavior: '',
+      acceptance_criteria: [],
+      proposed_tests: [],
+      relevant_graph_entities: [],
+      candidate_files: [],
+      risk_level: 'low',
+      expected_complexity: 'small',
+      estimated_resources: '1 LLM call, 1 pytest run',
+      evidence: [],
+      status: 'PROPOSED',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
   const parseArray = (val: any): string[] => {
-    if (Array.isArray(val)) return val;
+    if (Array.isArray(val)) return val.map((item) => String(item ?? ''));
     if (typeof val === 'string') {
       try {
         const parsed = JSON.parse(val);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return parsed.map((item) => String(item ?? ''));
       } catch {
         return val.trim() ? [val] : [];
       }
@@ -58,14 +79,24 @@ function normalizeTicket(t: any): Ticket {
 
   return {
     ...t,
+    id: String(t.id || `ouro-${Math.random().toString(36).slice(2, 8)}`),
+    repo_id: String(t.repo_id || 'agent_chess'),
+    title: String(t.title || 'Untitled Ticket'),
+    problem_statement: String(t.problem_statement || ''),
+    motivation: String(t.motivation || ''),
+    current_behavior: String(t.current_behavior || ''),
+    desired_behavior: String(t.desired_behavior || ''),
     acceptance_criteria: parseArray(t.acceptance_criteria ?? t.acceptance_criteria_json),
     proposed_tests: parseArray(t.proposed_tests ?? t.proposed_tests_json),
     candidate_files: parseArray(t.candidate_files ?? t.candidate_files_json),
     relevant_graph_entities: parseArray(t.relevant_graph_entities ?? t.relevant_graph_entities_json),
     evidence: parseArray(t.evidence ?? t.evidence_json),
-    risk_level: t.risk_level || 'low',
-    expected_complexity: t.expected_complexity || 'small',
-    status: t.status || 'PROPOSED',
+    risk_level: String(t.risk_level || 'low'),
+    expected_complexity: String(t.expected_complexity || 'small'),
+    estimated_resources: String(t.estimated_resources || '1 LLM call, 1 pytest run'),
+    status: String(t.status || 'PROPOSED'),
+    created_at: String(t.created_at || new Date().toISOString()),
+    updated_at: String(t.updated_at || new Date().toISOString()),
   };
 }
 
@@ -210,11 +241,13 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
   };
 
   const startEdit = (t: Ticket) => {
-    setEditTitle(t.title);
-    setEditProblem(t.problem_statement);
-    setEditCurrent(t.current_behavior);
-    setEditDesired(t.desired_behavior);
-    setEditCriteria((t.acceptance_criteria || []).join('\n'));
+    setEditTitle(t.title || '');
+    setEditProblem(t.problem_statement || '');
+    setEditCurrent(t.current_behavior || '');
+    setEditDesired(t.desired_behavior || '');
+    setEditCriteria(
+      (Array.isArray(t.acceptance_criteria) ? t.acceptance_criteria : []).join('\n')
+    );
     setIsEditing(true);
   };
 
@@ -245,11 +278,17 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
     setIsEditing(false);
   };
 
-  const filteredTickets = tickets.filter((t) => {
+  const filteredTickets = (Array.isArray(tickets) ? tickets : []).filter((t) => {
+    if (!t) return false;
+    const q = (searchQuery || '').toLowerCase();
+    const idStr = String(t.id || '').toLowerCase();
+    const titleStr = String(t.title || '').toLowerCase();
+    const probStr = String(t.problem_statement || '').toLowerCase();
     const matchesSearch =
-      t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.problem_statement.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      idStr.includes(q) ||
+      titleStr.includes(q) ||
+      probStr.includes(q);
     const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -577,7 +616,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
                   />
                 ) : (
                   <ul className="space-y-1.5 font-mono text-[11px]">
-                    {(selectedTicket.acceptance_criteria || []).map((ac, idx) => (
+                    {(Array.isArray(selectedTicket.acceptance_criteria) ? selectedTicket.acceptance_criteria : []).map((ac, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-zinc-300 bg-zinc-900/50 p-2.5 rounded-lg border border-zinc-800/60">
                         <span className="text-emerald-400 font-bold">[{idx + 1}]</span>
                         <span className="leading-relaxed">{ac}</span>
@@ -594,7 +633,7 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
                   Allowed Target Files
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {(selectedTicket.candidate_files || []).map((f, i) => (
+                  {(Array.isArray(selectedTicket.candidate_files) ? selectedTicket.candidate_files : []).map((f, i) => (
                     <span key={i} className="font-mono text-xs px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-cyan-300 flex items-center gap-1">
                       <Tag className="w-3 h-3 opacity-60" />
                       {f}
@@ -604,13 +643,13 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ onSelectRun, setCurren
               </div>
 
               {/* Proposed Test Plan */}
-              {(selectedTicket.proposed_tests || []).length > 0 && (
+              {Array.isArray(selectedTicket.proposed_tests) && selectedTicket.proposed_tests.length > 0 && (
                 <div>
                   <h4 className="font-mono text-zinc-400 font-bold uppercase tracking-wider text-[11px] mb-1.5">
                     Proposed Pytest Assertions
                   </h4>
                   <div className="space-y-1 font-mono text-[11px]">
-                    {(selectedTicket.proposed_tests || []).map((t, i) => (
+                    {selectedTicket.proposed_tests.map((t, i) => (
                       <div key={i} className="text-zinc-400 bg-zinc-900/30 p-2.5 rounded-lg border border-zinc-800/50">
                         {t}
                       </div>

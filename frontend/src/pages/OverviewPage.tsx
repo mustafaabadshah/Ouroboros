@@ -403,7 +403,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ setCurrentTab, onSel
             </div>
 
             <div className="divide-y divide-zinc-800/80">
-              {pendingTickets.length === 0 ? (
+              {!Array.isArray(pendingTickets) || pendingTickets.length === 0 ? (
                 <div className="p-6 text-center text-xs text-zinc-500 font-mono">
                   No proposed tickets awaiting planning.
                 </div>
@@ -416,11 +416,11 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ setCurrentTab, onSel
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-semibold text-zinc-200">{t.id}</span>
-                      <StatusBadge status={t.status} size="sm" />
+                      <StatusBadge status={t.status || 'PROPOSED'} size="sm" />
                     </div>
-                    <div className="text-xs text-zinc-300 line-clamp-1">{t.title}</div>
+                    <div className="text-xs text-zinc-300 line-clamp-1">{t.title || 'Untitled Ticket'}</div>
                     <div className="text-[10px] text-zinc-500 font-mono">
-                      Repo: {t.repo_id} | Risk: {t.risk_level || 'STANDARD'}
+                      Repo: {t.repo_id || 'agent_chess'} | Risk: {t.risk_level || 'STANDARD'}
                     </div>
                   </div>
                 ))

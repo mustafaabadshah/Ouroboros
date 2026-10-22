@@ -1,5 +1,7 @@
+import threading
+import time
 from pathlib import Path
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 from app.core.config import settings
 from app.core.logging import logger
@@ -20,9 +22,19 @@ if "sqlite" in settings.DATABASE_URL:
 
 engine = create_engine(
     settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {},
+    connect_args={"check_same_thread": False, "timeout": 30} if "sqlite" in settings.DATABASE_URL else {},
     pool_pre_ping=True
 )
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    if "sqlite" in settings.DATABASE_URL:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA cache_size=-64000")
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -50,7 +62,7 @@ def sync_seed_data():
 
     import sqlite3
     try:
-        conn = sqlite3.connect(str(target_path))
+        conn = sqlite3.connect(str(target_path), timeout=30)
         conn.execute(f"ATTACH DATABASE '{seed_db.as_posix()}' AS seed")
         tables = [
             "repositories",
@@ -73,10 +85,10 @@ def sync_seed_data():
     except Exception as e:
         logger.warning(f"Failed to merge persistent seed data: {e}")
 
-def backup_live_to_seed():
-    """Backs up the current live database state to seed_db so state is preserved across container runs."""
-    if "sqlite" not in settings.DATABASE_URL:
-        return
+_last_backup_time = 0.0
+_backup_lock = threading.Lock()
+
+def _do_backup():
     seed_db = Path(__file__).resolve().parent / "seeds" / "ouroboros_seed.db"
     target_file = settings.DATABASE_URL.replace("sqlite:///", "")
     target_path = Path(target_file)
@@ -84,14 +96,29 @@ def backup_live_to_seed():
         return
     import sqlite3
     try:
-        source_conn = sqlite3.connect(str(target_path))
-        target_conn = sqlite3.connect(str(seed_db))
+        source_conn = sqlite3.connect(str(target_path), timeout=30)
+        target_conn = sqlite3.connect(str(seed_db), timeout=30)
         source_conn.backup(target_conn)
         source_conn.close()
         target_conn.close()
         logger.debug("Live database backed up to persistent seed.")
     except Exception as err:
         logger.debug(f"Live database seed backup notice: {err}")
+
+def backup_live_to_seed():
+    """Debounced, non-blocking backup of live database to persistent seed db."""
+    global _last_backup_time
+    if "sqlite" not in settings.DATABASE_URL:
+        return
+    now = time.time()
+    if now - _last_backup_time < 30.0:
+        return
+    with _backup_lock:
+        if now - _last_backup_time < 30.0:
+            return
+        _last_backup_time = now
+        t = threading.Thread(target=_do_backup, daemon=True)
+        t.start()
 
 def init_db():
     """Initializes tables in the SQLite database and applies non-destructive column additions."""
