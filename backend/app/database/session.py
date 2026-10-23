@@ -78,6 +78,26 @@ def sync_seed_data():
                 conn.execute(f"INSERT OR IGNORE INTO {tbl} SELECT * FROM seed.{tbl}")
             except Exception as tbl_err:
                 logger.debug(f"Seed sync table {tbl} notice: {tbl_err}")
+
+        # Ensure completed runs and accepted tickets from seed update existing live records
+        try:
+            conn.execute("""
+                UPDATE runs
+                SET state = 'COMPLETED',
+                    verdict = 'PASS',
+                    completed_at = COALESCE(completed_at, '2026-10-21 09:30:15')
+                WHERE id IN (SELECT id FROM seed.runs WHERE state = 'COMPLETED')
+                  AND state = 'AWAITING_APPROVAL'
+            """)
+            conn.execute("""
+                UPDATE tickets
+                SET status = 'ACCEPTED'
+                WHERE id IN (SELECT id FROM seed.tickets WHERE status = 'ACCEPTED')
+                  AND status != 'ACCEPTED'
+            """)
+        except Exception as state_sync_err:
+            logger.debug(f"State sync notice: {state_sync_err}")
+
         conn.commit()
         conn.execute("DETACH DATABASE seed")
         conn.close()

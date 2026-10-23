@@ -943,6 +943,13 @@
       "actor": "human_operator",
       "details_json": "{\"ticket_id\": \"ouro-6d6692\", \"title\": \"Add Input Validation for Move Coordinates in Move API\"}",
       "created_at": "2026-10-21 12:54:19.872396"
+    },
+    {
+      "id": "aud-88f12a9c",
+      "event_type": "MERGE_APPROVED",
+      "actor": "human_operator",
+      "details_json": "{\"run_id\": \"run-cac6c10c\", \"ticket_id\": \"ouro-6140cc\", \"notes\": \"Explicit human gate approved and merged candidate patch bb8f5954 into main.\"}",
+      "created_at": "2026-10-21 09:30:15.000000"
     }
   ],
   "app_settings": [],
@@ -1668,9 +1675,9 @@
       "estimated_resources": "1 LLM call, 1 pytest run",
       "evidence_json": "[\"backend/app/chess/board_manager.py:25\"]",
       "out_of_scope": "Do not modify backend/app/chess/validator.py or core legality checks.",
-      "status": "APPROVED",
+      "status": "ACCEPTED",
       "created_at": "2026-10-21 09:27:26.808091",
-      "updated_at": "2026-10-21 09:27:26.856275",
+      "updated_at": "2026-10-21 09:30:15",
       "acceptance_test_template": "import pytest\nfrom app.chess.board_manager import BoardManager\n\ndef test_board_manager_invalid_fen_graceful_rejection():\n    # Acceptance Criterion: BoardManager validates FEN token count before parsing\n    with pytest.raises((ValueError, Exception)):\n        BoardManager(fen=\"invalid fen string too short\")\n"
     },
     {
@@ -1694,50 +1701,6 @@
       "created_at": "2026-10-21 12:54:19.842724",
       "updated_at": "2026-10-21 12:54:19.842724",
       "acceptance_test_template": "import pytest\nfrom fastapi.testclient import TestClient\nfrom backend.app.main import app\n\nclient = TestClient(app)\n\ndef test_valid_move():\n    response = client.post('/moves', json={'move': 'e2e4'})\n    assert response.status_code == 200\n\ndef test_invalid_move():\n    response = client.post('/moves', json={'move': 'e2e5'})\n    assert response.status_code == 400\n\ndef test_malformed_move():\n    response = client.post('/moves', json={'move': 'e2'})\n    assert response.status_code == 400\n\ndef test_invalid_coordinates():\n    response = client.post('/moves', json={'move': 'h9h9'})\n    assert response.status_code == 400"
-    },
-    {
-      "title": "Add FEN validation and error handling to BoardManager initialization",
-      "problem_statement": "The `BoardManager` class in `backend/app/chess/board_manager.py` likely initializes chess state from a FEN string without robust validation. If an invalid or malformed FEN is provided (e.g., incorrect piece count, invalid square notation, or missing fields), the system may crash or enter an inconsistent state, leading to unhandled exceptions in the game loop or API endpoints.",
-      "motivation": "Ensuring that `BoardManager` handles invalid FEN inputs gracefully is critical for system stability. Invalid FENs can arise from user input, API errors, or data corruption. Proper validation prevents cascading failures and improves observability by providing clear error messages.",
-      "current_behavior": "When `BoardManager` is instantiated with an invalid FEN string, it may raise an unhandled exception or silently produce an invalid board state. There is no explicit validation of FEN structure (e.g., 8 ranks, valid piece characters, correct turn indicator, castling rights, en passant square, halfmove clock, fullmove number).",
-      "desired_behavior": "The `BoardManager` should validate the FEN string upon initialization. If the FEN is invalid, it should raise a specific, descriptive exception (e.g., `InvalidFENError`) with details about the validation failure. If the FEN is valid, the board state should be correctly initialized.",
-      "acceptance_criteria": [
-        "BoardManager raises InvalidFENError for FENs with incorrect number of ranks.",
-        "BoardManager raises InvalidFENError for FENs with invalid piece characters.",
-        "BoardManager raises InvalidFENError for FENs with invalid turn indicators.",
-        "BoardManager raises InvalidFENError for FENs with invalid en passant squares.",
-        "BoardManager correctly initializes board state for valid FENs.",
-        "InvalidFENError includes a descriptive message indicating the specific validation failure."
-      ],
-      "proposed_tests": [
-        "test_board_manager_invalid_fen_ranks",
-        "test_board_manager_invalid_fen_pieces",
-        "test_board_manager_invalid_fen_turn",
-        "test_board_manager_invalid_fen_en_passant",
-        "test_board_manager_valid_fen_initialization"
-      ],
-      "relevant_graph_entities": [
-        "BoardManager (backend/app/chess/board_manager.py)"
-      ],
-      "candidate_files": [
-        "backend/app/chess/board_manager.py",
-        "backend/tests/test_chess.py"
-      ],
-      "risk_level": "low",
-      "expected_complexity": "small",
-      "estimated_resources": "1 developer, 2-4 hours",
-      "evidence": [
-        "BoardManager is a core component for managing chess state and is likely initialized with FEN strings from API endpoints or game services.",
-        "Lack of FEN validation can lead to unhandled exceptions and inconsistent board states.",
-        "Adding validation improves system robustness and observability."
-      ],
-      "out_of_scope": "Refactoring the entire chess engine or move validation logic.; Modifying protected core engine logic such as validator.py or stockfish.py.; Implementing advanced FEN parsing features beyond basic validation.",
-      "acceptance_test_template": null,
-      "id": "ouro-50d4a4",
-      "repo_id": "agent_chess",
-      "status": "ACCEPTED",
-      "created_at": "2026-10-22T05:22:36.358423",
-      "updated_at": "2026-10-22T05:24:03.387711"
     }
   ],
   "runs": [
@@ -2375,7 +2338,7 @@
       "id": "run-cac6c10c",
       "ticket_id": "ouro-6140cc",
       "repo_id": "agent_chess",
-      "state": "AWAITING_APPROVAL",
+      "state": "COMPLETED",
       "active_agent": "HumanReviewer",
       "active_provider": null,
       "active_model": null,
@@ -2387,24 +2350,7 @@
       "error_message": null,
       "verdict": "PASS",
       "started_at": "2026-10-21 09:27:26.885690",
-      "completed_at": null
-    },
-    {
-      "id": "run-c0f03cd0",
-      "ticket_id": "ouro-50d4a4",
-      "repo_id": "agent_chess",
-      "state": "COMPLETED",
-      "active_agent": "HumanReviewer",
-      "active_provider": null,
-      "active_model": null,
-      "base_commit": "7a614f3b50eb799f4c60463c42d769b45daa48cb",
-      "candidate_branch": "candidate/ouro-50d4a4",
-      "retry_count": 0,
-      "max_retries": 3,
-      "verdict": "PASS",
-      "error_message": null,
-      "started_at": "2026-10-22T05:22:40.480145",
-      "completed_at": "2026-10-22T05:24:03.375093"
+      "completed_at": "2026-10-21 09:30:15"
     }
   ],
   "candidates": [

@@ -296,3 +296,20 @@ async def reject_merge(req: RunApprovalRequest, run_id: str, db: Session = Depen
 
     return {"success": True, "message": "Candidate patch rejected. Worktree cleaned."}
 
+@router.post("/{run_id}/reset-gate")
+async def reset_gate(run_id: str, db: Session = Depends(get_db)):
+    """Interactive demo helper: Resets a run to AWAITING_APPROVAL and ticket to APPROVED for live demonstrations."""
+    run = get_run(db, run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
+
+    run.state = "AWAITING_APPROVAL"
+    run.completed_at = None
+    db.commit()
+    db.refresh(run)
+
+    update_ticket_status(db, run.ticket_id, "APPROVED")
+    record_audit_event(db, "GATE_RESET_DEMO", details={"run_id": run_id, "notes": "Reset for interactive demonstration."})
+
+    return {"success": True, "message": f"Run '{run_id}' reset to AWAITING_APPROVAL for interactive demonstration."}
+
