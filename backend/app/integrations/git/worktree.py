@@ -66,7 +66,34 @@ class GitWorktreeManager:
             except Exception:
                 pass
 
+        # Ensure database fixtures (e.g. chessmind.db) are present in the new worktree
+        self._sync_worktree_fixtures(worktree_path, repo_path)
+
         return worktree_path, candidate_branch, base_commit
+
+    @staticmethod
+    def _sync_worktree_fixtures(worktree_path: Path, repo_path: Optional[Path] = None):
+        """Copies untracked database fixtures (e.g. chessmind.db) into isolated worktree."""
+        try:
+            target_repo = repo_path
+            if not target_repo:
+                git_file = worktree_path / ".git"
+                if git_file.exists() and git_file.is_file():
+                    content = git_file.read_text(encoding="utf-8").strip()
+                    if content.startswith("gitdir:"):
+                        git_dir = Path(content.replace("gitdir:", "").strip())
+                        if len(git_dir.parents) >= 3:
+                            target_repo = git_dir.parents[2]
+            if target_repo and target_repo.exists():
+                for db_name in ["backend/chessmind.db", "chessmind.db"]:
+                    src_db = target_repo / db_name
+                    dst_db = worktree_path / db_name
+                    if src_db.exists() and not dst_db.exists():
+                        dst_db.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copyfile(src_db, dst_db)
+                        logger.info(f"Copied database fixture {db_name} into isolated worktree {worktree_path.name}.")
+        except Exception as e:
+            logger.debug(f"Notice syncing worktree fixtures: {e}")
 
     async def create_parallel_subtask_worktrees(
         self,
@@ -393,6 +420,9 @@ class GitWorktreeManager:
             if code_clean != 0:
                 logger.error(f"Git clean failed in worktree {safe_worktree}: {err_clean}")
                 return False
+
+            # Restore database fixtures if deleted by git clean
+            self._sync_worktree_fixtures(safe_worktree)
 
             return True
 

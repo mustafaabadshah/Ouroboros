@@ -88,11 +88,11 @@ class GroqProvider(BaseLLMProvider):
         prompt: str,
         system_instruction: Optional[str] = None,
         model_name: Optional[str] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 600,
         temperature: float = 0.2
     ) -> Dict[str, Any]:
         """
-        Executes generation on Groq with exponential backoff on 429.
+        Executes generation on Groq with exponential backoff and dynamic token clamping on 429.
         """
         model = model_name or self.default_model
         messages = []
@@ -100,6 +100,8 @@ class GroqProvider(BaseLLMProvider):
             messages.append({"role": "system", "content": system_instruction})
         messages.append({"role": "user", "content": prompt})
 
+        # Strictly clamp max_tokens to prevent OTPM (1000 tokens/min) rate limits on qwen/qwen3.8-27b
+        effective_max_tokens = min(max_tokens, 600)
         max_attempts = 3
         backoff = 1.0
         start_time = time.perf_counter()
@@ -110,7 +112,7 @@ class GroqProvider(BaseLLMProvider):
                 completion = await client.chat.completions.create(
                     model=model,
                     messages=messages,
-                    max_tokens=max_tokens,
+                    max_tokens=effective_max_tokens,
                     temperature=temperature
                 )
                 latency = int((time.perf_counter() - start_time) * 1000)
@@ -141,7 +143,9 @@ class GroqProvider(BaseLLMProvider):
                         "is_error": True,
                         "error_message": f"Groq rate limit exceeded after {max_attempts} retries."
                     }
-                logger.warning(f"Groq 429 rate limit hit. Backing off for {backoff}s...")
+                # Halve requested tokens down to 250 floor to slip under rate-limit token quota
+                effective_max_tokens = max(250, effective_max_tokens // 2)
+                logger.warning(f"Groq 429 rate limit hit. Throttled max_tokens to {effective_max_tokens}, backing off for {backoff}s...")
                 await asyncio.sleep(backoff)
                 backoff *= 2.0
 

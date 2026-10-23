@@ -188,8 +188,6 @@ async def approve_merge(req: RunApprovalRequest, run_id: str, db: Session = Depe
             raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
 
         if run.state != "AWAITING_APPROVAL":
-            if run.state == "COMPLETED":
-                return {"success": True, "message": "Candidate patch was already approved and merged."}
             raise HTTPException(status_code=400, detail=f"Run is in state '{run.state}', not 'AWAITING_APPROVAL'.")
 
         # Policy revalidation: only PASS or PASS_WITH_WARNINGS verdicts can be approved and merged
@@ -241,8 +239,17 @@ async def approve_merge(req: RunApprovalRequest, run_id: str, db: Session = Depe
         merge_msg = "Candidate patch successfully merged into main branch."
 
         if repo_path and repo_path.exists() and (repo_path / ".git").exists():
+            from app.core.security import run_safe_subprocess
+            # Target branch drift check: ensure target branch HEAD has not moved since base_commit
+            if run.base_commit:
+                code_head, main_head, _ = await run_safe_subprocess(["git", "rev-parse", "main"], cwd=repo_path)
+                if code_head == 0 and main_head.strip() and main_head.strip() != run.base_commit.strip():
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"Approval invalidated: Target branch has drifted from base commit '{run.base_commit[:8]}'. Current HEAD is '{main_head.strip()[:8]}'. Rebase required."
+                    )
+
             try:
-                from app.core.security import run_safe_subprocess
                 code, branches, _ = await run_safe_subprocess(["git", "branch", "--list", run.candidate_branch], cwd=repo_path)
                 if code == 0 and branches and run.candidate_branch in branches:
                     success, msg = await git_worktree_manager.merge_candidate(

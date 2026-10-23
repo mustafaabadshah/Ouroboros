@@ -236,7 +236,7 @@ class DeterministicJudge:
                         "is_fail_fast": True,
                         "fail_fast_test": impact_file,
                         "duration_ms": impact_res.get("duration_ms", 0),
-                        "reason": f"Acceptance tests failed (⚡ Fail-Fast Gate Triggered: {impact_file} failed in {impact_res.get('duration_ms', 0)}ms with {impact_res['failed_count']} failed, {impact_res['error_count']} errors). Aborted regression suite to trigger repair in 3s.",
+                        "reason": f"Acceptance tests failed ([Fail-Fast Gate] {impact_file} failed in {impact_res.get('duration_ms', 0)}ms with {impact_res['failed_count']} failed, {impact_res['error_count']} errors). Aborted regression suite to trigger repair in 3s.",
                         "acceptance": impact_res,
                         "regression": impact_res,
                         "impact_failure_file": impact_file
