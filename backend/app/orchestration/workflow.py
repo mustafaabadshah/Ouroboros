@@ -31,6 +31,7 @@ from app.agents.repair_agent import repair_agent
 from app.evaluation.judge import deterministic_judge
 from app.evaluation.runner import pytest_runner
 from app.memory.flywheel import failure_flywheel
+from app.core.security import is_protected_path
 
 class WorkflowController:
     """
@@ -260,13 +261,17 @@ class WorkflowController:
                             coder_res = await local_coder_agent.generate_patch(code_prompt, force_mock=use_mock_agents)
                         else:
                             # Repair step
+                            repair_context = failure_flywheel.get_repair_context(db, ticket.id)
                             target_file_rel = target_subtask.get("target_file", "").replace("\\", "/")
+                            if repair_context.get("target_file") and not is_protected_path(repair_context["target_file"]):
+                                target_file_rel = str(repair_context["target_file"]).replace("\\", "/")
+
                             target_full_path = worktree_path / target_file_rel
                             current_file_content = ""
                             if target_full_path.exists():
                                 with open(target_full_path, "r", encoding="utf-8", errors="replace") as f:
                                     current_file_content = f.read()
-                            repair_context = failure_flywheel.get_repair_context(db, ticket.id)
+
                             coder_res = await repair_agent.synthesize_repair(
                                 ticket={"title": ticket.title},
                                 target_file=target_file_rel,
@@ -284,9 +289,27 @@ class WorkflowController:
                     await self._transition(db, run_id, "PATCH_VALIDATION", active_agent="Judge")
 
                     with phoenix_service.trace_step("patch.validate", attempt=attempt):
+                        # Construct comprehensive allowed files:
+                        # 1. Candidate files
+                        # 2. Planner's subtasks target files
+                        # 3. Relevant graph entities
+                        # Exclude any protected file patterns
+                        allowed_scope = set()
+                        for f in (ticket.candidate_files_json or []):
+                            if not is_protected_path(f):
+                                allowed_scope.add(f)
+                        for st in subtasks:
+                            tf = st.get("target_file")
+                            if tf and not is_protected_path(tf):
+                                allowed_scope.add(tf)
+                        for rge in (ticket.relevant_graph_entities_json or []):
+                            if isinstance(rge, str) and ("/" in rge or "." in rge) and not is_protected_path(rge):
+                                allowed_scope.add(rge)
+
+                        effective_allowed = list(allowed_scope) if allowed_scope else ticket.candidate_files_json
                         static_check = deterministic_judge.evaluate_patch_static(
                             diff_text=diff_text,
-                            allowed_files=ticket.candidate_files_json,
+                            allowed_files=effective_allowed,
                             worktree_path=worktree_path
                         )
 

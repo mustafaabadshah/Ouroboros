@@ -137,9 +137,11 @@ def sync_seed_data():
                     conn.execute("""
                         UPDATE tickets
                         SET candidate_files_json = (SELECT candidate_files_json FROM seed.tickets WHERE seed.tickets.id = tickets.id),
+                            relevant_graph_entities_json = (SELECT relevant_graph_entities_json FROM seed.tickets WHERE seed.tickets.id = tickets.id),
                             proposed_tests_json = (SELECT proposed_tests_json FROM seed.tickets WHERE seed.tickets.id = tickets.id),
                             status = (SELECT status FROM seed.tickets WHERE seed.tickets.id = tickets.id)
                         WHERE id IN (SELECT id FROM seed.tickets WHERE status = 'PROPOSED')
+                           OR id IN ('ouro-6d6692', 'ouro-051eaf')
                     """)
                 except Exception as state_sync_err:
                     logger.debug(f"State sync notice: {state_sync_err}")

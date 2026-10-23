@@ -315,10 +315,13 @@ class MetaGraphAdapter:
                         graph.add_edge(f_node_id, other_node_id, key="TESTS:0", type="TESTS")
                         edges_data.append({"source_id": f_node_id, "target_id": other_node_id, "type": "TESTS", "properties": {}})
 
-        # Save to data/indexes/{repo_id}_nx.json
-        index_dir = self.navigator_path / "data" / "indexes"
-        index_dir.mkdir(parents=True, exist_ok=True)
-        index_file = index_dir / f"{repo_id}_nx.json"
+        # Save to data/indexes/{repo_id}_nx.json and fixtures
+        backend_dir = Path(__file__).resolve().parent.parent.parent.parent
+        target_dirs = [
+            backend_dir / "data" / "indexes",
+            backend_dir / "tests" / "fixtures" / "indexes",
+            self.navigator_path / "data" / "indexes"
+        ]
 
         meta = {
             "id": repo_id,
@@ -328,16 +331,23 @@ class MetaGraphAdapter:
         }
         self._repo_metadata[repo_id] = meta
 
-        try:
-            with open(index_file, "w", encoding="utf-8") as f:
-                json.dump({
-                    "repository": meta,
-                    "nodes": nodes_data,
-                    "edges": edges_data
-                }, f, indent=2)
-            logger.info(f"Generated comprehensive AST index for {repo_id}: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges saved to {index_file}")
-        except Exception as e:
-            logger.warning(f"Could not persist AST index to {index_file}: {e}")
+        payload = {
+            "repository": meta,
+            "nodes": nodes_data,
+            "edges": edges_data
+        }
+
+        saved_any = False
+        for tdir in target_dirs:
+            try:
+                tdir.mkdir(parents=True, exist_ok=True)
+                target_file = tdir / f"{repo_id}_nx.json"
+                with open(target_file, "w", encoding="utf-8") as f:
+                    json.dump(payload, f, indent=2)
+                saved_any = True
+                logger.info(f"Persisted comprehensive AST index ({graph.number_of_nodes()} nodes, {len(project_files)} files) to {target_file}")
+            except Exception as e:
+                logger.debug(f"Could not persist AST index to {tdir}: {e}")
 
         self._cached_graphs[repo_id] = graph
         self._cached_summaries.pop(repo_id, None)
