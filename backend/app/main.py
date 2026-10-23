@@ -73,14 +73,10 @@ async def lifespan(app: FastAPI):
                 path=str(resolved_repo_path),
                 file_count=48
             )
-            get_or_create_repository(
-                db=db,
-                repo_id="multi_agent_ai_chess_arena",
-                name="Multi-Agent-AI-Chess-Arena",
-                path=str(resolved_repo_path),
-                file_count=48
-            )
-            logger.info(f"Registered default target repositories at: {resolved_repo_path}")
+            # Ensure obsolete duplicate repository is purged
+            from app.database.repositories import delete_repository
+            delete_repository(db, "multi_agent_ai_chess_arena")
+            logger.info(f"Registered default target repository 'agent_chess' at: {resolved_repo_path}")
         except Exception as e:
             logger.warning(f"Could not seed default repositories: {e}")
         finally:

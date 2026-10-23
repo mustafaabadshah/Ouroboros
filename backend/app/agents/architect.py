@@ -302,6 +302,11 @@ Ensure the problem_statement, current_behavior, and desired_behavior directly de
                     else:
                         ticket.title = f"{ticket.title} (Phase #{len(existing_tickets) + 1})"
 
+                from app.core.security import is_protected_path
+                ticket.candidate_files = [f for f in ticket.candidate_files if not is_protected_path(f)]
+                if not ticket.candidate_files:
+                    ticket.candidate_files = ["backend/app/api/analysis.py", "backend/tests/test_api.py"]
+
                 if not ticket.acceptance_test_template or len(ticket.acceptance_test_template.strip()) < 10:
                     ticket.acceptance_test_template = ArchitectAgent.synthesize_test_template(
                         ticket_title=ticket.title,

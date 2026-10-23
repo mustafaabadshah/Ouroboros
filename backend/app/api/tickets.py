@@ -101,8 +101,8 @@ async def generate_ticket(
                 if resolved_repo_path:
                     repo = get_or_create_repository(
                         db=db,
-                        repo_id=req.repo_id or "multi_agent_ai_chess_arena",
-                        name="Multi-Agent-AI-Chess-Arena",
+                        repo_id=req.repo_id or "agent_chess",
+                        name="Agent Chess (ChessMind Arena)",
                         path=str(resolved_repo_path),
                         file_count=48
                     )

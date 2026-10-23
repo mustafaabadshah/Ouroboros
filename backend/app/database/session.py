@@ -79,6 +79,12 @@ def sync_seed_data():
             except Exception as tbl_err:
                 logger.debug(f"Seed sync table {tbl} notice: {tbl_err}")
 
+        # Purge obsolete repositories not present in seed
+        try:
+            conn.execute("DELETE FROM repositories WHERE id NOT IN (SELECT id FROM seed.repositories)")
+        except Exception as repo_purge_err:
+            logger.debug(f"Repo purge notice: {repo_purge_err}")
+
         # Ensure completed runs and accepted tickets from seed update existing live records
         try:
             conn.execute("""
@@ -94,6 +100,13 @@ def sync_seed_data():
                 SET status = 'ACCEPTED'
                 WHERE id IN (SELECT id FROM seed.tickets WHERE status = 'ACCEPTED')
                   AND status != 'ACCEPTED'
+            """)
+            conn.execute("""
+                UPDATE tickets
+                SET candidate_files_json = (SELECT candidate_files_json FROM seed.tickets WHERE seed.tickets.id = tickets.id),
+                    proposed_tests_json = (SELECT proposed_tests_json FROM seed.tickets WHERE seed.tickets.id = tickets.id),
+                    status = (SELECT status FROM seed.tickets WHERE seed.tickets.id = tickets.id)
+                WHERE id IN (SELECT id FROM seed.tickets WHERE status = 'PROPOSED')
             """)
         except Exception as state_sync_err:
             logger.debug(f"State sync notice: {state_sync_err}")
