@@ -151,6 +151,34 @@ def sync_seed_data():
             except Exception as attach_err:
                 logger.debug(f"Seed db attach notice: {attach_err}")
 
+        # 3. Always sync ticket candidates and statuses from seed_data.json directly
+        if seed_json.exists():
+            import json
+            try:
+                with open(seed_json, "r", encoding="utf-8") as f:
+                    dump = json.load(f)
+                for t in dump.get("tickets", []):
+                    tid = t.get("id")
+                    if tid and (t.get("status") == "PROPOSED" or tid in ("ouro-6d6692", "ouro-051eaf")):
+                        conn.execute("""
+                            UPDATE tickets
+                            SET candidate_files_json = ?,
+                                relevant_graph_entities_json = ?,
+                                proposed_tests_json = ?,
+                                status = ?
+                            WHERE id = ?
+                        """, (
+                            t.get("candidate_files_json"),
+                            t.get("relevant_graph_entities_json"),
+                            t.get("proposed_tests_json"),
+                            t.get("status"),
+                            tid
+                        ))
+                conn.commit()
+                logger.info("Synchronized proposed ticket candidate files and states directly from seed_data.json")
+            except Exception as ticket_sync_err:
+                logger.warning(f"Failed to sync tickets from seed_data.json: {ticket_sync_err}")
+
         # 3. Always purge duplicate repository
         try:
             conn.execute("DELETE FROM repositories WHERE id = 'multi_agent_ai_chess_arena'")

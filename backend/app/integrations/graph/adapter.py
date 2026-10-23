@@ -368,15 +368,21 @@ class MetaGraphAdapter:
 
                 self._repo_metadata[repo_id] = data.get("repository", {})
                 for node in data.get("nodes", []):
-                    nid = node["id"]
+                    nid = node.get("id")
+                    if not nid:
+                        continue
                     graph.add_node(nid, **node)
 
                 for edge in data.get("edges", []):
+                    src = edge.get("source_id")
+                    tgt = edge.get("target_id")
+                    if not src or not tgt:
+                        continue
                     graph.add_edge(
-                        edge["source_id"],
-                        edge["target_id"],
-                        key=f"{edge['type']}:{edge.get('properties', {}).get('line', 0)}",
-                        type=edge["type"],
+                        src,
+                        tgt,
+                        key=f"{edge.get('type')}:{edge.get('properties', {}).get('line', 0)}",
+                        type=edge.get("type", "DEPENDS_ON"),
                         **edge.get("properties", {})
                     )
                 logger.info(f"Loaded {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges for {repo_id}")
