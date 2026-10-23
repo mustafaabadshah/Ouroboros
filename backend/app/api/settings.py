@@ -118,3 +118,11 @@ async def get_system_logs(limit: int = 150):
         "limit": limit,
         "logs": logs[-limit:] if limit > 0 else logs
     }
+
+@router.post("/settings/sync-seed")
+async def trigger_sync_seed():
+    """Forces synchronization and population of seed tickets, repositories, and historical runs."""
+    from app.database.session import sync_seed_data
+    sync_seed_data()
+    return {"status": "synced", "message": "Database synchronized from persistent seed files."}
+
